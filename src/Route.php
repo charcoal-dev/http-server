@@ -149,9 +149,10 @@ class Route
      * Try Request object with this route, return fully-qualified controller class name or NULL
      * @param \Charcoal\HTTP\Router\Controllers\Request $request
      * @param bool $bypassHttpAuth
+     * @param bool $checkClassExists
      * @return string|null
      */
-    public function try(Request $request, bool $bypassHttpAuth = false): ?string
+    public function try(Request $request, bool $bypassHttpAuth = false, bool $checkClassExists = true): ?string
     {
         $path = $request->url->path;
 
@@ -182,6 +183,10 @@ class Route
             $controllerClass = sprintf('%s\%s', $namespace, implode('\\', $controllerClass));
             $controllerClass = preg_replace('/\\\{2,}/', '\\', $controllerClass);
             $controllerClass = rtrim($controllerClass, '\\');
+        }
+
+        if (!$checkClassExists) {
+            return $controllerClass;
         }
 
         return $controllerClass && class_exists($controllerClass) ? $controllerClass : $this->fallbackController;
