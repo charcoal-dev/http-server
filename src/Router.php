@@ -58,6 +58,15 @@ class Router
     }
 
     /**
+     * Gets all defined routes in array
+     * @return array
+     */
+    public function routesArray(): array
+    {
+        return $this->routes;
+    }
+
+    /**
      * Fallback/default controller class, this class is invoked when a request cannot be routed to any controller
      * @param string $controller
      * @return $this
