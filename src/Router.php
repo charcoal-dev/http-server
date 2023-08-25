@@ -49,6 +49,7 @@ class Router
     }
 
     /**
+     * Total number of routes configured in this router
      * @return int
      */
     public function routesCount(): int
@@ -57,6 +58,7 @@ class Router
     }
 
     /**
+     * Fallback/default controller class, this class is invoked when a request cannot be routed to any controller
      * @param string $controller
      * @return $this
      */
@@ -71,6 +73,7 @@ class Router
     }
 
     /**
+     * Defines a route, use "*" as wildcard character. A trailing "*" indicates path is to a namespace rather than a class
      * @param string $path
      * @param string $controllerClassOrNamespace
      * @return \Charcoal\HTTP\Router\Route
@@ -84,6 +87,8 @@ class Router
     }
 
     /**
+     * Try to route request to one of the routes,
+     * on fail routes request to fallback controller (if defined) or throws RouterException
      * @param \Charcoal\HTTP\Router\Controllers\Request $request
      * @param bool $bypassHttpAuth
      * @return \Charcoal\HTTP\Router\Controllers\AbstractController

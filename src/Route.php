@@ -86,6 +86,7 @@ class Route
     }
 
     /**
+     * Sets a fallback controller specific to this route, useful for namespace routes
      * @param string $controller
      * @return $this
      */
@@ -123,6 +124,7 @@ class Route
     }
 
     /**
+     * Following path indexes will be ignored while routing to a classname
      * @param int ...$indexes
      * @return Route
      */
@@ -133,6 +135,7 @@ class Route
     }
 
     /**
+     * Protect this route by setting up HTTP authorization
      * @param \Charcoal\HTTP\Router\Authorization\AbstractAuthorization $auth
      * @return $this
      */
@@ -143,6 +146,7 @@ class Route
     }
 
     /**
+     * Try Request object with this route, return fully-qualified controller class name or NULL
      * @param \Charcoal\HTTP\Router\Controllers\Request $request
      * @param bool $bypassHttpAuth
      * @return string|null
