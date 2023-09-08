@@ -92,7 +92,7 @@ abstract class AbstractController
      * @throws \Charcoal\HTTP\Router\Exception\ControllerException
      * @throws \Charcoal\HTTP\Router\Exception\RouterException
      */
-    public function send(): void
+    public function sendResponse(): void
     {
         if (!$this->response->headers->has("content-type")) {
             throw new ControllerException(
