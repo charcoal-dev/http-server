@@ -35,6 +35,8 @@ class Router
     private ?string $fallbackController = null;
     /** @var ResponseHandler */
     public readonly ResponseHandler $response;
+    /** @var array */
+    private array $controllersArgs = [];
 
     use NotCloneableTrait;
     use NotSerializableTrait;
@@ -46,6 +48,15 @@ class Router
     public function __construct()
     {
         $this->response = new ResponseHandler();
+    }
+
+    /**
+     * @param array $args
+     * @return void
+     */
+    public function setControllersArgs(array $args): void
+    {
+        $this->controllersArgs = $args;
     }
 
     /**
@@ -120,8 +131,25 @@ class Router
             throw new RouterException('Could not route request to any controller');
         }
 
+        return $this->createControllerInstance($controller, $request);
+    }
+
+    /**
+     * @param string $controllerClass
+     * @param \Charcoal\HTTP\Router\Controllers\Request $request
+     * @param \Charcoal\HTTP\Router\Controllers\AbstractController|null $previous
+     * @param string|null $entryPoint
+     * @return \Charcoal\HTTP\Router\Controllers\AbstractController
+     */
+    public function createControllerInstance(
+        string              $controllerClass,
+        Request             $request,
+        ?AbstractController $previous = null,
+        ?string             $entryPoint = null
+    ): AbstractController
+    {
         try {
-            $reflect = new \ReflectionClass($controller);
+            $reflect = new \ReflectionClass($controllerClass);
             if (!$reflect->isSubclassOf(AbstractController::class)) {
                 throw new \DomainException('Controller class does not extend "Charcoal\HTTP\Router\Controllers\AbstractController"');
             }
@@ -129,6 +157,6 @@ class Router
             throw new \RuntimeException('Could not get reflection instance for controller class', previous: $e);
         }
 
-        return new $controller($this, $request);
+        return new $controllerClass($this, $request, $previous, $entryPoint, $this->controllersArgs);
     }
 }

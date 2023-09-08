@@ -40,13 +40,16 @@ abstract class AbstractController
      * @param \Charcoal\HTTP\Router\Controllers\Request $request
      * @param \Charcoal\HTTP\Router\Controllers\AbstractController|null $prev
      * @param string|null $entryPoint
+     * @param array $constructorArgs
      * @throws \Charcoal\HTTP\Router\Exception\ControllerException
      */
     public function __construct(
         public readonly Router  $router,
         public readonly Request $request,
         ?AbstractController     $prev = null,
-        protected ?string       $entryPoint = null)
+        protected ?string       $entryPoint = null,
+        array                   $constructorArgs = []
+    )
     {
         $this->response = $prev?->response ?? new Response();
 
@@ -59,15 +62,14 @@ abstract class AbstractController
             }
         }
 
-        // Callback method will determine and call entrypoint method, prepare response structures, etc...
-        $this->callback();
+        $this->onConstruct($constructorArgs);
     }
 
     /**
+     * @param array $args
      * @return void
      */
-    abstract public function callback(): void;
-
+    abstract protected function onConstruct(array $args): void;
 
     /**
      * @return \Charcoal\HTTP\Commons\ReadOnlyPayload
@@ -108,18 +110,7 @@ abstract class AbstractController
      */
     public function forwardToController(string $controllerClass, string $entryPoint): AbstractController
     {
-        try {
-            $reflect = new \ReflectionClass($controllerClass);
-            if (!$reflect->isSubclassOf(AbstractController::class)) {
-                throw new \DomainException(
-                    'Forwarded to controller class does not extend "Charcoal\HTTP\Router\Controllers\AbstractController"'
-                );
-            }
-        } catch (\ReflectionException $e) {
-            throw new \RuntimeException('Could not get reflection instance for forwarded-to controller class', previous: $e);
-        }
-
-        return new $controllerClass($this->router, $this->request, $this, $entryPoint);
+        return $this->router->createControllerInstance($controllerClass, $this->request, $this, $entryPoint);
     }
 
     /**
