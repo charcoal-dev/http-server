@@ -89,7 +89,7 @@ class ResponseHandler
 
         // Headers
         if ($response->headers->count()) {
-            foreach ($response->headers as $key => $val) {
+            foreach ($response->headers->toArray() as $key => $val) {
                 header(sprintf('%s: %s', $key, $val));
             }
         }
