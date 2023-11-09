@@ -67,7 +67,7 @@ class ResponseHandler
      */
     public function handle(string $contentType, \Closure $handler): self
     {
-        if (!preg_match('/^\w+\/\w+$/i', $contentType)) {
+        if (!preg_match('/^[\w\-]+\/[\w\-]+$/i', $contentType)) {
             throw new \InvalidArgumentException('Invalid content type argument');
         }
 
