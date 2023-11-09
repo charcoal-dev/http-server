@@ -24,8 +24,8 @@ use Charcoal\HTTP\Commons\WritablePayload;
  */
 class Response
 {
-    /** @var int */
     private int $statusCode = 200;
+    private ?string $downloadFilepath = null;
 
     /**
      * @param \Charcoal\HTTP\Commons\WritableHeaders $headers
@@ -38,6 +38,25 @@ class Response
         public readonly Buffer          $body = new Buffer(),
     )
     {
+    }
+
+    /**
+     * @return void
+     */
+    public function download(): void
+    {
+        ob_end_clean();
+        flush();
+        readfile($this->downloadFilepath);
+    }
+
+    /**
+     * @param string $filepath
+     * @return void
+     */
+    public function setDownloadFilepath(string $filepath): void
+    {
+        $this->downloadFilepath = $filepath;
     }
 
     /**
