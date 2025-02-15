@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace Charcoal\HTTP\Router\Controllers;
 
 use Charcoal\HTTP\Commons\ReadOnlyPayload;
-use Charcoal\HTTP\Commons\WritablePayload;
+use Charcoal\HTTP\Router\Controllers\Response\AbstractControllerResponse;
 use Charcoal\HTTP\Router\Exception\ControllerException;
 use Charcoal\HTTP\Router\Router;
 use Charcoal\OOP\Traits\NoDumpTrait;
@@ -28,8 +28,7 @@ use Charcoal\OOP\Traits\NotSerializableTrait;
  */
 abstract class AbstractController
 {
-    /** @var Response */
-    public readonly Response $response;
+    private AbstractControllerResponse $response;
 
     use NoDumpTrait;
     use NotCloneableTrait;
@@ -51,7 +50,7 @@ abstract class AbstractController
         array                   $constructorArgs = []
     )
     {
-        $this->response = $prev?->response ?? new Response();
+        $this->response = $prev?->getResponseObject() ?? $this->initEmptyResponse();
 
         if ($entryPoint) {
             $this->entryPoint = method_exists($this, $entryPoint) ? $entryPoint : null;
@@ -62,14 +61,36 @@ abstract class AbstractController
             }
         }
 
-        $this->onConstruct($constructorArgs);
+        $this->onConstructHook($constructorArgs);
     }
 
     /**
      * @param array $args
      * @return void
      */
-    abstract protected function onConstruct(array $args): void;
+    abstract protected function onConstructHook(array $args): void;
+
+    /**
+     * @return AbstractControllerResponse
+     */
+    abstract protected function initEmptyResponse(): AbstractControllerResponse;
+
+    /**
+     * @return AbstractControllerResponse
+     */
+    public function getResponseObject(): AbstractControllerResponse
+    {
+        return $this->response;
+    }
+
+    /**
+     * @param AbstractControllerResponse $response
+     * @return void
+     */
+    public function swapResponseObject(AbstractControllerResponse $response): void
+    {
+        $this->response = $response;
+    }
 
     /**
      * @return \Charcoal\HTTP\Commons\ReadOnlyPayload
@@ -80,27 +101,12 @@ abstract class AbstractController
     }
 
     /**
-     * @return \Charcoal\HTTP\Commons\WritablePayload
+     * @return never
+     * @throws \Charcoal\HTTP\Router\Exception\ResponseDispatchedException
      */
-    public function output(): WritablePayload
+    public function sendResponse(): never
     {
-        return $this->response->payload;
-    }
-
-    /**
-     * @return void
-     * @throws \Charcoal\HTTP\Router\Exception\ControllerException
-     * @throws \Charcoal\HTTP\Router\Exception\RouterException
-     */
-    public function sendResponse(): void
-    {
-        if (!$this->response->headers->has("content-type")) {
-            throw new ControllerException(
-                sprintf('Controller class "%s" did not define "Content-Type" header for response', static::class)
-            );
-        }
-
-        $this->router->response->send($this->response);
+        $this->response->send();
     }
 
     /**
@@ -119,7 +125,7 @@ abstract class AbstractController
      */
     public function redirectOut(string $url, ?int $code = null): never
     {
-        $code = $code ?? $this->response->getHttpStatusCode();
+        $code = $code ?? $this->response->getStatusCode();
         if ($code > 0) {
             http_response_code($code);
         }

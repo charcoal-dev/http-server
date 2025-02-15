@@ -33,8 +33,6 @@ class Router
     private int $count = 0;
     /** @var null|string */
     private ?string $fallbackController = null;
-    /** @var ResponseHandler */
-    public readonly ResponseHandler $response;
     /** @var array */
     private array $controllersArgs = [];
 
@@ -47,7 +45,6 @@ class Router
      */
     public function __construct()
     {
-        $this->response = new ResponseHandler();
     }
 
     /**
