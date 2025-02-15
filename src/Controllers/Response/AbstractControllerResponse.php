@@ -23,13 +23,18 @@ use Charcoal\Http\Router\Exception\ResponseDispatchedException;
  */
 abstract class AbstractControllerResponse
 {
-    protected ?int $cachedOn = null;
+    public readonly int $createdOn;
 
+    /**
+     * @param int $statusCode
+     * @param WritableHeaders $headers
+     */
     public function __construct(
         protected int          $statusCode = 200,
         public WritableHeaders $headers = new WritableHeaders()
     )
     {
+        $this->createdOn = time();
     }
 
     /**
