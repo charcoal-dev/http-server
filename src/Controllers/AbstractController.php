@@ -29,6 +29,7 @@ use Charcoal\OOP\Traits\NotSerializableTrait;
 abstract class AbstractController
 {
     private AbstractControllerResponse $response;
+    private ?CacheControl $cacheControl = null;
 
     use NoDumpTrait;
     use NotCloneableTrait;
@@ -62,6 +63,23 @@ abstract class AbstractController
         }
 
         $this->onConstructHook($constructorArgs);
+    }
+
+    /**
+     * @param CacheControl $cacheControl
+     * @return void
+     */
+    protected function useCacheControl(CacheControl $cacheControl): void
+    {
+        $this->cacheControl = $cacheControl;
+    }
+
+    /**
+     * @return void
+     */
+    protected function unsetCacheControl(): void
+    {
+        $this->cacheControl = null;
     }
 
     /**
@@ -106,6 +124,10 @@ abstract class AbstractController
      */
     public function sendResponse(): never
     {
+        if ($this->cacheControl) {
+            $this->response->headers->set("Cache-Control", $this->cacheControl->getHeaderValue());
+        }
+
         $this->response->send();
     }
 
