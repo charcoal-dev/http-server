@@ -12,20 +12,20 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\HTTP\Router\Controllers;
+namespace Charcoal\Http\Router\Controllers;
 
 use Charcoal\Buffers\Buffer;
-use Charcoal\HTTP\Commons\Headers;
-use Charcoal\HTTP\Commons\HttpMethod;
-use Charcoal\HTTP\Commons\ReadOnlyPayload;
-use Charcoal\HTTP\Commons\UrlInfo;
+use Charcoal\Http\Commons\Headers;
+use Charcoal\Http\Commons\HttpMethod;
+use Charcoal\Http\Commons\ReadOnlyPayload;
+use Charcoal\Http\Commons\UrlInfo;
 use Charcoal\OOP\Traits\NoDumpTrait;
 use Charcoal\OOP\Traits\NotCloneableTrait;
 use Charcoal\OOP\Traits\NotSerializableTrait;
 
 /**
  * Class Request
- * @package Charcoal\HTTP\Router\Controllers
+ * @package Charcoal\Http\Router\Controllers
  */
 class Request
 {
@@ -37,10 +37,10 @@ class Request
     use NotCloneableTrait;
 
     /**
-     * @param \Charcoal\HTTP\Commons\HttpMethod $method
-     * @param \Charcoal\HTTP\Commons\UrlInfo $url
-     * @param \Charcoal\HTTP\Commons\Headers $headers
-     * @param \Charcoal\HTTP\Commons\ReadOnlyPayload $payload
+     * @param \Charcoal\Http\Commons\HttpMethod $method
+     * @param \Charcoal\Http\Commons\UrlInfo $url
+     * @param \Charcoal\Http\Commons\Headers $headers
+     * @param \Charcoal\Http\Commons\ReadOnlyPayload $payload
      * @param \Charcoal\Buffers\Buffer $body
      */
     public function __construct(

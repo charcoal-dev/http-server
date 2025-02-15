@@ -14,12 +14,12 @@
   ],
   "require": {
     "php": "^8.1",
-    "charcoal-dev/http-commons": "^0.1.0",
-    "charcoal-dev/oop-base": "^0.1.0"
+    "charcoal-dev/http-commons": "^0.1.1",
+    "charcoal-dev/oop-base": "^0.1.5"
   },
   "autoload": {
     "psr-4": {
-      "Charcoal\\HTTP\\Router\\": [
+      "Charcoal\\Http\\Router\\": [
         "src"
       ]
     }

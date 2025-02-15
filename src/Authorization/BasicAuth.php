@@ -12,21 +12,21 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\HTTP\Router\Authorization;
+namespace Charcoal\Http\Router\Authorization;
 
-use Charcoal\HTTP\Commons\Headers;
-use Charcoal\HTTP\Router\Exception\RouteAuthException;
+use Charcoal\Http\Commons\Headers;
+use Charcoal\Http\Router\Exception\RouteAuthException;
 
 /**
  * Class BasicAuth
- * @package Charcoal\HTTP\Router\Authorization
+ * @package Charcoal\Http\Router\Authorization
  */
 class BasicAuth extends AbstractAuthorization
 {
     /**
-     * @param \Charcoal\HTTP\Commons\Headers $headers
+     * @param \Charcoal\Http\Commons\Headers $headers
      * @return void
-     * @throws \Charcoal\HTTP\Router\Exception\RouteAuthException
+     * @throws \Charcoal\Http\Router\Exception\RouteAuthException
      */
     public function authorize(Headers $headers): void
     {

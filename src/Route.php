@@ -12,10 +12,10 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\HTTP\Router;
+namespace Charcoal\Http\Router;
 
-use Charcoal\HTTP\Router\Authorization\AbstractAuthorization;
-use Charcoal\HTTP\Router\Controllers\Request;
+use Charcoal\Http\Router\Authorization\AbstractAuthorization;
+use Charcoal\Http\Router\Controllers\Request;
 use Charcoal\OOP\CaseStyles;
 use Charcoal\OOP\Traits\NoDumpTrait;
 use Charcoal\OOP\Traits\NotCloneableTrait;
@@ -23,7 +23,7 @@ use Charcoal\OOP\Traits\NotSerializableTrait;
 
 /**
  * Class Route
- * @package Charcoal\HTTP\Router
+ * @package Charcoal\Http\Router
  */
 class Route
 {
@@ -41,7 +41,7 @@ class Route
     private array $ignorePathIndexes = [];
     /** @var null|string */
     private ?string $fallbackController = null;
-    /** @var \Charcoal\HTTP\Router\Authorization\AbstractAuthorization|null */
+    /** @var \Charcoal\Http\Router\Authorization\AbstractAuthorization|null */
     private ?AbstractAuthorization $auth = null;
 
     use NotCloneableTrait;
@@ -49,7 +49,7 @@ class Route
     use NoDumpTrait;
 
     /**
-     * @param \Charcoal\HTTP\Router\Router $router
+     * @param \Charcoal\Http\Router\Router $router
      * @param string $path
      * @param string $namespaceOrClass
      */
@@ -136,7 +136,7 @@ class Route
 
     /**
      * Protect this route by setting up HTTP authorization
-     * @param \Charcoal\HTTP\Router\Authorization\AbstractAuthorization $auth
+     * @param \Charcoal\Http\Router\Authorization\AbstractAuthorization $auth
      * @return $this
      */
     public function useAuthorization(AbstractAuthorization $auth): self
@@ -147,7 +147,7 @@ class Route
 
     /**
      * Try Request object with this route, return fully-qualified controller class name or NULL
-     * @param \Charcoal\HTTP\Router\Controllers\Request $request
+     * @param \Charcoal\Http\Router\Controllers\Request $request
      * @param bool $bypassHttpAuth
      * @param bool $checkClassExists
      * @return string|null

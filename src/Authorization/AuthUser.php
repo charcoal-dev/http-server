@@ -12,11 +12,11 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\HTTP\Router\Authorization;
+namespace Charcoal\Http\Router\Authorization;
 
 /**
  * Class AuthUser
- * @package Charcoal\HTTP\Router\Authorization
+ * @package Charcoal\Http\Router\Authorization
  */
 class AuthUser
 {

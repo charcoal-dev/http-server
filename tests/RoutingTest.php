@@ -22,7 +22,7 @@ class RoutingTest extends \PHPUnit\Framework\TestCase
      */
     public function testRouting1(): void
     {
-        $router = new \Charcoal\HTTP\Router\Router();
+        $router = new \Charcoal\Http\Router\Router();
         $route1 = $router->route('/docs/*', 'MyApp\Services\Docs\Controllers\Libs\*')
             ->ignorePathIndexes(0, 1);
         $route2 = $router->route('/auth/*', 'MyApp\Services\API\Controllers\Account\*')
@@ -65,7 +65,7 @@ class RoutingTest extends \PHPUnit\Framework\TestCase
      */
     public function testRouting2(): void
     {
-        $router = new \Charcoal\HTTP\Router\Router();
+        $router = new \Charcoal\Http\Router\Router();
         $r1 = $router->route('/wss', 'MyApp\WSS\ServerController');
         $r2 = $router->route('/wss/*', 'MyApp\WSS\ServerController');
         $r3 = $router->route('/*', 'MyApp\Controllers\*');
@@ -88,16 +88,16 @@ class RoutingTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @param string $url
-     * @param \Charcoal\HTTP\Commons\HttpMethod $method
-     * @return \Charcoal\HTTP\Router\Controllers\Request
+     * @param \Charcoal\Http\Commons\HttpMethod $method
+     * @return \Charcoal\Http\Router\Controllers\Request
      */
-    private function createRequest(string $url, \Charcoal\HTTP\Commons\HttpMethod $method = \Charcoal\HTTP\Commons\HttpMethod::GET): \Charcoal\HTTP\Router\Controllers\Request
+    private function createRequest(string $url, \Charcoal\Http\Commons\HttpMethod $method = \Charcoal\Http\Commons\HttpMethod::GET): \Charcoal\Http\Router\Controllers\Request
     {
-        return new \Charcoal\HTTP\Router\Controllers\Request(
+        return new \Charcoal\Http\Router\Controllers\Request(
             $method,
-            new \Charcoal\HTTP\Commons\UrlInfo($url),
-            new \Charcoal\HTTP\Commons\Headers(),
-            new \Charcoal\HTTP\Commons\ReadOnlyPayload(),
+            new \Charcoal\Http\Commons\UrlInfo($url),
+            new \Charcoal\Http\Commons\Headers(),
+            new \Charcoal\Http\Commons\ReadOnlyPayload(),
             new \Charcoal\Buffers\Buffer()
         );
     }

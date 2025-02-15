@@ -12,19 +12,19 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\HTTP\Router\Controllers;
+namespace Charcoal\Http\Router\Controllers;
 
-use Charcoal\HTTP\Commons\ReadOnlyPayload;
-use Charcoal\HTTP\Router\Controllers\Response\AbstractControllerResponse;
-use Charcoal\HTTP\Router\Exception\ControllerException;
-use Charcoal\HTTP\Router\Router;
+use Charcoal\Http\Commons\ReadOnlyPayload;
+use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
+use Charcoal\Http\Router\Exception\ControllerException;
+use Charcoal\Http\Router\Router;
 use Charcoal\OOP\Traits\NoDumpTrait;
 use Charcoal\OOP\Traits\NotCloneableTrait;
 use Charcoal\OOP\Traits\NotSerializableTrait;
 
 /**
  * Class AbstractController
- * @package Charcoal\HTTP\Router\Controllers
+ * @package Charcoal\Http\Router\Controllers
  */
 abstract class AbstractController
 {
@@ -35,12 +35,12 @@ abstract class AbstractController
     use NotSerializableTrait;
 
     /**
-     * @param \Charcoal\HTTP\Router\Router $router
-     * @param \Charcoal\HTTP\Router\Controllers\Request $request
-     * @param \Charcoal\HTTP\Router\Controllers\AbstractController|null $prev
+     * @param \Charcoal\Http\Router\Router $router
+     * @param \Charcoal\Http\Router\Controllers\Request $request
+     * @param \Charcoal\Http\Router\Controllers\AbstractController|null $prev
      * @param string|null $entryPoint
      * @param array $constructorArgs
-     * @throws \Charcoal\HTTP\Router\Exception\ControllerException
+     * @throws \Charcoal\Http\Router\Exception\ControllerException
      */
     public function __construct(
         public readonly Router  $router,
@@ -93,7 +93,7 @@ abstract class AbstractController
     }
 
     /**
-     * @return \Charcoal\HTTP\Commons\ReadOnlyPayload
+     * @return \Charcoal\Http\Commons\ReadOnlyPayload
      */
     public function input(): ReadOnlyPayload
     {
@@ -102,7 +102,7 @@ abstract class AbstractController
 
     /**
      * @return never
-     * @throws \Charcoal\HTTP\Router\Exception\ResponseDispatchedException
+     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
      */
     public function sendResponse(): never
     {
@@ -112,7 +112,7 @@ abstract class AbstractController
     /**
      * @param string $controllerClass
      * @param string $entryPoint
-     * @return \Charcoal\HTTP\Router\Controllers\AbstractController
+     * @return \Charcoal\Http\Router\Controllers\AbstractController
      */
     public function forwardToController(string $controllerClass, string $entryPoint): AbstractController
     {

@@ -12,18 +12,18 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\HTTP\Router;
+namespace Charcoal\Http\Router;
 
-use Charcoal\HTTP\Router\Controllers\AbstractController;
-use Charcoal\HTTP\Router\Controllers\Request;
-use Charcoal\HTTP\Router\Exception\RouterException;
+use Charcoal\Http\Router\Controllers\AbstractController;
+use Charcoal\Http\Router\Controllers\Request;
+use Charcoal\Http\Router\Exception\RouterException;
 use Charcoal\OOP\Traits\NoDumpTrait;
 use Charcoal\OOP\Traits\NotCloneableTrait;
 use Charcoal\OOP\Traits\NotSerializableTrait;
 
 /**
  * Class Router
- * @package Charcoal\HTTP\Router
+ * @package Charcoal\Http\Router
  */
 class Router
 {
@@ -93,7 +93,7 @@ class Router
      * Defines a route, use "*" as wildcard character. A trailing "*" indicates path is to a namespace rather than a class
      * @param string $path
      * @param string $controllerClassOrNamespace
-     * @return \Charcoal\HTTP\Router\Route
+     * @return \Charcoal\Http\Router\Route
      */
     public function route(string $path, string $controllerClassOrNamespace): Route
     {
@@ -106,10 +106,10 @@ class Router
     /**
      * Try to route request to one of the routes,
      * on fail routes request to fallback controller (if defined) or throws RouterException
-     * @param \Charcoal\HTTP\Router\Controllers\Request $request
+     * @param \Charcoal\Http\Router\Controllers\Request $request
      * @param bool $bypassHttpAuth
-     * @return \Charcoal\HTTP\Router\Controllers\AbstractController
-     * @throws \Charcoal\HTTP\Router\Exception\RouterException
+     * @return \Charcoal\Http\Router\Controllers\AbstractController
+     * @throws \Charcoal\Http\Router\Exception\RouterException
      */
     public function try(Request $request, bool $bypassHttpAuth = false): AbstractController
     {
@@ -133,10 +133,10 @@ class Router
 
     /**
      * @param string $controllerClass
-     * @param \Charcoal\HTTP\Router\Controllers\Request $request
-     * @param \Charcoal\HTTP\Router\Controllers\AbstractController|null $previous
+     * @param \Charcoal\Http\Router\Controllers\Request $request
+     * @param \Charcoal\Http\Router\Controllers\AbstractController|null $previous
      * @param string|null $entryPoint
-     * @return \Charcoal\HTTP\Router\Controllers\AbstractController
+     * @return \Charcoal\Http\Router\Controllers\AbstractController
      */
     public function createControllerInstance(
         string              $controllerClass,
@@ -148,7 +148,7 @@ class Router
         try {
             $reflect = new \ReflectionClass($controllerClass);
             if (!$reflect->isSubclassOf(AbstractController::class)) {
-                throw new \DomainException('Controller class does not extend "Charcoal\HTTP\Router\Controllers\AbstractController"');
+                throw new \DomainException('Controller class does not extend "Charcoal\Http\Router\Controllers\AbstractController"');
             }
         } catch (\ReflectionException $e) {
             throw new \RuntimeException('Could not get reflection instance for controller class', previous: $e);

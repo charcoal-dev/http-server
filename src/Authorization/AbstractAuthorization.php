@@ -12,16 +12,16 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\HTTP\Router\Authorization;
+namespace Charcoal\Http\Router\Authorization;
 
-use Charcoal\HTTP\Commons\Headers;
+use Charcoal\Http\Commons\Headers;
 use Charcoal\OOP\Traits\NoDumpTrait;
 use Charcoal\OOP\Traits\NotCloneableTrait;
 use Charcoal\OOP\Traits\NotSerializableTrait;
 
 /**
  * Class AbstractAuthorization
- * @package Charcoal\HTTP\Router\Authorization
+ * @package Charcoal\Http\Router\Authorization
  */
 abstract class AbstractAuthorization
 {
@@ -65,7 +65,7 @@ abstract class AbstractAuthorization
     }
 
     /**
-     * @param \Charcoal\HTTP\Commons\Headers $headers
+     * @param \Charcoal\Http\Commons\Headers $headers
      * @return void
      */
     abstract public function authorize(Headers $headers): void;

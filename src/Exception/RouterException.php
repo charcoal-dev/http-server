@@ -12,13 +12,13 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\HTTP\Router\Exception;
+namespace Charcoal\Http\Router\Exception;
 
-use Charcoal\HTTP\Commons\Exception\HttpException;
+use Charcoal\Http\Commons\Exception\HttpException;
 
 /**
  * Class RouterException
- * @package Charcoal\HTTP\Router\Exception
+ * @package Charcoal\Http\Router\Exception
  */
 class RouterException extends HttpException
 {

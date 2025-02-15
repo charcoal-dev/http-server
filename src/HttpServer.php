@@ -12,26 +12,26 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\HTTP\Router;
+namespace Charcoal\Http\Router;
 
 use Charcoal\Buffers\Buffer;
-use Charcoal\HTTP\Commons\Headers;
-use Charcoal\HTTP\Commons\HttpMethod;
-use Charcoal\HTTP\Commons\ReadOnlyPayload;
-use Charcoal\HTTP\Commons\UrlInfo;
-use Charcoal\HTTP\Router\Controllers\Request;
+use Charcoal\Http\Commons\Headers;
+use Charcoal\Http\Commons\HttpMethod;
+use Charcoal\Http\Commons\ReadOnlyPayload;
+use Charcoal\Http\Commons\UrlInfo;
+use Charcoal\Http\Router\Controllers\Request;
 
 /**
  * Class HttpServer
- * @package Charcoal\HTTP\Router
+ * @package Charcoal\Http\Router
  */
 class HttpServer
 {
     /**
-     * @param \Charcoal\HTTP\Router\Router $router
+     * @param \Charcoal\Http\Router\Router $router
      * @param \Closure $closure
      * @return void
-     * @throws \Charcoal\HTTP\Router\Exception\RouterException
+     * @throws \Charcoal\Http\Router\Exception\RouterException
      */
     public static function requestFromServerGlobals(Router $router, \Closure $closure): void
     {
