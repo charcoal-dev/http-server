@@ -56,10 +56,27 @@ class PayloadResponse extends AbstractControllerResponse
     /**
      * @return void
      */
-    protected function sendBody(): void
+    final protected function sendBody(): void
+    {
+        $this->sendBodyByContentType($this->getBodyArray());
+    }
+
+    /**
+     * @return array
+     */
+    protected function getBodyArray(): array
+    {
+        return $this->payload->toArray();
+    }
+
+    /**
+     * @param array $body
+     * @return void
+     */
+    protected function sendBodyByContentType(array $body): void
     {
         if ($this->contentType === "application/json") {
-            print(json_encode($this->payload->toArray()));
+            print(json_encode($body));
         }
 
         throw new \RuntimeException("Cannot handle content type: " . $this->contentType);
