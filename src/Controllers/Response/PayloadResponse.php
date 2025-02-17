@@ -77,6 +77,7 @@ class PayloadResponse extends AbstractControllerResponse
     {
         if ($this->contentType === "application/json") {
             print(json_encode($body));
+            return;
         }
 
         throw new \RuntimeException("Cannot handle content type: " . $this->contentType);
