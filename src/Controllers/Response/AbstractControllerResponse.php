@@ -24,6 +24,7 @@ use Charcoal\Http\Router\Exception\ResponseDispatchedException;
 abstract class AbstractControllerResponse
 {
     public readonly int $createdOn;
+    protected ?string $integrityTag = null;
 
     /**
      * @param int $statusCode
@@ -35,6 +36,26 @@ abstract class AbstractControllerResponse
     )
     {
         $this->createdOn = time();
+    }
+
+    /**
+     * Integrity Tag is an optional arbitrary value that uniquely represents a complete response object.
+     * Its primary use is in cached responses, allowing the server to determine whether a cached response
+     * is still valid for serving.
+     * @param string $tag
+     * @return void
+     */
+    public function setIntegrityTag(string $tag): void
+    {
+        $this->integrityTag = $tag;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getIntegrityTag(): ?string
+    {
+        return $this->integrityTag;
     }
 
     /**
