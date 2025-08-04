@@ -34,6 +34,9 @@ class PayloadResponse extends AbstractControllerResponse
         parent::__construct();
     }
 
+    /**
+     * @return array
+     */
     protected function collectSerializableData(): array
     {
         $data = parent::collectSerializableData();
@@ -43,11 +46,11 @@ class PayloadResponse extends AbstractControllerResponse
     }
 
     /**
-     * @return array|\class-string[]
+     * @return class-string[]
      */
     public static function unserializeDependencies(): array
     {
-        return [static::class, WritablePayload::class, ...parent::unserializeDependencies()];
+        return [...parent::unserializeDependencies(), WritablePayload::class];
     }
 
     /**

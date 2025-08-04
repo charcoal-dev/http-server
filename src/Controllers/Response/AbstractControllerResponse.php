@@ -46,9 +46,10 @@ abstract class AbstractControllerResponse
     public static function unserializeDependencies(): array
     {
         return [
-            WritableHeaders::class,
+            static::class,
+            KeyValuePair::class,
             Headers::class,
-            KeyValuePair::class
+            WritableHeaders::class,
         ];
     }
 

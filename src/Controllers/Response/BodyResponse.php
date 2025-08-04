@@ -50,7 +50,7 @@ class BodyResponse extends AbstractControllerResponse
      */
     public static function unserializeDependencies(): array
     {
-        return [static::class, Buffer::class, ...parent::unserializeDependencies()];
+        return [...parent::unserializeDependencies(), Buffer::class];
     }
 
     /**

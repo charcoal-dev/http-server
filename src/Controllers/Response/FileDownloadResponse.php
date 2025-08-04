@@ -44,14 +44,6 @@ class FileDownloadResponse extends AbstractControllerResponse
     }
 
     /**
-     * @return class-string[]
-     */
-    public static function unserializeDependencies(): array
-    {
-        return [static::class, ...parent::unserializeDependencies()];
-    }
-
-    /**
      * @return array
      */
     protected function collectSerializableData(): array
