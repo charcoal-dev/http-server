@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Controllers\Response;
 
+use Charcoal\Http\Commons\Headers;
+use Charcoal\Http\Commons\KeyValuePair;
 use Charcoal\Http\Commons\WritableHeaders;
 use Charcoal\Http\Router\Exception\ResponseDispatchedException;
 
@@ -36,6 +38,51 @@ abstract class AbstractControllerResponse
     )
     {
         $this->createdOn = time();
+    }
+
+    /**
+     * @return class-string[]
+     */
+    public static function unserializeDependencies(): array
+    {
+        return [
+            WritableHeaders::class,
+            Headers::class,
+            KeyValuePair::class
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    protected function collectSerializableData(): array
+    {
+        return [
+            "createdOn" => $this->createdOn,
+            "statusCode" => $this->statusCode,
+            "integrityTag" => $this->integrityTag,
+            "headers" => $this->headers
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    final public function __serialize(): array
+    {
+        return $this->collectSerializableData();
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->createdOn = $data["createdOn"];
+        $this->integrityTag = $data["integrityTag"];
+        $this->statusCode = $data["statusCode"];
+        $this->headers = $data["headers"];
     }
 
     /**

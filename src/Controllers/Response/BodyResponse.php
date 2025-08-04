@@ -35,6 +35,36 @@ class BodyResponse extends AbstractControllerResponse
     }
 
     /**
+     * @return array
+     */
+    protected function collectSerializableData(): array
+    {
+        $data = parent::collectSerializableData();
+        $data["contentType"] = $this->contentType;
+        $data["body"] = $this->body;
+        return $data;
+    }
+
+    /**
+     * @return class-string[]
+     */
+    public static function unserializeDependencies(): array
+    {
+        return [static::class, Buffer::class, ...parent::unserializeDependencies()];
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->contentType = $data["contentType"];
+        $this->body = $data["body"];
+        parent::__unserialize($data);
+    }
+
+    /**
      * @return void
      */
     protected function beforeSendResponseHook(): void

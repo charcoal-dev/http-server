@@ -34,6 +34,33 @@ class PayloadResponse extends AbstractControllerResponse
         parent::__construct();
     }
 
+    protected function collectSerializableData(): array
+    {
+        $data = parent::collectSerializableData();
+        $data["contentType"] = $this->contentType;
+        $data["payload"] = $this->payload;
+        return $data;
+    }
+
+    /**
+     * @return array|\class-string[]
+     */
+    public static function unserializeDependencies(): array
+    {
+        return [static::class, WritablePayload::class, ...parent::unserializeDependencies()];
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->contentType = $data["contentType"];
+        $this->payload = $data["payload"];
+        parent::__unserialize($data);
+    }
+
     /**
      * @param string $key
      * @param string|int|float|bool|array|object|null $value

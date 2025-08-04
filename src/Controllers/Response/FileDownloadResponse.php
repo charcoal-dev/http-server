@@ -44,6 +44,44 @@ class FileDownloadResponse extends AbstractControllerResponse
     }
 
     /**
+     * @return class-string[]
+     */
+    public static function unserializeDependencies(): array
+    {
+        return [static::class, ...parent::unserializeDependencies()];
+    }
+
+    /**
+     * @return array
+     */
+    protected function collectSerializableData(): array
+    {
+        $data = parent::collectSerializableData();
+        $data["filepath"] = $this->filepath;
+        $data["filename"] = $this->filename;
+        $data["contentType"] = $this->contentType;
+        $data["encoding"] = $this->encoding;
+        $data["pragma"] = $this->pragma;
+        $data["expires"] = $this->expires;
+        return $data;
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->filepath = $data["filepath"];
+        $this->filename = $data["filename"];
+        $this->contentType = $data["contentType"];
+        $this->encoding = $data["encoding"];
+        $this->pragma = $data["pragma"];
+        $this->expires = $data["expires"];
+        parent::__unserialize($data);
+    }
+
+    /**
      * @return void
      */
     protected function beforeSendResponseHook(): void

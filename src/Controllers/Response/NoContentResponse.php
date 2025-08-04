@@ -32,5 +32,13 @@ class NoContentResponse extends AbstractControllerResponse
     protected function sendBody(): void
     {
     }
+
+    /**
+     * @return class-string[]
+     */
+    public static function unserializeDependencies(): array
+    {
+        return [static::class, ...parent::unserializeDependencies()];
+    }
 }
 
