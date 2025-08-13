@@ -17,17 +17,17 @@ use Charcoal\Http\Commons\Enums\HttpHeaderKeyPolicy;
  * Class HttpHeaderPolicy
  * @package Charcoal\Http\Router\Policy
  */
-readonly class HttpHeaderPolicy extends HttpDataPolicy
+readonly class HeadersPolicy extends HttpDataPolicy
 {
     public function __construct(
-        public HttpHeaderKeyPolicy $keyPolicy = HttpHeaderKeyPolicy::STRICT,
-        int                        $keyMaxLength = 64,
-        bool                       $keyOverflowTrim = false,
-        int                        $valueMaxLength = 2048,
-        bool                       $valueOverflowTrim = false,
-        ValidationState            $accessKeyTrust = ValidationState::VALIDATED,
-        ValidationState            $setterKeyTrust = ValidationState::RAW,
-        ValidationState            $valueTrust = ValidationState::RAW,
+        public HttpHeaderKeyPolicy        $keyPolicy = HttpHeaderKeyPolicy::STRICT,
+        int                               $keyMaxLength = 64,
+        bool                              $keyOverflowTrim = false,
+        int                               $valueMaxLength = 2048,
+        bool                              $valueOverflowTrim = false,
+        ValidationState                   $accessKeyTrust = ValidationState::VALIDATED,
+        ValidationState                   $setterKeyTrust = ValidationState::RAW,
+        ValidationState                   $valueTrust = ValidationState::RAW,
     )
     {
         parent::__construct(

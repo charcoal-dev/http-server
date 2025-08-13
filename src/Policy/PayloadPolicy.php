@@ -17,18 +17,18 @@ use Charcoal\Http\Commons\Enums\HttpParamKeyPolicy;
  * Class HttpPayloadPolicy
  * @package Charcoal\Http\Router\Policy
  */
-readonly class HttpPayloadPolicy extends HttpDataPolicy
+readonly class PayloadPolicy extends HttpDataPolicy
 {
     public function __construct(
-        public HttpParamKeyPolicy $keyPolicy = HttpParamKeyPolicy::STRICT,
-        Charset                   $charset = Charset::UTF8,
-        int                       $keyMaxLength = 64,
-        bool                      $keyOverflowTrim = false,
-        int                       $valueMaxLength = 2048,
-        bool                      $valueOverflowTrim = false,
-        ValidationState           $accessKeyTrust = ValidationState::VALIDATED,
-        ValidationState           $setterKeyTrust = ValidationState::RAW,
-        ValidationState           $valueTrust = ValidationState::RAW,
+        public HttpParamKeyPolicy         $keyPolicy = HttpParamKeyPolicy::STRICT,
+        Charset                           $charset = Charset::UTF8,
+        int                               $keyMaxLength = 64,
+        bool                              $keyOverflowTrim = false,
+        int                               $valueMaxLength = 2048,
+        bool                              $valueOverflowTrim = false,
+        ValidationState                   $accessKeyTrust = ValidationState::VALIDATED,
+        ValidationState                   $setterKeyTrust = ValidationState::RAW,
+        ValidationState                   $valueTrust = ValidationState::RAW,
     )
     {
         parent::__construct(
