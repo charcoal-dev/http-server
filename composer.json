@@ -14,15 +14,20 @@
   ],
   "require": {
     "php": "^8.3",
-    "charcoal-dev/base": "^0.0.9",
+    "charcoal-dev/base": "^0.0.13",
     "charcoal-dev/buffers": "^0.2.0",
-    "charcoal-dev/http-commons": "^0.2.0"
+    "charcoal-dev/http-commons": "^0.2.1"
   },
   "autoload": {
     "psr-4": {
       "Charcoal\\Http\\Router\\": [
         "src"
       ]
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Charcoal\\Http\\Tests\\Router\\": "tests/"
     }
   },
   "minimum-stability": "dev"
