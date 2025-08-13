@@ -1,23 +1,18 @@
 <?php
-/*
- * This file is a part of "charcoal-dev/http-router" package.
- * https://github.com/charcoal-dev/http-router
- *
- * Copyright (c) Furqan A. Siddiqui <hello@furqansiddiqui.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code or visit following link:
- * https://github.com/charcoal-dev/http-router/blob/main/LICENSE
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
  */
 
 declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Authorization;
 
-use Charcoal\Http\Commons\Headers;
-use Charcoal\OOP\Traits\NoDumpTrait;
-use Charcoal\OOP\Traits\NotCloneableTrait;
-use Charcoal\OOP\Traits\NotSerializableTrait;
+use Charcoal\Base\Charsets\Ascii;
+use Charcoal\Base\Traits\NoDumpTrait;
+use Charcoal\Base\Traits\NotCloneableTrait;
+use Charcoal\Base\Traits\NotSerializableTrait;
+use Charcoal\Http\Commons\Header\Headers;
 
 /**
  * Class AbstractAuthorization
@@ -65,7 +60,7 @@ abstract class AbstractAuthorization
     }
 
     /**
-     * @param \Charcoal\Http\Commons\Headers $headers
+     * @param Headers $headers
      * @return void
      */
     abstract public function authorize(Headers $headers): void;
@@ -80,6 +75,6 @@ abstract class AbstractAuthorization
             return "";
         }
 
-        return filter_var($in, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+        return Ascii::sanitizeUseFilter($in);
     }
 }
