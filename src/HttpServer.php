@@ -14,28 +14,35 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router;
 
+use Charcoal\Base\Enums\ExceptionAction;
+use Charcoal\Base\Support\Data\BatchEnvelope;
 use Charcoal\Buffers\Buffer;
-use Charcoal\Http\Commons\Headers;
-use Charcoal\Http\Commons\HttpMethod;
-use Charcoal\Http\Commons\ReadOnlyPayload;
-use Charcoal\Http\Commons\UrlInfo;
+use Charcoal\Http\Commons\Body\UnsafePayload;
+use Charcoal\Http\Commons\Data\UrlInfo;
+use Charcoal\Http\Commons\Enums\HttpMethod;
+use Charcoal\Http\Commons\Header\Headers;
 use Charcoal\Http\Router\Controllers\Request;
 
 /**
  * Class HttpServer
  * @package Charcoal\Http\Router
  */
-class HttpServer
+readonly class HttpServer
 {
     /**
-     * @param \Charcoal\Http\Router\Router $router
+     * @param Router $router
      * @param \Closure $closure
      * @return void
-     * @throws \Charcoal\Http\Router\Exception\RouterException
+     * @throws Exception\RouterException
+     * @throws \Charcoal\Base\Exceptions\WrappedException
+     * @throws \Charcoal\Http\Commons\Exception\InvalidUrlException
      */
-    public static function requestFromServerGlobals(Router $router, \Closure $closure): void
+    public static function requestFromServerGlobals(
+        Router   $router,
+        \Closure $closure
+    ): void
     {
-        // Check if URL not rewritten properly (i.e. called /index.php/some/controller)
+        // Check if URL not rewritten properly (i.e., called /index.php/some/controller)
         $url = $_SERVER["REQUEST_URI"] ?? "";
         if (preg_match('/^\/?[\w\-.]+\.php\//', $url)) {
             $url = explode("/", $url);
@@ -64,7 +71,19 @@ class HttpServer
             }
         }
 
-        $headers = new Headers($headers);
+        $incomingLogger = $router->policy->incomingLogger;
+        $headersPolicy = $router->policy->incomingHeaders;
+        $headers = new Headers(
+            $headersPolicy,
+            $headersPolicy->keyPolicy,
+            new BatchEnvelope(
+                $headers,
+                $incomingLogger?->handlesInvalidHeader() ? ExceptionAction::Log : ExceptionAction::Throw,
+                $incomingLogger?->handlesInvalidHeader() ? $incomingLogger->onInvalidHeader() : null
+            )
+        );
+
+        unset($headersPolicy);
 
         // Payload & Body
         $body = new Buffer();
@@ -80,7 +99,7 @@ class HttpServer
         $params = [];
         $stream = file_get_contents("php://input");
         if ($stream) {
-            $body->append($stream); // Append "as-is" (Un-sanitized) body to request
+            $body->append($stream); // Append "as-is" (unsanitized) body to request
             switch ($contentType) {
                 case "application/json":
                     try {
@@ -113,7 +132,16 @@ class HttpServer
         }
 
         // Payload
-        $payload = new ReadOnlyPayload($payload);
+        $payloadPolicy = $router->policy->incomingPayload;
+        $payload = new UnsafePayload(
+            $payloadPolicy,
+            $payloadPolicy->keyPolicy,
+            new BatchEnvelope(
+                $payload,
+                $incomingLogger?->handlesInvalidPayload() ? ExceptionAction::Log : ExceptionAction::Throw,
+                $incomingLogger?->handlesInvalidPayload() ? $incomingLogger->onInvalidPayload() : null
+            )
+        );
 
         // Bypass HTTP auth.
         $bypassAuth = false;
