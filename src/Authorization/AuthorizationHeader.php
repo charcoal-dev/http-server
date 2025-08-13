@@ -25,28 +25,32 @@ readonly class AuthorizationHeader
     public string $unchecked;
 
     /**
-     * @param Headers|string $authorization
+     * @param Headers $headers
      */
-    public function __construct(Headers|string $authorization)
+    public function __construct(Headers $headers)
     {
-        if ($authorization instanceof Headers) {
-            $authorization = $authorization->policy->valueTrust->meets(ValidationState::VALIDATED) ?
-                Ascii::sanitizeUseFilter(strval($authorization->get("authorization"))) : "";
+        $authorization = (string)$headers->get("authorization");
+        if (!$headers->policy->valueTrust->meets(ValidationState::VALIDATED)) {
+            $authorization = Ascii::sanitizeUseFilter($authorization);
         }
 
         $authorization = trim($authorization);
         if (!$authorization) {
+            $this->schemes = [];
+            $this->invalid = [];
+            $this->unchecked = "";
             return;
         }
 
         list($valid, $this->invalid, $this->unchecked) = static::from($authorization);
+        $schemes = [];
         if ($valid) {
             foreach ($valid as $scheme) {
                 $schemes[strtolower($scheme[0])] = $scheme[1];
             }
         }
 
-        $this->schemes = $schemes ?? [];
+        $this->schemes = $schemes;
     }
 
     /**
