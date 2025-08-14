@@ -19,7 +19,7 @@ use Charcoal\Http\Router\Contracts\Auth\AuthRealmEnum;
 readonly class AuthContext implements AuthContextInterface
 {
     public function __construct(
-        public AuthScheme         $scheme,
+        public AuthScheme    $scheme,
         public AuthRealmEnum $realm
     )
     {

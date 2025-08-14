@@ -12,12 +12,13 @@ use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
 use Charcoal\Http\Commons\Body\UnsafePayload;
+use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
 use Charcoal\Http\Router\Controller\Promise\FileDownload;
 use Charcoal\Http\Router\Exception\ControllerException;
 use Charcoal\Http\Router\Request\Request;
 use Charcoal\Http\Router\Response\AbstractResponse;
 use Charcoal\Http\Router\Response\Headers\CacheControl;
-use Charcoal\Http\Router\Router;
+use Charcoal\Http\Router\Route;
 
 /**
  * Class AbstractController
@@ -27,13 +28,14 @@ abstract class AbstractController
 {
     private AbstractResponse $response;
     private ?CacheControl $cacheControl = null;
+    public readonly ?AuthContextInterface $authContext;
 
     use NoDumpTrait;
     use NotCloneableTrait;
     use NotSerializableTrait;
 
     /**
-     * @param Router $router
+     * @param Route $route
      * @param Request $request
      * @param AbstractController|null $previous
      * @param string|null $entryPoint
@@ -41,11 +43,11 @@ abstract class AbstractController
      * @throws ControllerException
      */
     public function __construct(
-        public readonly Router  $router,
+        public readonly Route   $route,
         public readonly Request $request,
         ?AbstractController     $previous = null,
         protected ?string       $entryPoint = null,
-        array                   $constructorArgs = []
+        array                   $constructorArgs = [],
     )
     {
         $this->response = $previous?->getResponseObject() ?? $this->createResponseObject();
@@ -57,6 +59,8 @@ abstract class AbstractController
                 );
             }
         }
+
+        $this->route->isProtected()?->authenticate($this->request);
 
         $this->onConstructHook($constructorArgs);
     }
@@ -146,13 +150,26 @@ abstract class AbstractController
     }
 
     /**
+     * @param AuthContextInterface $context
+     * @return void
+     */
+    public function setAuthorized(AuthContextInterface $context): void
+    {
+        if (isset($this->authContext)) {
+            throw new \LogicException("Authorization context already set");
+        }
+
+        $this->authContext = $context;
+    }
+
+    /**
      * @param string $controllerClass
      * @param string $entryPoint
      * @return AbstractController
      */
     public function forwardToController(string $controllerClass, string $entryPoint): AbstractController
     {
-        return $this->router->createControllerInstance($controllerClass, $this->request, $this, $entryPoint);
+        return $this->route->router->createControllerInstance($controllerClass, $this->request, $this, $entryPoint);
     }
 
     /**

@@ -27,7 +27,6 @@ use Charcoal\Http\Router\Request\Headers\Authorization;
 class Request
 {
     public readonly ?ContentType $contentType;
-    public readonly ?AuthContextInterface $authContext;
     private ?Authorization $authorization = null;
 
     use NoDumpTrait;
@@ -62,18 +61,5 @@ class Request
         }
 
         return $this->authorization;
-    }
-
-    /**
-     * @param AuthContextInterface $context
-     * @return void
-     */
-    public function setAuthorized(AuthContextInterface $context): void
-    {
-        if (isset($this->authContext)) {
-            throw new \LogicException("Authorization context already set");
-        }
-
-        $this->authContext = $context;
     }
 }

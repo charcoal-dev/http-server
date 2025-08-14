@@ -16,6 +16,7 @@ use Charcoal\Http\Commons\Data\UrlInfo;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Header\Headers;
+use Charcoal\Http\Router\Controller\AbstractController;
 use Charcoal\Http\Router\Request\Request;
 
 /**
@@ -26,7 +27,7 @@ readonly class HttpServer
 {
     /**
      * @param Router $router
-     * @param \Closure $closure
+     * @param \Closure(AbstractController): void $closure
      * @return void
      * @throws Exception\RoutingException
      * @throws \Charcoal\Base\Exceptions\WrappedException
@@ -143,14 +144,8 @@ readonly class HttpServer
             )
         );
 
-        // Bypass HTTP auth.
-        $bypassAuth = false;
-        if ($method === HttpMethod::OPTIONS) {
-            $bypassAuth = true;
-        }
-
         // Get Controller
-        $controller = $router->try(new Request($method, $url, $headers, $payload, $body), $bypassAuth);
+        $controller = $router->try(new Request($method, $url, $headers, $payload, $body));
 
         // Callback Close
         call_user_func($closure, $controller);

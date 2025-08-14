@@ -1,20 +1,16 @@
 <?php
-/*
- * This file is a part of "charcoal-dev/http-router" package.
- * https://github.com/charcoal-dev/http-router
- *
- * Copyright (c) Furqan A. Siddiqui <hello@furqansiddiqui.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code or visit following link:
- * https://github.com/charcoal-dev/http-router/blob/main/LICENSE
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
  */
 
 declare(strict_types=1);
 
+namespace Charcoal\Http\Tests\Router\Enums;
+
+use Charcoal\Http\Router\Enums\CacheStoreDirective;
+use Charcoal\Http\Router\Response\Headers\CacheControl;
 use PHPUnit\Framework\TestCase;
-use Charcoal\Http\Router\Controllers\CacheControl;
-use Charcoal\Http\Router\Controllers\CacheStoreDirective;
 
 /**
  * Class CacheControlTest
