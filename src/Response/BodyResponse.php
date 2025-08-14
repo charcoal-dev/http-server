@@ -63,9 +63,9 @@ class BodyResponse extends AbstractResponse
     }
 
     /**
-     * @return Buffer|null
+     * @return Buffer
      */
-    protected function getBody(): ?Buffer
+    protected function getBody(): Buffer
     {
         if (!$this->body->len()) {
             throw new \RuntimeException("No response body set");

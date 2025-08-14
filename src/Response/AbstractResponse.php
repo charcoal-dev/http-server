@@ -119,9 +119,9 @@ abstract class AbstractResponse
     }
 
     /**
-     * @return Buffer|null
+     * @return string|Buffer|null
      */
-    abstract protected function getBody(): ?Buffer;
+    abstract protected function getBody(): null|string|Buffer;
 
     /**
      * @return FinalizedResponse
