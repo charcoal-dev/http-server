@@ -12,10 +12,10 @@ use Charcoal\Http\Commons\Exception\HttpException;
 use Charcoal\Http\Router\Authorization\AuthError;
 
 /**
- * Class AuthorizationException
+ * Class AuthenticationException
  * @package Charcoal\Http\Router\Exception
  */
-class AuthorizationException extends HttpException
+class AuthenticationException extends HttpException
 {
     public function __construct(
         public readonly AuthError $error,

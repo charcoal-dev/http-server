@@ -26,7 +26,7 @@ use Charcoal\Http\Router\Route;
  */
 abstract class AbstractController
 {
-    private AbstractResponse $response;
+    private ?AbstractResponse $response;
     private ?CacheControl $cacheControl = null;
     public readonly ?AuthContextInterface $authContext;
 
@@ -41,6 +41,7 @@ abstract class AbstractController
      * @param string|null $entryPoint
      * @param array $constructorArgs
      * @throws ControllerException
+     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
      */
     public function __construct(
         public readonly Route   $route,
@@ -62,7 +63,7 @@ abstract class AbstractController
 
         $this->route->isProtected()?->authenticate($this->request);
 
-        $this->onConstructHook($constructorArgs);
+        $this->resolveEntryPoint($constructorArgs);
     }
 
     /**
@@ -88,7 +89,7 @@ abstract class AbstractController
      * @param array $args
      * @return void
      */
-    abstract protected function onConstructHook(array $args): void;
+    abstract protected function resolveEntryPoint(array $args): void;
 
     /**
      * @return AbstractResponse
@@ -147,6 +148,16 @@ abstract class AbstractController
         }
 
         ResponseDispatcher::dispatchPromise($statusCode, $this->response->headers, $file);
+    }
+
+    /**
+     * @param int $statusCode
+     * @return void
+     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
+     */
+    public function terminate(int $statusCode): void
+    {
+        ResponseDispatcher::dispatch(new FinalizedResponse($statusCode, $this->response->headers, null, null));
     }
 
     /**
