@@ -11,7 +11,7 @@ namespace Charcoal\Http\Router\Policy;
 use Charcoal\Base\Enums\Charset;
 use Charcoal\Base\Enums\ValidationState;
 use Charcoal\Http\Commons\Data\HttpDataPolicy;
-use Charcoal\Http\Commons\Enums\HttpParamKeyPolicy;
+use Charcoal\Http\Commons\Enums\ParamKeyPolicy;
 
 /**
  * Class HttpPayloadPolicy
@@ -20,15 +20,15 @@ use Charcoal\Http\Commons\Enums\HttpParamKeyPolicy;
 readonly class PayloadPolicy extends HttpDataPolicy
 {
     public function __construct(
-        public HttpParamKeyPolicy         $keyPolicy = HttpParamKeyPolicy::STRICT,
-        Charset                           $charset = Charset::UTF8,
-        int                               $keyMaxLength = 64,
-        bool                              $keyOverflowTrim = false,
-        int                               $valueMaxLength = 2048,
-        bool                              $valueOverflowTrim = false,
-        ValidationState                   $accessKeyTrust = ValidationState::VALIDATED,
-        ValidationState                   $setterKeyTrust = ValidationState::RAW,
-        ValidationState                   $valueTrust = ValidationState::RAW,
+        public ParamKeyPolicy $keyPolicy = ParamKeyPolicy::STRICT,
+        Charset               $charset = Charset::UTF8,
+        int                   $keyMaxLength = 64,
+        bool                  $keyOverflowTrim = false,
+        int                   $valueMaxLength = 2048,
+        bool                  $valueOverflowTrim = false,
+        ValidationState       $accessKeyTrust = ValidationState::VALIDATED,
+        ValidationState       $setterKeyTrust = ValidationState::RAW,
+        ValidationState       $valueTrust = ValidationState::RAW,
     )
     {
         parent::__construct(

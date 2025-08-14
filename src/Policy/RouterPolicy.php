@@ -8,20 +8,22 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Policy;
 
-use Charcoal\Http\Router\Contracts\HttpRouterLoggerInterface;
+use Charcoal\Http\Router\Contracts\RouterLoggerInterface;
 
 /**
  * Class ServerPolicy
  * @package Charcoal\Http\Router\Policy
  */
-class RouterPolicy
+readonly class RouterPolicy
 {
     public function __construct(
-        public readonly HeadersPolicy              $incomingHeaders,
-        public readonly ?HttpRouterLoggerInterface $incomingLogger = null,
-        public readonly PayloadPolicy              $incomingPayload,
-        public readonly HeadersPolicy              $outgoingHeaders,
-        public PayloadPolicy              $outgoingPayload,
+        public HeadersPolicy          $incomingHeaders,
+        public ?RouterLoggerInterface $incomingLogger = null,
+        public PayloadPolicy          $incomingPayload,
+        public HeadersPolicy          $outgoingHeaders,
+        public PayloadPolicy          $outgoingPayload,
+        public bool                   $parsePayloadKeepBody = false,
+        public string                 $parseScalarPayloadParam = "_json"
     )
     {
     }
