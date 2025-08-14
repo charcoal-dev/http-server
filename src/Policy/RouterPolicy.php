@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Policy;
 
-use Charcoal\Http\Commons\Body\Payload;
+use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Contracts\RouterLoggerInterface;
 
@@ -40,11 +40,11 @@ readonly class RouterPolicy
     }
 
     /**
-     * @return Payload
+     * @return WritablePayload
      * @throws \Charcoal\Base\Exceptions\WrappedException
      */
-    public function createResponsePayload(): Payload
+    public function createResponsePayload(): WritablePayload
     {
-        return new Payload($this->outgoingPayload, $this->outgoingPayload->keyPolicy);
+        return new WritablePayload($this->outgoingPayload, $this->outgoingPayload->keyPolicy);
     }
 }
