@@ -11,7 +11,7 @@ namespace Charcoal\Http\Router\Authorization;
 use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
-use Charcoal\Http\Router\Contracts\AuthRealmInterface;
+use Charcoal\Http\Router\Contracts\Auth\AuthRealmEnum;
 
 /**
  * Class AbstractAuthorization
@@ -24,9 +24,9 @@ abstract class AbstractAuthorization
     use NotSerializableTrait;
 
     /**
-     * @param AuthRealmInterface $realm
+     * @param AuthRealmEnum $realm
      */
-    public function __construct(protected readonly AuthRealmInterface $realm)
+    public function __construct(protected readonly AuthRealmEnum $realm)
     {
     }
 }

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts;
+namespace Charcoal\Http\Router\Contracts\Auth;
 
 use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Request\Request;

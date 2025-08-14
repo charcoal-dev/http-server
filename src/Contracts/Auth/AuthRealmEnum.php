@@ -6,12 +6,13 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts;
+namespace Charcoal\Http\Router\Contracts\Auth;
 
 /**
- * Interface AuthContextInterface
+ * Interface AuthRealmInterface
  * @package Charcoal\Http\Router\Contracts
  */
-interface AuthContextInterface
+interface AuthRealmEnum
 {
+    public function getRealmName(): string;
 }

@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Authorization;
 
 use Charcoal\Http\Commons\Enums\AuthScheme;
-use Charcoal\Http\Router\Contracts\AuthContextInterface;
-use Charcoal\Http\Router\Contracts\AuthRealmInterface;
+use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
+use Charcoal\Http\Router\Contracts\Auth\AuthRealmEnum;
 
 /**
  * Class AuthContext
@@ -20,7 +20,7 @@ readonly class AuthContext implements AuthContextInterface
 {
     public function __construct(
         public AuthScheme         $scheme,
-        public AuthRealmInterface $realm
+        public AuthRealmEnum $realm
     )
     {
     }

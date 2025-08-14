@@ -11,9 +11,9 @@ namespace Charcoal\Http\Router\Authorization;
 use Charcoal\Base\Support\Helpers\EncodingHelper;
 use Charcoal\Http\Commons\Enums\AuthScheme;
 use Charcoal\Http\Commons\Header\WritableHeaders;
-use Charcoal\Http\Router\Contracts\AuthContextInterface;
-use Charcoal\Http\Router\Contracts\AuthenticatorInterface;
-use Charcoal\Http\Router\Contracts\AuthRealmInterface;
+use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
+use Charcoal\Http\Router\Contracts\Auth\AuthenticatorInterface;
+use Charcoal\Http\Router\Contracts\Auth\AuthRealmEnum;
 use Charcoal\Http\Router\Exception\AuthorizationException;
 use Charcoal\Http\Router\Request\Request;
 
@@ -24,12 +24,12 @@ use Charcoal\Http\Router\Request\Request;
 abstract class AbstractBasicAuth extends AbstractAuthorization implements AuthenticatorInterface
 {
     /**
-     * @param AuthRealmInterface $realm
+     * @param AuthRealmEnum $realm
      * @param AuthScheme $scheme
      */
     public function __construct(
-        AuthRealmInterface $realm,
-        public AuthScheme  $scheme = AuthScheme::Basic
+        AuthRealmEnum     $realm,
+        public AuthScheme $scheme = AuthScheme::Basic
     )
     {
         parent::__construct($realm);

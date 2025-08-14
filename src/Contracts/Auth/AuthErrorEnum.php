@@ -6,12 +6,12 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts;
+namespace Charcoal\Http\Router\Contracts\Auth;
 
 /**
  * Interface AuthErrorInterface
  * @package Charcoal\Http\Router\Contracts
  */
-interface AuthErrorInterface extends \BackedEnum
+interface AuthErrorEnum extends \BackedEnum
 {
 }
