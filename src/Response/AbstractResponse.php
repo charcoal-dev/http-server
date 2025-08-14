@@ -119,17 +119,6 @@ abstract class AbstractResponse
     }
 
     /**
-     * @param string $key
-     * @param string $value
-     * @return $this
-     */
-    public function setHeader(string $key, string $value): static
-    {
-        $this->headers->set($key, $value);
-        return $this;
-    }
-
-    /**
      * @return Buffer|null
      */
     abstract protected function getBody(): ?Buffer;
