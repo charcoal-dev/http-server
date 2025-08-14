@@ -12,7 +12,6 @@ use Charcoal\Base\Support\Helpers\CaseStyleHelper;
 use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
-use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Contracts\Auth\AuthenticatorInterface;
 use Charcoal\Http\Router\Contracts\RoutingInterface;
 use Charcoal\Http\Router\Controller\AbstractController;

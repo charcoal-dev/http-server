@@ -8,8 +8,6 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Controller;
 
-use Charcoal\Base\Enums\ExceptionAction;
-use Charcoal\Base\Support\Data\BatchEnvelope;
 use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
@@ -191,29 +189,5 @@ abstract class AbstractController
 
         header(sprintf('Location: %s', $url));
         exit;
-    }
-
-    /**
-     * @return Payload
-     * @throws \Charcoal\Base\Exceptions\WrappedException
-     * @api
-     */
-    protected function policyCreatePayload(): Payload
-    {
-        $policy = $this->route->router->policy;
-        return new Payload($this->route->router->policy->outgoingPayload,
-            ParamKeyPolicy::UNSANITIZED);
-    }
-
-    /**
-     * @return WritableHeaders
-     * @throws \Charcoal\Base\Exceptions\WrappedException
-     * @api
-     */
-    protected function policyCreateHeaders(): WritableHeaders
-    {
-        $policy = $this->route->router->policy;
-        return new WritableHeaders($policy->outgoingHeaders,
-            HeaderKeyPolicy::UNSANITIZED);
     }
 }

@@ -17,7 +17,6 @@ use Charcoal\Http\Commons\Data\UrlInfo;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Header\Headers;
-use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
 use Charcoal\Http\Router\Request\Headers\Authorization;
 
 /**
