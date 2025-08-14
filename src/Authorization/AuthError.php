@@ -9,16 +9,14 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Authorization;
 
 /**
- * Class AuthUser
+ * Class AuthError
  * @package Charcoal\Http\Router\Authorization
  */
-readonly class AuthUser
+enum AuthError: int
 {
-    public function __construct(
-        public string $username,
-        #[\SensitiveParameter]
-        public string $password
-    )
-    {
-    }
+    case INVALID_SCHEME = 1;
+    case NO_SCHEME_CREDENTIALS = 2;
+    case NO_CREDENTIALS = 11;
+    case INVALID_CREDENTIALS = 12;
+    case BAD_CREDENTIALS = 13;
 }
