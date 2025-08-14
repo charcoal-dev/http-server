@@ -13,9 +13,10 @@ use Charcoal\Base\Support\Data\BatchEnvelope;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Data\UrlInfo;
+use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Header\Headers;
-use Charcoal\Http\Router\Controllers\Request;
+use Charcoal\Http\Router\Request\Request;
 
 /**
  * Class HttpServer
@@ -27,7 +28,7 @@ readonly class HttpServer
      * @param Router $router
      * @param \Closure $closure
      * @return void
-     * @throws Exception\RouterException
+     * @throws Exception\RoutingException
      * @throws \Charcoal\Base\Exceptions\WrappedException
      * @throws \Charcoal\Http\Commons\Exception\InvalidUrlException
      */
@@ -80,9 +81,9 @@ readonly class HttpServer
         unset($headersPolicy);
 
         // Payload & Body
+        $payload = [];
         $body = new Buffer();
-        $payload = []; // Initiate payload
-        $contentType = strtolower(trim(explode(";", $_SERVER["CONTENT_TYPE"] ?? "")[0]));
+        $contentType = ContentType::find($_SERVER["CONTENT_TYPE"] ?? "");
 
         // Ready query string
         if (isset($_SERVER["QUERY_STRING"])) {
@@ -93,19 +94,22 @@ readonly class HttpServer
         $params = [];
         $stream = file_get_contents("php://input");
         if ($stream) {
-            $body->append($stream); // Append "as-is" (unsanitized) body to request
+            if ($router->policy->parsePayloadKeepBody) {
+                $body->append($stream);
+            }
+
             switch ($contentType) {
-                case "application/json":
+                case ContentType::JSON:
                     try {
                         $json = json_decode($stream, true, flags: JSON_THROW_ON_ERROR);
                     } catch (\JsonException $e) {
-                        throw new \RuntimeException('Failed to decode request body as JSON', previous: $e);
+                        throw new \RuntimeException("Failed to decode request body as JSON", previous: $e);
                     }
 
                     if (is_array($json)) {
                         $params = $json;
                     } elseif (is_scalar($json) || is_null($json)) {
-                        $params = ["_json" => $json];
+                        $params = [$router->policy->parseScalarPayloadParam => $json];
                     }
 
                     break;
@@ -114,14 +118,14 @@ readonly class HttpServer
                     break;
                 case "multipart/form-data":
                     if ($method === HttpMethod::POST) {
-                        $params = $_POST; // Simply use $_POST var;
+                        $params = $_POST;
                     }
 
                     break;
             }
         }
 
-        if (is_array($params) && $params) { // Merge body and URL params
+        if (is_array($params) && $params) {
             $payload = array_merge($params, $payload);
         }
 
