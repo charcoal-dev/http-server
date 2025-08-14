@@ -1,38 +1,26 @@
 <?php
-/*
- * This file is a part of "charcoal-dev/http-router" package.
- * https://github.com/charcoal-dev/http-router
- *
- * Copyright (c) Furqan A. Siddiqui <hello@furqansiddiqui.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code or visit following link:
- * https://github.com/charcoal-dev/http-router/blob/main/LICENSE
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
  */
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Controllers;
+namespace Charcoal\Http\Router\Response\Headers;
+
+use Charcoal\Http\Router\Enums\CacheStoreDirective;
 
 /**
  * Class CacheControl
- * @package Charcoal\Http\Router\Controllers
+ * @package Charcoal\Http\Router\Response\Headers
  */
-class CacheControl
+readonly class CacheControl
 {
-    /**
-     * @param CacheStoreDirective $store
-     * @param int|null $maxAge
-     * @param int|null $sMaxAge
-     * @param bool $mustRevalidate
-     * @param bool $noCache
-     * @param bool $immutable
-     * @param bool $noTransform
-     * @param array $customDirectives
-     */
+    public ?int $sMaxAge;
+
     public function __construct(
         public CacheStoreDirective $store,
         public ?int                $maxAge = null,
-        public ?int                $sMaxAge = null,
+        ?int                       $sMaxAge = null,
         public bool                $mustRevalidate = false,
         public bool                $noCache = false,
         public bool                $immutable = false,
@@ -40,7 +28,7 @@ class CacheControl
         public array               $customDirectives = []
     )
     {
-        $this->sMaxAge = $this->sMaxAge ?? $this->maxAge;
+        $this->sMaxAge = $sMaxAge ?? $this->maxAge;
     }
 
     /**
