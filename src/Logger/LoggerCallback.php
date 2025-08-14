@@ -8,13 +8,13 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Logger;
 
-use Charcoal\Http\Router\Contracts\HttpRouterLoggerInterface;
+use Charcoal\Http\Router\Contracts\RouterLoggerInterface;
 
 /**
  * Class LoggerCallback
  * @package Charcoal\Http\Router\Policy
  */
-class LoggerCallback implements HttpRouterLoggerInterface
+class LoggerCallback implements RouterLoggerInterface
 {
     public function __construct(
         public ?\Closure $onInvalidHeader = null,
