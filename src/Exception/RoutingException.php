@@ -11,9 +11,9 @@ namespace Charcoal\Http\Router\Exception;
 use Charcoal\Http\Commons\Exception\HttpException;
 
 /**
- * Class ControllerException
+ * Class RoutingException
  * @package Charcoal\Http\Router\Exception
  */
-class ControllerException extends HttpException
+class RoutingException extends HttpException
 {
 }
