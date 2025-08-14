@@ -9,12 +9,16 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Contracts;
 
 /**
- * Interface HttpRouterLoggerInterface
+ * Interface RouterLoggerInterface
  * @package Charcoal\Http\Router\Contracts
  */
-interface HttpRouterLoggerInterface
+interface RouterLoggerInterface
 {
     public function onInvalidHeader(): ?\Closure;
 
+    public function handlesInvalidHeader(): bool;
+
     public function onInvalidPayload(): ?\Closure;
+
+    public function handlesInvalidPayload(): bool;
 }
