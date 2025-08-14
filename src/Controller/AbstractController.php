@@ -1,26 +1,23 @@
 <?php
-/*
- * This file is a part of "charcoal-dev/http-router" package.
- * https://github.com/charcoal-dev/http-router
- *
- * Copyright (c) Furqan A. Siddiqui <hello@furqansiddiqui.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code or visit following link:
- * https://github.com/charcoal-dev/http-router/blob/main/LICENSE
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Controllers;
+namespace Charcoal\Http\Router\Controller;
 
-use Charcoal\Http\Commons\ReadOnlyPayload;
-use Charcoal\Http\Router\Controllers\Response\AbstractControllerResponse;
+use Charcoal\Base\Traits\NoDumpTrait;
+use Charcoal\Base\Traits\NotCloneableTrait;
+use Charcoal\Base\Traits\NotSerializableTrait;
+use Charcoal\Http\Commons\Body\UnsafePayload;
+use Charcoal\Http\Router\Controller\Promise\FileDownload;
 use Charcoal\Http\Router\Exception\ControllerException;
+use Charcoal\Http\Router\Request\Request;
+use Charcoal\Http\Router\Response\AbstractResponse;
+use Charcoal\Http\Router\Response\Headers\CacheControl;
 use Charcoal\Http\Router\Router;
-use Charcoal\OOP\Traits\NoDumpTrait;
-use Charcoal\OOP\Traits\NotCloneableTrait;
-use Charcoal\OOP\Traits\NotSerializableTrait;
 
 /**
  * Class AbstractController
@@ -28,7 +25,7 @@ use Charcoal\OOP\Traits\NotSerializableTrait;
  */
 abstract class AbstractController
 {
-    private AbstractControllerResponse $response;
+    private AbstractResponse $response;
     private ?CacheControl $cacheControl = null;
 
     use NoDumpTrait;
@@ -36,23 +33,22 @@ abstract class AbstractController
     use NotSerializableTrait;
 
     /**
-     * @param \Charcoal\Http\Router\Router $router
-     * @param \Charcoal\Http\Router\Controllers\Request $request
-     * @param \Charcoal\Http\Router\Controllers\AbstractController|null $prev
+     * @param Router $router
+     * @param Request $request
+     * @param AbstractController|null $previous
      * @param string|null $entryPoint
      * @param array $constructorArgs
-     * @throws \Charcoal\Http\Router\Exception\ControllerException
+     * @throws ControllerException
      */
     public function __construct(
         public readonly Router  $router,
         public readonly Request $request,
-        ?AbstractController     $prev = null,
+        ?AbstractController     $previous = null,
         protected ?string       $entryPoint = null,
         array                   $constructorArgs = []
     )
     {
-        $this->response = $prev?->getResponseObject() ?? $this->initEmptyResponse();
-
+        $this->response = $previous?->getResponseObject() ?? $this->createResponseObject();
         if ($entryPoint) {
             $this->entryPoint = method_exists($this, $entryPoint) ? $entryPoint : null;
             if (!$this->entryPoint) {
@@ -68,14 +64,16 @@ abstract class AbstractController
     /**
      * @param CacheControl $cacheControl
      * @return void
+     * @api
      */
-    protected function useCacheControl(CacheControl $cacheControl): void
+    protected function setCacheControl(CacheControl $cacheControl): void
     {
         $this->cacheControl = $cacheControl;
     }
 
     /**
      * @return void
+     * @api
      */
     protected function unsetCacheControl(): void
     {
@@ -89,31 +87,31 @@ abstract class AbstractController
     abstract protected function onConstructHook(array $args): void;
 
     /**
-     * @return AbstractControllerResponse
+     * @return AbstractResponse
      */
-    abstract protected function initEmptyResponse(): AbstractControllerResponse;
+    abstract protected function createResponseObject(): AbstractResponse;
 
     /**
-     * @return AbstractControllerResponse
+     * @return AbstractResponse
      */
-    public function getResponseObject(): AbstractControllerResponse
+    public function getResponseObject(): AbstractResponse
     {
         return $this->response;
     }
 
     /**
-     * @param AbstractControllerResponse $response
+     * @param AbstractResponse $response
      * @return void
      */
-    public function swapResponseObject(AbstractControllerResponse $response): void
+    public function swapResponseObject(AbstractResponse $response): void
     {
         $this->response = $response;
     }
 
     /**
-     * @return \Charcoal\Http\Commons\ReadOnlyPayload
+     * @return UnsafePayload
      */
-    public function input(): ReadOnlyPayload
+    public function payload(): UnsafePayload
     {
         return $this->request->payload;
     }
@@ -122,19 +120,35 @@ abstract class AbstractController
      * @return never
      * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
      */
-    public function sendResponse(): never
+    public function send(): never
     {
         if ($this->cacheControl) {
             $this->response->headers->set("Cache-Control", $this->cacheControl->getHeaderValue());
         }
 
-        $this->response->send();
+        ResponseDispatcher::dispatch($this->response->finalize());
+    }
+
+    /**
+     * @param int $statusCode
+     * @param FileDownload $file
+     * @param CacheControl|null $cacheControl
+     * @return never
+     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
+     */
+    public function sendFileDownload(int $statusCode, FileDownload $file, ?CacheControl $cacheControl): never
+    {
+        if ($cacheControl) {
+            $this->response->headers->set("Cache-Control", $this->cacheControl->getHeaderValue());
+        }
+
+        ResponseDispatcher::dispatchPromise($statusCode, $this->response->headers, $file);
     }
 
     /**
      * @param string $controllerClass
      * @param string $entryPoint
-     * @return \Charcoal\Http\Router\Controllers\AbstractController
+     * @return AbstractController
      */
     public function forwardToController(string $controllerClass, string $entryPoint): AbstractController
     {

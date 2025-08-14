@@ -1,26 +1,26 @@
 <?php
-/*
- * This file is a part of "charcoal-dev/http-router" package.
- * https://github.com/charcoal-dev/http-router
- *
- * Copyright (c) Furqan A. Siddiqui <hello@furqansiddiqui.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code or visit following link:
- * https://github.com/charcoal-dev/http-router/blob/main/LICENSE
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Controllers\Response;
+namespace Charcoal\Http\Router\Controller\Promise;
+
+use Charcoal\Base\Traits\ControlledSerializableTrait;
+use Charcoal\Http\Commons\Header\WritableHeaders;
+use Charcoal\Http\Router\Contracts\PromiseResponseOnDispatch;
 
 /**
- * Class FileDownloadResponse
- * @package Charcoal\Http\Router\Controllers\Response
+ * Class FileDownload
+ * @package Charcoal\Http\Router\Controller\Promise
  */
-class FileDownloadResponse extends AbstractControllerResponse
+class FileDownload implements PromiseResponseOnDispatch
 {
     public readonly string $filename;
+
+    use ControlledSerializableTrait;
 
     /**
      * @param string $filepath
@@ -39,7 +39,6 @@ class FileDownloadResponse extends AbstractControllerResponse
         public readonly string $expires = "0"
     )
     {
-        parent::__construct();
         $this->filename = $filename ?? basename($filepath);
     }
 
@@ -48,7 +47,6 @@ class FileDownloadResponse extends AbstractControllerResponse
      */
     protected function collectSerializableData(): array
     {
-        $data = parent::collectSerializableData();
         $data["filepath"] = $this->filepath;
         $data["filename"] = $this->filename;
         $data["contentType"] = $this->contentType;
@@ -70,15 +68,15 @@ class FileDownloadResponse extends AbstractControllerResponse
         $this->encoding = $data["encoding"];
         $this->pragma = $data["pragma"];
         $this->expires = $data["expires"];
-        parent::__unserialize($data);
     }
 
     /**
+     * @param WritableHeaders $headers
      * @return void
      */
-    protected function beforeSendResponseHook(): void
+    public function setHeaders(WritableHeaders $headers): void
     {
-        $this->headers->set("Content-type", $this->contentType)
+        $headers->set("Content-type", $this->contentType)
             ->set("Content-Disposition", "attachment; filename=" . $this->filename)
             ->set("Content-Transfer-Encoding", $this->encoding)
             ->set("Pragma", $this->pragma)
@@ -88,7 +86,7 @@ class FileDownloadResponse extends AbstractControllerResponse
     /**
      * @return void
      */
-    protected function sendBody(): void
+    public function resolve(): void
     {
         if (ob_get_level() > 0) {
             throw new \RuntimeException("Cannot send file download response with output buffering enabled");
