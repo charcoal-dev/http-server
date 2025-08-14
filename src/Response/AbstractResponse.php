@@ -1,40 +1,35 @@
 <?php
-/*
- * This file is a part of "charcoal-dev/http-router" package.
- * https://github.com/charcoal-dev/http-router
- *
- * Copyright (c) Furqan A. Siddiqui <hello@furqansiddiqui.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code or visit following link:
- * https://github.com/charcoal-dev/http-router/blob/main/LICENSE
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Controllers\Response;
+namespace Charcoal\Http\Router\Response;
 
-use Charcoal\Http\Commons\Headers;
-use Charcoal\Http\Commons\KeyValuePair;
-use Charcoal\Http\Commons\WritableHeaders;
+use Charcoal\Base\Enums\ValidationState;
+use Charcoal\Base\Support\Data\CheckedKeyValue;
+use Charcoal\Base\Traits\ControlledSerializableTrait;
+use Charcoal\Http\Commons\Header\Headers;
+use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Exception\ResponseDispatchedException;
 
 /**
- * Class AbstractControllerResponse
- * @package Charcoal\Http\Router\Controllers\Response
+ * Class AbstractResponse
+ * @package Charcoal\Http\Router\Response
  */
-abstract class AbstractControllerResponse
+abstract class AbstractResponse
 {
     public readonly int $createdOn;
+    protected WritableHeaders $headers;
     protected ?string $integrityTag = null;
 
-    /**
-     * @param int $statusCode
-     * @param WritableHeaders $headers
-     */
+    use ControlledSerializableTrait;
+
     public function __construct(
-        protected int          $statusCode = 200,
-        public WritableHeaders $headers = new WritableHeaders()
+        protected WritableHeaders $writableHeaders,
+        protected int             $statusCode = 200,
     )
     {
         $this->createdOn = time();
@@ -47,7 +42,8 @@ abstract class AbstractControllerResponse
     {
         return [
             static::class,
-            KeyValuePair::class,
+            ValidationState::class,
+            CheckedKeyValue::class,
             Headers::class,
             WritableHeaders::class,
         ];
@@ -64,14 +60,6 @@ abstract class AbstractControllerResponse
             "integrityTag" => $this->integrityTag,
             "headers" => $this->headers
         ];
-    }
-
-    /**
-     * @return array
-     */
-    final public function __serialize(): array
-    {
-        return $this->collectSerializableData();
     }
 
     /**
@@ -158,8 +146,8 @@ abstract class AbstractControllerResponse
 
         // Headers
         if ($this->headers->count()) {
-            foreach ($this->headers->toArray() as $key => $val) {
-                header(sprintf('%s: %s', $key, $val));
+            foreach ($this->headers->getArray() as $key => $val) {
+                header(sprintf("%s: %s", $key, $val));
             }
         }
 
