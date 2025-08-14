@@ -11,9 +11,11 @@ namespace Charcoal\Http\Router\Response;
 use Charcoal\Base\Enums\ValidationState;
 use Charcoal\Base\Support\Data\CheckedKeyValue;
 use Charcoal\Base\Traits\ControlledSerializableTrait;
+use Charcoal\Buffers\Buffer;
+use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Header\Headers;
 use Charcoal\Http\Commons\Header\WritableHeaders;
-use Charcoal\Http\Router\Exception\ResponseDispatchedException;
+use Charcoal\Http\Router\Controller\FinalizedResponse;
 
 /**
  * Class AbstractResponse
@@ -22,14 +24,19 @@ use Charcoal\Http\Router\Exception\ResponseDispatchedException;
 abstract class AbstractResponse
 {
     public readonly int $createdOn;
-    protected WritableHeaders $headers;
     protected ?string $integrityTag = null;
 
     use ControlledSerializableTrait;
 
+    /**
+     * @param WritableHeaders $headers
+     * @param ContentType|null $contentType
+     * @param int $statusCode
+     */
     public function __construct(
-        protected WritableHeaders $writableHeaders,
-        protected int             $statusCode = 200,
+        public WritableHeaders $headers,
+        public ?ContentType    $contentType,
+        protected int          $statusCode = 200,
     )
     {
         $this->createdOn = time();
@@ -58,7 +65,8 @@ abstract class AbstractResponse
             "createdOn" => $this->createdOn,
             "statusCode" => $this->statusCode,
             "integrityTag" => $this->integrityTag,
-            "headers" => $this->headers
+            "headers" => $this->headers,
+            "contentType" => $this->contentType,
         ];
     }
 
@@ -72,12 +80,10 @@ abstract class AbstractResponse
         $this->integrityTag = $data["integrityTag"];
         $this->statusCode = $data["statusCode"];
         $this->headers = $data["headers"];
+        $this->contentType = $data["contentType"];
     }
 
     /**
-     * Integrity Tag is an optional arbitrary value that uniquely represents a complete response object.
-     * Its primary use is in cached responses, allowing the server to determine whether a cached response
-     * is still valid for serving.
      * @param string $tag
      * @return void
      */
@@ -124,35 +130,15 @@ abstract class AbstractResponse
     }
 
     /**
-     * @return void
+     * @return Buffer|null
      */
-    abstract protected function beforeSendResponseHook(): void;
+    abstract protected function getBody(): ?Buffer;
 
     /**
-     * @return void
+     * @return FinalizedResponse
      */
-    abstract protected function sendBody(): void;
-
-    /**
-     * @return never
-     * @throws ResponseDispatchedException
-     */
-    public function send(): never
+    public function finalize(): FinalizedResponse
     {
-        $this->beforeSendResponseHook();
-
-        // HTTP Response Code
-        http_response_code($this->statusCode);
-
-        // Headers
-        if ($this->headers->count()) {
-            foreach ($this->headers->getArray() as $key => $val) {
-                header(sprintf("%s: %s", $key, $val));
-            }
-        }
-
-        $this->sendBody();
-
-        throw new ResponseDispatchedException();
+        return new FinalizedResponse($this->statusCode, $this->headers, $this->contentType, $this->getBody());
     }
 }
