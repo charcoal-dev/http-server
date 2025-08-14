@@ -17,6 +17,7 @@ use Charcoal\Http\Commons\Data\UrlInfo;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Header\Headers;
+use Charcoal\Http\Router\Contracts\AuthContextInterface;
 use Charcoal\Http\Router\Request\Headers\Authorization;
 
 /**
@@ -25,7 +26,8 @@ use Charcoal\Http\Router\Request\Headers\Authorization;
  */
 class Request
 {
-    public readonly ?string $contentType;
+    public readonly ?ContentType $contentType;
+    public readonly ?AuthContextInterface $authContext;
     private ?Authorization $authorization = null;
 
     use NoDumpTrait;
@@ -60,5 +62,18 @@ class Request
         }
 
         return $this->authorization;
+    }
+
+    /**
+     * @param AuthContextInterface $context
+     * @return void
+     */
+    public function setAuthorized(AuthContextInterface $context): void
+    {
+        if (isset($this->authContext)) {
+            throw new \LogicException("Authorization context already set");
+        }
+
+        $this->authContext = $context;
     }
 }
