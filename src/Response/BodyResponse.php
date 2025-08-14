@@ -26,7 +26,7 @@ class BodyResponse extends AbstractResponse
      */
     public function __construct(
         WritableHeaders        $headers,
-        ContentType            $contentType = ContentType::HTML,
+        ContentType            $contentType = ContentType::Html,
         public readonly Buffer $body = new Buffer(),
         int                    $statusCode = 200
     )

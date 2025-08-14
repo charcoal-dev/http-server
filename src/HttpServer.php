@@ -101,7 +101,7 @@ readonly class HttpServer
             }
 
             switch ($contentType) {
-                case ContentType::JSON:
+                case ContentType::Json:
                     try {
                         $json = json_decode($stream, true, flags: JSON_THROW_ON_ERROR);
                     } catch (\JsonException $e) {

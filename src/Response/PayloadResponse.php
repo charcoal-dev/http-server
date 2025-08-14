@@ -27,7 +27,7 @@ class PayloadResponse extends AbstractResponse
     public function __construct(
         WritableHeaders                 $headers,
         public readonly WritablePayload $payload,
-        ContentType                     $contentType = ContentType::JSON,
+        ContentType                     $contentType = ContentType::Json,
         int                             $statusCode = 200
     )
     {
