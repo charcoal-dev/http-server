@@ -17,6 +17,7 @@ use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Header\Headers;
 use Charcoal\Http\Router\Controller\AbstractController;
+use Charcoal\Http\Router\Exception\ResponseDispatchedException;
 use Charcoal\Http\Router\Request\Request;
 
 /**

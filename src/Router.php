@@ -1,50 +1,51 @@
 <?php
-/*
- * This file is a part of "charcoal-dev/http-router" package.
- * https://github.com/charcoal-dev/http-router
- *
- * Copyright (c) Furqan A. Siddiqui <hello@furqansiddiqui.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code or visit following link:
- * https://github.com/charcoal-dev/http-router/blob/main/LICENSE
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
  */
 
 declare(strict_types=1);
 
 namespace Charcoal\Http\Router;
 
-use Charcoal\Http\Router\Controllers\AbstractController;
-use Charcoal\Http\Router\Controllers\Request;
-use Charcoal\Http\Router\Exception\RouterException;
-use Charcoal\OOP\Traits\NoDumpTrait;
-use Charcoal\OOP\Traits\NotCloneableTrait;
-use Charcoal\OOP\Traits\NotSerializableTrait;
+use Charcoal\Base\Traits\NoDumpTrait;
+use Charcoal\Base\Traits\NotCloneableTrait;
+use Charcoal\Base\Traits\NotSerializableTrait;
+use Charcoal\Http\Router\Contracts\RoutingInterface;
+use Charcoal\Http\Router\Controller\AbstractController;
+use Charcoal\Http\Router\Exception\RoutingException;
+use Charcoal\Http\Router\Policy\RouterPolicy;
+use Charcoal\Http\Router\Request\Request;
 
 /**
  * Class Router
  * @package Charcoal\Http\Router
  */
-class Router
+class Router implements RoutingInterface
 {
-    /** @var array */
+    /** @var array<Route> */
     private array $routes = [];
-    /** @var int */
     private int $count = 0;
+
+
     /** @var null|string */
     private ?string $fallbackController = null;
     /** @var array */
     private array $controllersArgs = [];
 
+    use NoDumpTrait;
     use NotCloneableTrait;
     use NotSerializableTrait;
-    use NoDumpTrait;
 
-    /**
-     * Router constructor.
-     */
-    public function __construct()
+    public function __construct(
+        public readonly RouterPolicy $policy
+    )
     {
+    }
+
+    public function routerCount(): int
+    {
+        return $this->count;
     }
 
     /**
@@ -57,16 +58,7 @@ class Router
     }
 
     /**
-     * Total number of routes configured in this router
-     * @return int
-     */
-    public function routesCount(): int
-    {
-        return $this->count;
-    }
-
-    /**
-     * Gets all defined routes in array
+     * Gets all defined routes in an array
      * @return array
      */
     public function routesArray(): array
@@ -79,7 +71,7 @@ class Router
      * @param string $controller
      * @return $this
      */
-    public function fallbackController(string $controller): self
+    public function fallbackController(string $controller): static
     {
         if (!class_exists($controller)) {
             throw new \InvalidArgumentException('Default router fallback controller class is invalid or does not exist');
@@ -90,10 +82,9 @@ class Router
     }
 
     /**
-     * Defines a route, use "*" as wildcard character. A trailing "*" indicates path is to a namespace rather than a class
      * @param string $path
      * @param string $controllerClassOrNamespace
-     * @return \Charcoal\Http\Router\Route
+     * @return Route
      */
     public function route(string $path, string $controllerClassOrNamespace): Route
     {
@@ -104,20 +95,16 @@ class Router
     }
 
     /**
-     * Try to route request to one of the routes,
-     * on fail routes request to fallback controller (if defined) or throws RouterException
-     * @param \Charcoal\Http\Router\Controllers\Request $request
-     * @param bool $bypassHttpAuth
-     * @return \Charcoal\Http\Router\Controllers\AbstractController
-     * @throws \Charcoal\Http\Router\Exception\RouterException
+     * @param Request $request
+     * @return AbstractController
+     * @throws RoutingException
      */
-    public function try(Request $request, bool $bypassHttpAuth = false): AbstractController
+    public function try(Request $request): AbstractController
     {
         // Find controller
         $controller = null;
-        /** @var Route $route */
         foreach ($this->routes as $route) {
-            $controller = $route->try($request, $bypassHttpAuth);
+            $controller = $route->try($request);
             if ($controller) {
                 break;
             }
@@ -125,18 +112,18 @@ class Router
 
         $controller = $controller ?? $this->fallbackController;
         if (!$controller) {
-            throw new RouterException('Could not route request to any controller');
+            throw new RoutingException('Could not route request to any controller');
         }
 
         return $this->createControllerInstance($controller, $request);
     }
 
     /**
-     * @param string $controllerClass
-     * @param \Charcoal\Http\Router\Controllers\Request $request
-     * @param \Charcoal\Http\Router\Controllers\AbstractController|null $previous
+     * @param class-string<AbstractController> $controllerClass
+     * @param Request $request
+     * @param AbstractController|null $previous
      * @param string|null $entryPoint
-     * @return \Charcoal\Http\Router\Controllers\AbstractController
+     * @return AbstractController
      */
     public function createControllerInstance(
         string              $controllerClass,
@@ -145,13 +132,8 @@ class Router
         ?string             $entryPoint = null
     ): AbstractController
     {
-        try {
-            $reflect = new \ReflectionClass($controllerClass);
-            if (!$reflect->isSubclassOf(AbstractController::class)) {
-                throw new \DomainException('Controller class does not extend "Charcoal\Http\Router\Controllers\AbstractController"');
-            }
-        } catch (\ReflectionException $e) {
-            throw new \RuntimeException('Could not get reflection instance for controller class', previous: $e);
+        if (!is_subclass_of($controllerClass, AbstractController::class, true)) {
+            throw new \DomainException('Controller class does not extend "' . AbstractController::class . '"');
         }
 
         return new $controllerClass($this, $request, $previous, $entryPoint, $this->controllersArgs);

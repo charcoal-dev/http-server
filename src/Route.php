@@ -1,81 +1,68 @@
 <?php
-/*
- * This file is a part of "charcoal-dev/http-router" package.
- * https://github.com/charcoal-dev/http-router
- *
- * Copyright (c) Furqan A. Siddiqui <hello@furqansiddiqui.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code or visit following link:
- * https://github.com/charcoal-dev/http-router/blob/main/LICENSE
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
  */
 
 declare(strict_types=1);
 
 namespace Charcoal\Http\Router;
 
-use Charcoal\Http\Router\Authorization\AbstractAuthorization;
-use Charcoal\Http\Router\Controllers\Request;
-use Charcoal\OOP\CaseStyles;
-use Charcoal\OOP\Traits\NoDumpTrait;
-use Charcoal\OOP\Traits\NotCloneableTrait;
-use Charcoal\OOP\Traits\NotSerializableTrait;
+use Charcoal\Base\Support\Helpers\CaseStyleHelper;
+use Charcoal\Base\Traits\NoDumpTrait;
+use Charcoal\Base\Traits\NotCloneableTrait;
+use Charcoal\Base\Traits\NotSerializableTrait;
+use Charcoal\Http\Commons\Header\WritableHeaders;
+use Charcoal\Http\Router\Contracts\Auth\AuthenticatorInterface;
+use Charcoal\Http\Router\Contracts\RoutingInterface;
+use Charcoal\Http\Router\Controller\AbstractController;
+use Charcoal\Http\Router\Request\Request;
 
 /**
  * Class Route
- * @package Charcoal\Http\Router
+ * @package Charcoal\Http\Router\Route
  */
-class Route
+class Route implements RoutingInterface
 {
-    /** @var int */
-    public readonly int $id;
-    /** @var string */
+    public readonly int $num;
     public readonly string $path;
-    /** @var string */
     public readonly string $matchRegExp;
-    /** @var string */
     public readonly string $controller;
-    /** @var bool */
     public readonly bool $isNamespace;
-    /** @var array */
     private array $ignorePathIndexes = [];
-    /** @var null|string */
     private ?string $fallbackController = null;
-    /** @var \Charcoal\Http\Router\Authorization\AbstractAuthorization|null */
-    private ?AbstractAuthorization $auth = null;
 
+    private ?AuthenticatorInterface $auth = null;
+
+    use NoDumpTrait;
     use NotCloneableTrait;
     use NotSerializableTrait;
-    use NoDumpTrait;
 
-    /**
-     * @param \Charcoal\Http\Router\Router $router
-     * @param string $path
-     * @param string $namespaceOrClass
-     */
     public function __construct(
-        private readonly Router $router,
-        string                  $path,
-        string                  $namespaceOrClass
+        public readonly Router $router,
+        string                 $path,
+        string                 $namespaceOrClass
     )
     {
-        $this->id = $this->router->routesCount() + 1;
+        $this->num = $this->router->routerCount() + 1;
 
         // URL Path
         $path = "/" . trim(strtolower($path), "/"); // Case-insensitivity
         if (!preg_match('/^((\/?[\w\-.]+)|(\/\*))*(\/\*)?$/', $path)) {
-            throw new \InvalidArgumentException('Route URL path argument contain an illegal character', $this->id);
+            throw new \InvalidArgumentException(
+                sprintf("Route #%d URL path argument contain an illegal character", $this->num));
         }
 
         // Controller or Namespace
         if (!preg_match('/^\w+(\\\\\w+)*(\\\\\*)?$/i', $namespaceOrClass)) {
-            throw new \InvalidArgumentException('Class or namespace contains an illegal character', $this->id);
+            throw new \InvalidArgumentException(
+                sprintf("Class or namespace for route #%d contains an illegal character", $this->num));
         }
 
         $urlIsWildcard = str_ends_with($path, '/*');
         $controllerIsWildcard = str_ends_with($namespaceOrClass, '\*');
         if ($controllerIsWildcard && !$urlIsWildcard) {
-            throw new \InvalidArgumentException('Route URL must end with "/*"', $this->id);
+            throw new \InvalidArgumentException(sprintf('Route #%d URL must end with "/*"', $this->num));
         }
 
         $this->path = $path;
@@ -90,10 +77,11 @@ class Route
      * @param string $controller
      * @return $this
      */
-    public function fallbackController(string $controller): self
+    public function fallbackController(string $controller): static
     {
         if (!class_exists($controller)) {
-            throw new \InvalidArgumentException('Fallback controller class is invalid or does not exist', $this->id);
+            throw new \InvalidArgumentException(
+                sprintf("Fallback controller for route #%d class is invalid or does not exist", $this->num));
         }
 
         $this->fallbackController = $controller;
@@ -119,12 +107,12 @@ class Route
         // Middle wildcards
         $pattern = str_replace('\*', '[^\/]?[\w\-\.]+', $pattern);
 
-        // Finalise and return
+        // Finalize and return
         return $pattern . "$/";
     }
 
     /**
-     * Following path indexes will be ignored while routing to a classname
+     * The following path indexes will be ignored while routing to a classname
      * @param int ...$indexes
      * @return Route
      */
@@ -139,41 +127,48 @@ class Route
      * @param \Charcoal\Http\Router\Authorization\AbstractAuthorization $auth
      * @return $this
      */
-    public function useAuthorization(AbstractAuthorization $auth): self
+    public function useAuthorization(AuthenticatorInterface $auth): self
     {
         $this->auth = $auth;
         return $this;
     }
 
     /**
-     * Try Request object with this route, return fully-qualified controller class name or NULL
-     * @param \Charcoal\Http\Router\Controllers\Request $request
-     * @param bool $bypassHttpAuth
-     * @param bool $checkClassExists
-     * @return string|null
+     * @return AuthenticatorInterface|null
      */
-    public function try(Request $request, bool $bypassHttpAuth = false, bool $checkClassExists = true): ?string
+    public function isProtected(): ?AuthenticatorInterface
     {
-        $path = $request->url->path;
+        return $this->auth;
+    }
 
-        // RegEx match URL pattern
-        if (!is_string($path) || !preg_match($this->matchRegExp, $path)) {
+    /**
+     * @param Request $request
+     * @return class-string<AbstractController>|null
+     */
+    public function try(Request $request): ?string
+    {
+        $controllerClass = $this->getControllerClass($request->url->path);
+        return $controllerClass && class_exists($controllerClass) ?
+            $controllerClass : $this->fallbackController;
+    }
+
+    /**
+     * @param string $path
+     * @return class-string<AbstractController>|null
+     */
+    public function getControllerClass(string $path): ?string
+    {
+        if (!$path || !preg_match($this->matchRegExp, $path)) {
             return null;
         }
 
-        // Route Authentication
-        if ($this->auth && !$bypassHttpAuth) {
-            $this->auth->authorize($request->headers);
-        }
-
-        // Find HTTP Controller
         $controllerClass = $this->controller;
         if ($this->isNamespace) {
             $pathIndex = -1;
             $controllerClass = array_map(function ($part) use (&$pathIndex) {
                 $pathIndex++;
                 if ($part && !in_array($pathIndex, $this->ignorePathIndexes)) {
-                    return CaseStyles::PascalCase($part);
+                    return CaseStyleHelper::pascalCaseFromRaw($part);
                 }
 
                 return null;
@@ -185,10 +180,6 @@ class Route
             $controllerClass = rtrim($controllerClass, '\\');
         }
 
-        if (!$checkClassExists) {
-            return $controllerClass;
-        }
-
-        return $controllerClass && class_exists($controllerClass) ? $controllerClass : $this->fallbackController;
+        return $controllerClass;
     }
 }

@@ -8,10 +8,16 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Controller;
 
+use Charcoal\Base\Enums\ExceptionAction;
+use Charcoal\Base\Support\Data\BatchEnvelope;
 use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
+use Charcoal\Http\Commons\Body\Payload;
 use Charcoal\Http\Commons\Body\UnsafePayload;
+use Charcoal\Http\Commons\Enums\HeaderKeyPolicy;
+use Charcoal\Http\Commons\Enums\ParamKeyPolicy;
+use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
 use Charcoal\Http\Router\Controller\Promise\FileDownload;
 use Charcoal\Http\Router\Exception\ControllerException;
@@ -185,5 +191,29 @@ abstract class AbstractController
 
         header(sprintf('Location: %s', $url));
         exit;
+    }
+
+    /**
+     * @return Payload
+     * @throws \Charcoal\Base\Exceptions\WrappedException
+     * @api
+     */
+    protected function policyCreatePayload(): Payload
+    {
+        $policy = $this->route->router->policy;
+        return new Payload($this->route->router->policy->outgoingPayload,
+            ParamKeyPolicy::UNSANITIZED);
+    }
+
+    /**
+     * @return WritableHeaders
+     * @throws \Charcoal\Base\Exceptions\WrappedException
+     * @api
+     */
+    protected function policyCreateHeaders(): WritableHeaders
+    {
+        $policy = $this->route->router->policy;
+        return new WritableHeaders($policy->outgoingHeaders,
+            HeaderKeyPolicy::UNSANITIZED);
     }
 }
