@@ -41,7 +41,6 @@ abstract class AbstractController
      * @param string|null $entryPoint
      * @param array $constructorArgs
      * @throws ControllerException
-     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
      */
     public function __construct(
         public readonly Route   $route,
