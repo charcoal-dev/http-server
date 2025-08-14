@@ -6,17 +6,17 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Authorization;
+namespace Charcoal\Http\Router\Request\Headers;
 
 use Charcoal\Base\Charsets\Ascii;
 use Charcoal\Base\Enums\ValidationState;
 use Charcoal\Http\Commons\Header\Headers;
 
 /**
- * Class AuthorizationTokens
- * @package Charcoal\Http\Router\Authorization
+ * Class Authorization
+ * @package Charcoal\Http\Router\Request\Headers
  */
-readonly class AuthorizationHeader
+readonly class Authorization
 {
     /** @var array<string,string|array<string,string>> */
     public array $schemes;
