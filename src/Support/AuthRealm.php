@@ -8,13 +8,13 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Support;
 
-use Charcoal\Http\Router\Contracts\AuthRealmInterface;
+use Charcoal\Http\Router\Contracts\Auth\AuthRealmEnum;
 
 /**
  * Class AuthRealm
  * @package Charcoal\Http\Router\Support
  */
-readonly class AuthRealm implements AuthRealmInterface
+readonly class AuthRealm implements AuthRealmEnum
 {
     public function __construct(public string $name)
     {

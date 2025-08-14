@@ -11,8 +11,8 @@ namespace Charcoal\Http\Router\Support;
 use Charcoal\Http\Commons\Enums\AuthScheme;
 use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Authorization\AbstractBasicAuth;
-use Charcoal\Http\Router\Contracts\AuthContextInterface;
-use Charcoal\Http\Router\Contracts\AuthRealmInterface;
+use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
+use Charcoal\Http\Router\Contracts\Auth\AuthRealmEnum;
 
 /**
  * Class BasicAuth
@@ -21,14 +21,14 @@ use Charcoal\Http\Router\Contracts\AuthRealmInterface;
 class BasicAuth extends AbstractBasicAuth
 {
     /**
-     * @param AuthRealmInterface $realm
+     * @param AuthRealmEnum $realm
      * @param \Closure(string, string): bool $tryLogin
      * @param \Closure(AuthContextInterface): void|null $onSuccess
      * @param \Closure(WritableHeaders): bool|null $onFailure
      * @param AuthScheme $scheme
      */
     public function __construct(
-        AuthRealmInterface        $realm,
+        AuthRealmEnum             $realm,
         public readonly \Closure  $tryLogin,
         public readonly ?\Closure $onSuccess = null,
         public readonly ?\Closure $onFailure = null,
