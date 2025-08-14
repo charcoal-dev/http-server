@@ -12,17 +12,41 @@
 
 declare(strict_types=1);
 
+namespace Charcoal\Http\Tests\Router;
+
+use Charcoal\Buffers\Buffer;
+use Charcoal\Http\Commons\Body\UnsafePayload;
+use Charcoal\Http\Commons\Data\UrlInfo;
+use Charcoal\Http\Commons\Enums\HttpMethod;
+use Charcoal\Http\Commons\Header\Headers;
+use Charcoal\Http\Router\Policy\RouterPolicy;
+use Charcoal\Http\Router\Request\Request;
+use Charcoal\Http\Router\Support\PolicyHelper;
+
 /**
  * Class RoutingTest
  */
 class RoutingTest extends \PHPUnit\Framework\TestCase
 {
+    public static function getPolicy(): RouterPolicy
+    {
+        return new RouterPolicy(
+            PolicyHelper::getRequestHeaderPolicy(),
+            PolicyHelper::getRequestPayloadPolicy(),
+            PolicyHelper::getResponseHeaderPolicy(),
+            PolicyHelper::getResponsePayloadPolicy(),
+            null,
+        );
+    }
+
     /**
      * @return void
+     * @throws \Charcoal\Base\Exceptions\WrappedException
+     * @throws \Charcoal\Http\Commons\Exception\InvalidUrlException
      */
     public function testRouting1(): void
     {
-        $router = new \Charcoal\Http\Router\Router();
+        $router = new \Charcoal\Http\Router\Router(static::getPolicy());
         $route1 = $router->route('/docs/*', 'MyApp\Services\Docs\Controllers\Libs\*')
             ->ignorePathIndexes(0, 1);
         $route2 = $router->route('/auth/*', 'MyApp\Services\API\Controllers\Account\*')
@@ -37,27 +61,27 @@ class RoutingTest extends \PHPUnit\Framework\TestCase
         $req3 = $this->createRequest("/auth/dashboard?param=arg1");
         $req4 = $this->createRequest("/profiles/charcoal/main");
 
-        $this->assertNull($route1->try($req1, checkClassExists: false));
-        $this->assertEquals('MyApp\Services\Docs\Controllers\Libs\HttpRouter', $route1->try($req2, checkClassExists: false));
-        $this->assertNull($route1->try($req3, checkClassExists: false));
-        $this->assertNull($route1->try($req4, checkClassExists: false));
+        $this->assertNull($route1->getControllerClass($req1->url->path));
+        $this->assertEquals('MyApp\Services\Docs\Controllers\Libs\HttpRouter', $route1->getControllerClass($req2->url->path));
+        $this->assertNull($route1->getControllerClass($req3->url->path));
+        $this->assertNull($route1->getControllerClass($req4->url->path));
 
-        $this->assertNull($route2->try($req1, checkClassExists: false));
-        $this->assertNull($route2->try($req2, checkClassExists: false));
-        $this->assertEquals('MyApp\Services\API\Controllers\Account\Dashboard', $route2->try($req3, checkClassExists: false));
-        $this->assertNull($route2->try($req4, checkClassExists: false));
+        $this->assertNull($route2->getControllerClass($req1->url->path));
+        $this->assertNull($route2->getControllerClass($req2->url->path));
+        $this->assertEquals('MyApp\Services\API\Controllers\Account\Dashboard', $route2->getControllerClass($req3->url->path));
+        $this->assertNull($route2->getControllerClass($req4->url->path));
 
-        $this->assertNull($route3->try($req1, checkClassExists: false));
-        $this->assertNull($route3->try($req2, checkClassExists: false));
-        $this->assertNull($route3->try($req3, checkClassExists: false));
-        $this->assertEquals('MyApp\Services\API\Controllers\PublicProfile', $route3->try($req4, checkClassExists: false));
+        $this->assertNull($route3->getControllerClass($req1->url->path));
+        $this->assertNull($route3->getControllerClass($req2->url->path));
+        $this->assertNull($route3->getControllerClass($req3->url->path));
+        $this->assertEquals('MyApp\Services\API\Controllers\PublicProfile', $route3->getControllerClass($req4->url->path));
 
-        // Primary route to "/*" will basically match everything, therefore should be last-one defined,
+        // Primary route to "/*" will basically match everything, therefore, should be last-one defined,
         // Which is why "checkClassExists" is always true (only exception is this unit test)
-        $this->assertEquals('MyApp\Services\API\Controllers\Home', $mainRoute->try($req1, checkClassExists: false));
-        $this->assertEquals('MyApp\Services\API\Controllers\Docs\Lib\HttpRouter', $mainRoute->try($req2, checkClassExists: false));
-        $this->assertEquals('MyApp\Services\API\Controllers\Auth\Dashboard', $mainRoute->try($req3, checkClassExists: false));
-        $this->assertEquals('MyApp\Services\API\Controllers\Profiles\Charcoal\Main', $mainRoute->try($req4, checkClassExists: false));
+        $this->assertEquals('MyApp\Services\API\Controllers\Home', $mainRoute->getControllerClass($req1->url->path));
+        $this->assertEquals('MyApp\Services\API\Controllers\Docs\Lib\HttpRouter', $mainRoute->getControllerClass($req2->url->path));
+        $this->assertEquals('MyApp\Services\API\Controllers\Auth\Dashboard', $mainRoute->getControllerClass($req3->url->path));
+        $this->assertEquals('MyApp\Services\API\Controllers\Profiles\Charcoal\Main', $mainRoute->getControllerClass($req4->url->path));
     }
 
     /**
@@ -65,40 +89,43 @@ class RoutingTest extends \PHPUnit\Framework\TestCase
      */
     public function testRouting2(): void
     {
-        $router = new \Charcoal\Http\Router\Router();
+        $router = new \Charcoal\Http\Router\Router(static::getPolicy());
         $r1 = $router->route('/wss', 'MyApp\WSS\ServerController');
         $r2 = $router->route('/wss/*', 'MyApp\WSS\ServerController');
         $r3 = $router->route('/*', 'MyApp\Controllers\*');
 
-        $this->assertNull($r1->try($this->createRequest("/home"), checkClassExists: false));
-        $this->assertNull($r1->try($this->createRequest("/user/profile"), checkClassExists: false));
-        $this->assertEquals('MyApp\WSS\ServerController', $r1->try($this->createRequest("/wss"), checkClassExists: false));
-        $this->assertNull($r1->try($this->createRequest("/wss/some-path"), checkClassExists: false));
+        $this->assertNull($r1->getControllerClass($this->createRequest("/home")->url->path));
+        $this->assertNull($r1->getControllerClass($this->createRequest("/user/profile")->url->path));
+        $this->assertEquals('MyApp\WSS\ServerController', $r1->getControllerClass($this->createRequest("/wss")->url->path));
+        $this->assertNull($r1->getControllerClass($this->createRequest("/wss/some-path")->url->path));
 
-        $this->assertNull($r2->try($this->createRequest("/home"), checkClassExists: false));
-        $this->assertNull($r2->try($this->createRequest("/user/profile"), checkClassExists: false));
-        $this->assertEquals('MyApp\WSS\ServerController', $r2->try($this->createRequest("/wss"), checkClassExists: false));
-        $this->assertEquals('MyApp\WSS\ServerController', $r2->try($this->createRequest("/wss/some-path"), checkClassExists: false));
+        $this->assertNull($r2->getControllerClass($this->createRequest("/home")->url->path));
+        $this->assertNull($r2->getControllerClass($this->createRequest("/user/profile")->url->path));
+        $this->assertEquals('MyApp\WSS\ServerController', $r2->getControllerClass($this->createRequest("/wss")->url->path));
+        $this->assertEquals('MyApp\WSS\ServerController', $r2->getControllerClass($this->createRequest("/wss/some-path")->url->path));
 
-        $this->assertEquals('MyApp\Controllers\Home', $r3->try($this->createRequest("/home"), checkClassExists: false));
-        $this->assertEquals('MyApp\Controllers\User\Profile', $r3->try($this->createRequest("/user/profile"), checkClassExists: false));
-        $this->assertEquals('MyApp\Controllers\Wss', $r3->try($this->createRequest("/wss"), checkClassExists: false));
-        $this->assertEquals('MyApp\Controllers\Wss\Path1', $r3->try($this->createRequest("/wss/path1"), checkClassExists: false));
+        $this->assertEquals('MyApp\Controllers\Home', $r3->getControllerClass($this->createRequest("/home")->url->path));
+        $this->assertEquals('MyApp\Controllers\User\Profile', $r3->getControllerClass($this->createRequest("/user/profile")->url->path));
+        $this->assertEquals('MyApp\Controllers\Wss', $r3->getControllerClass($this->createRequest("/wss")->url->path));
+        $this->assertEquals('MyApp\Controllers\Wss\Path1', $r3->getControllerClass($this->createRequest("/wss/path1")->url->path));
     }
 
     /**
      * @param string $url
-     * @param \Charcoal\Http\Commons\HttpMethod $method
-     * @return \Charcoal\Http\Router\Controllers\Request
+     * @param HttpMethod $method
+     * @return Request
+     * @throws \Charcoal\Base\Exceptions\WrappedException
+     * @throws \Charcoal\Http\Commons\Exception\InvalidUrlException
      */
-    private function createRequest(string $url, \Charcoal\Http\Commons\HttpMethod $method = \Charcoal\Http\Commons\HttpMethod::GET): \Charcoal\Http\Router\Controllers\Request
+    private function createRequest(string $url, HttpMethod $method = HttpMethod::GET): Request
     {
-        return new \Charcoal\Http\Router\Controllers\Request(
+        $policy = static::getPolicy();
+        return new Request(
             $method,
-            new \Charcoal\Http\Commons\UrlInfo($url),
-            new \Charcoal\Http\Commons\Headers(),
-            new \Charcoal\Http\Commons\ReadOnlyPayload(),
-            new \Charcoal\Buffers\Buffer()
+            new UrlInfo($url),
+            new Headers($policy->incomingHeaders),
+            new UnsafePayload($policy->incomingPayload),
+            new Buffer()
         );
     }
 }

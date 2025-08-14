@@ -20,12 +20,12 @@ readonly class RouterPolicy
 {
     public function __construct(
         public HeadersPolicy          $incomingHeaders,
-        public ?RouterLoggerInterface $incomingLogger = null,
         public PayloadPolicy          $incomingPayload,
         public HeadersPolicy          $outgoingHeaders,
         public PayloadPolicy          $outgoingPayload,
+        public ?RouterLoggerInterface $incomingLogger = null,
         public bool                   $parsePayloadKeepBody = false,
-        public string                 $parseScalarPayloadParam = "_json"
+        public string                 $parsePayloadUndefinedParam = "json"
     )
     {
     }

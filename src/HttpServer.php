@@ -111,7 +111,7 @@ readonly class HttpServer
                     if (is_array($json)) {
                         $params = $json;
                     } elseif (is_scalar($json) || is_null($json)) {
-                        $params = [$router->policy->parseScalarPayloadParam => $json];
+                        $params = [$router->policy->parsePayloadUndefinedParam => $json];
                     }
 
                     break;

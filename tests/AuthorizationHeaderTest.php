@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Tests\Router;
 
-
 use Charcoal\Http\Router\Request\Headers\Authorization;
 use PHPUnit\Framework\TestCase;
 
