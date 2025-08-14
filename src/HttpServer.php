@@ -73,8 +73,9 @@ readonly class HttpServer
             $headersPolicy->keyPolicy,
             new BatchEnvelope(
                 $headers,
-                $incomingLogger?->handlesInvalidHeader() ? ExceptionAction::Log : ExceptionAction::Throw,
-                $incomingLogger?->handlesInvalidHeader() ? $incomingLogger->onInvalidHeader() : null
+                $incomingLogger?->onInvalidHeader() ?
+                    ExceptionAction::Log : ExceptionAction::Throw,
+                $incomingLogger?->onInvalidHeader()
             )
         );
 
@@ -136,8 +137,9 @@ readonly class HttpServer
             $payloadPolicy->keyPolicy,
             new BatchEnvelope(
                 $payload,
-                $incomingLogger?->handlesInvalidPayload() ? ExceptionAction::Log : ExceptionAction::Throw,
-                $incomingLogger?->handlesInvalidPayload() ? $incomingLogger->onInvalidPayload() : null
+                $incomingLogger?->onInvalidPayload() ?
+                    ExceptionAction::Log : ExceptionAction::Throw,
+                $incomingLogger?->onInvalidPayload()
             )
         );
 

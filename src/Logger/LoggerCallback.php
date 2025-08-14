@@ -28,18 +28,8 @@ class LoggerCallback implements RouterLoggerInterface
         return $this->onInvalidHeader;
     }
 
-    public function handlesInvalidHeader(): bool
-    {
-        return $this->onInvalidHeader !== null;
-    }
-
     public function onInvalidPayload(): ?\Closure
     {
         return $this->onInvalidPayload;
-    }
-
-    public function handlesInvalidPayload(): bool
-    {
-        return $this->onInvalidPayload !== null;
     }
 }

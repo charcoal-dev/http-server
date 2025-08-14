@@ -16,9 +16,5 @@ interface RouterLoggerInterface
 {
     public function onInvalidHeader(): ?\Closure;
 
-    public function handlesInvalidHeader(): bool;
-
     public function onInvalidPayload(): ?\Closure;
-
-    public function handlesInvalidPayload(): bool;
 }
