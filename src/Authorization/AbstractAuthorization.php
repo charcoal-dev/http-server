@@ -11,13 +11,14 @@ namespace Charcoal\Http\Router\Authorization;
 use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
+use Charcoal\Http\Router\Contracts\Auth\AuthenticatorInterface;
 use Charcoal\Http\Router\Contracts\Auth\AuthRealmEnum;
 
 /**
  * Class AbstractAuthorization
  * @package Charcoal\Http\Router\Authorization
  */
-abstract class AbstractAuthorization
+abstract class AbstractAuthorization implements AuthenticatorInterface
 {
     use NoDumpTrait;
     use NotCloneableTrait;
