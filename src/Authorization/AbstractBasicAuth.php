@@ -14,7 +14,7 @@ use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
 use Charcoal\Http\Router\Contracts\Auth\AuthenticatorInterface;
 use Charcoal\Http\Router\Contracts\Auth\AuthRealmEnum;
-use Charcoal\Http\Router\Exception\AuthenticationException;
+use Charcoal\Http\Router\Exceptions\AuthenticationException;
 use Charcoal\Http\Router\Request\Request;
 
 /**

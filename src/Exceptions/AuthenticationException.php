@@ -6,14 +6,14 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Exception;
+namespace Charcoal\Http\Router\Exceptions;
 
-use Charcoal\Http\Commons\Exception\HttpException;
+use Charcoal\Http\Commons\Exceptions\HttpException;
 use Charcoal\Http\Router\Authorization\AuthError;
 
 /**
  * Class AuthenticationException
- * @package Charcoal\Http\Router\Exception
+ * @package Charcoal\Http\Router\Exceptions
  */
 class AuthenticationException extends HttpException
 {

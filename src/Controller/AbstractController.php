@@ -14,7 +14,7 @@ use Charcoal\Base\Traits\NotSerializableTrait;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
 use Charcoal\Http\Router\Controller\Promise\FileDownload;
-use Charcoal\Http\Router\Exception\ControllerException;
+use Charcoal\Http\Router\Exceptions\ControllerException;
 use Charcoal\Http\Router\Request\Request;
 use Charcoal\Http\Router\Response\AbstractResponse;
 use Charcoal\Http\Router\Response\Headers\CacheControl;
@@ -122,7 +122,7 @@ abstract class AbstractController
 
     /**
      * @return never
-     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
+     * @throws \Charcoal\Http\Router\Exceptions\ResponseDispatchedException
      */
     public function send(): never
     {
@@ -138,7 +138,7 @@ abstract class AbstractController
      * @param FileDownload $file
      * @param CacheControl|null $cacheControl
      * @return never
-     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
+     * @throws \Charcoal\Http\Router\Exceptions\ResponseDispatchedException
      */
     public function sendFileDownload(int $statusCode, FileDownload $file, ?CacheControl $cacheControl): never
     {
@@ -152,7 +152,7 @@ abstract class AbstractController
     /**
      * @param int $statusCode
      * @return void
-     * @throws \Charcoal\Http\Router\Exception\ResponseDispatchedException
+     * @throws \Charcoal\Http\Router\Exceptions\ResponseDispatchedException
      */
     public function terminate(int $statusCode): void
     {

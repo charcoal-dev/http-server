@@ -10,7 +10,7 @@ namespace Charcoal\Http\Router\Controller;
 
 use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Contracts\PromiseResponseOnDispatch;
-use Charcoal\Http\Router\Exception\ResponseDispatchedException;
+use Charcoal\Http\Router\Exceptions\ResponseDispatchedException;
 
 /**
  * Class ResponseDispatcher

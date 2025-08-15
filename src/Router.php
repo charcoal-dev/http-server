@@ -13,7 +13,7 @@ use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
 use Charcoal\Http\Router\Contracts\RoutingInterface;
 use Charcoal\Http\Router\Controller\AbstractController;
-use Charcoal\Http\Router\Exception\RoutingException;
+use Charcoal\Http\Router\Exceptions\RoutingException;
 use Charcoal\Http\Router\Policy\RouterPolicy;
 use Charcoal\Http\Router\Request\Request;
 

@@ -29,9 +29,9 @@ readonly class HttpServer
      * @param Router $router
      * @param \Closure(AbstractController): void $closure
      * @return void
-     * @throws Exception\RoutingException
+     * @throws Exceptions\RoutingException
      * @throws \Charcoal\Base\Exceptions\WrappedException
-     * @throws \Charcoal\Http\Commons\Exception\InvalidUrlException
+     * @throws \Charcoal\Http\Commons\Exceptions\InvalidUrlException
      */
     public static function requestFromServerGlobals(
         Router   $router,

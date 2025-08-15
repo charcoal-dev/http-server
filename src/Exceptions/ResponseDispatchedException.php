@@ -6,13 +6,13 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Exception;
+namespace Charcoal\Http\Router\Exceptions;
 
 use Charcoal\Http\Router\Contracts\PromiseResponseOnDispatch;
 
 /**
  * Class ResponseDispatchedException
- * @package Charcoal\Http\Router\Exception
+ * @package Charcoal\Http\Router\Exceptions
  */
 class ResponseDispatchedException extends \Exception
 {
