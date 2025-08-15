@@ -42,7 +42,7 @@ class RoutingTest extends \PHPUnit\Framework\TestCase
     /**
      * @return void
      * @throws \Charcoal\Base\Exceptions\WrappedException
-     * @throws \Charcoal\Http\Commons\Exception\InvalidUrlException
+     * @throws \Charcoal\Http\Commons\Exceptions\InvalidUrlException
      */
     public function testRouting1(): void
     {
@@ -115,7 +115,7 @@ class RoutingTest extends \PHPUnit\Framework\TestCase
      * @param HttpMethod $method
      * @return Request
      * @throws \Charcoal\Base\Exceptions\WrappedException
-     * @throws \Charcoal\Http\Commons\Exception\InvalidUrlException
+     * @throws \Charcoal\Http\Commons\Exceptions\InvalidUrlException
      */
     private function createRequest(string $url, HttpMethod $method = HttpMethod::GET): Request
     {
