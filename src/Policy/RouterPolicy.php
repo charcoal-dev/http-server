@@ -8,8 +8,6 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Policy;
 
-use Charcoal\Http\Commons\Body\WritablePayload;
-use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Contracts\RouterLoggerInterface;
 
 /**
@@ -28,23 +26,5 @@ readonly class RouterPolicy
         public string                 $parsePayloadUndefinedParam = "json"
     )
     {
-    }
-
-    /**
-     * @return WritableHeaders
-     * @throws \Charcoal\Base\Exceptions\WrappedException
-     */
-    public function createResponseHeaders(): WritableHeaders
-    {
-        return new WritableHeaders($this->outgoingHeaders, $this->outgoingHeaders->keyPolicy);
-    }
-
-    /**
-     * @return WritablePayload
-     * @throws \Charcoal\Base\Exceptions\WrappedException
-     */
-    public function createResponsePayload(): WritablePayload
-    {
-        return new WritablePayload($this->outgoingPayload, $this->outgoingPayload->keyPolicy);
     }
 }
