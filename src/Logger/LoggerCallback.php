@@ -13,6 +13,8 @@ use Charcoal\Http\Router\Contracts\RouterLoggerInterface;
 /**
  * Class LoggerCallback
  * @package Charcoal\Http\Router\Policy
+ * @property (\Closure(string|int, \Throwable): void)|null $onInvalidHeader
+ * @property (\Closure(string|int, \Throwable): void)|null $onInvalidPayload
  */
 class LoggerCallback implements RouterLoggerInterface
 {
@@ -23,11 +25,17 @@ class LoggerCallback implements RouterLoggerInterface
     {
     }
 
+    /**
+     * @return (\Closure(string|int, \Throwable): void)|null
+     */
     public function onInvalidHeader(): ?\Closure
     {
         return $this->onInvalidHeader;
     }
 
+    /**
+     * @return (\Closure(string|int, \Throwable): void)|null
+     */
     public function onInvalidPayload(): ?\Closure
     {
         return $this->onInvalidPayload;
