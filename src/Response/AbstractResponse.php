@@ -8,19 +8,12 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Response;
 
-use Charcoal\Base\Abstracts\Dataset\DatasetPolicy;
-use Charcoal\Base\Abstracts\Dataset\ValidatingDataset;
-use Charcoal\Base\Enums\ValidationState;
-use Charcoal\Base\Support\Data\CheckedKeyValue;
 use Charcoal\Base\Traits\ControlledSerializableTrait;
 use Charcoal\Buffers\Buffer;
-use Charcoal\Http\Commons\Data\HttpDataPolicy;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Header\Headers;
 use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Controller\FinalizedResponse;
-use Charcoal\Http\Router\Policy\HeadersPolicy;
-use Charcoal\Http\Router\Policy\PayloadPolicy;
 
 /**
  * Class AbstractResponse
@@ -54,13 +47,6 @@ abstract class AbstractResponse
     {
         return [
             static::class,
-            DatasetPolicy::class,
-            HttpDataPolicy::class,
-            HeadersPolicy::class,
-            PayloadPolicy::class,
-            ValidatingDataset::class,
-            ValidationState::class,
-            CheckedKeyValue::class,
             Headers::class,
             WritableHeaders::class,
         ];
@@ -96,6 +82,7 @@ abstract class AbstractResponse
     /**
      * @param string $tag
      * @return void
+     * @api
      */
     public function setIntegrityTag(string $tag): void
     {
@@ -104,6 +91,7 @@ abstract class AbstractResponse
 
     /**
      * @return string|null
+     * @api
      */
     public function getIntegrityTag(): ?string
     {
