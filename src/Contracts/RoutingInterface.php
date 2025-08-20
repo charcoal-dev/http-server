@@ -18,10 +18,10 @@ use Charcoal\Http\Router\Request\Request;
 interface RoutingInterface
 {
     /**
-     * @param class-string<AbstractController> $controller
+     * @param class-string<AbstractController> $classname
      * @return $this
      */
-    public function fallbackController(string $controller): static;
+    public function fallbackController(string $classname): static;
 
     /**
      * @param Request $request

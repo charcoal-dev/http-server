@@ -29,7 +29,7 @@ abstract class AbstractController
 {
     private ?AbstractResponse $response;
     private ?CacheControl $cacheControl = null;
-    public readonly ?AuthContextInterface $authContext;
+    public readonly ?AuthContextInterface $authContext2;
 
     use NoDumpTrait;
     use NotCloneableTrait;
@@ -182,11 +182,11 @@ abstract class AbstractController
      */
     public function setAuthorized(AuthContextInterface $context): void
     {
-        if (isset($this->authContext)) {
+        if (isset($this->authContext2)) {
             throw new \LogicException("Authorization context already set");
         }
 
-        $this->authContext = $context;
+        $this->authContext2 = $context;
     }
 
     /**
