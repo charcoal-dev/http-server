@@ -165,11 +165,11 @@ abstract class AbstractController
 
     /**
      * @param int $statusCode
-     * @return void
+     * @return never
      * @throws \Charcoal\Http\Router\Exceptions\ResponseDispatchedException
      * @api
      */
-    public function terminate(int $statusCode): void
+    public function terminate(int $statusCode): never
     {
         $this->responseDispatcherHook(null);
         ResponseDispatcher::dispatch(new FinalizedResponse($statusCode, $this->response->headers, null, null));
