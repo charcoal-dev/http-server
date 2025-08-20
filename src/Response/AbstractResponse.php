@@ -122,6 +122,12 @@ abstract class AbstractResponse
     abstract protected function getBody(): null|string|Buffer;
 
     /**
+     * @return void
+     */
+    abstract public function responseDispatcherHook(): void;
+
+    /**
+     * Override this method for final response preparation, such as ECDSA signing.
      * @return FinalizedResponse
      */
     public function finalize(): FinalizedResponse

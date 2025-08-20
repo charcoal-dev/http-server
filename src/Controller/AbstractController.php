@@ -140,6 +140,7 @@ abstract class AbstractController
             $this->response->headers->set("Cache-Control", $this->cacheControl->getHeaderValue());
         }
 
+        $this->response->responseDispatcherHook();
         $finalized = $this->response->finalize();
         $this->responseDispatcherHook($finalized);
         ResponseDispatcher::dispatch($finalized);
@@ -159,6 +160,7 @@ abstract class AbstractController
             $this->response->headers->set("Cache-Control", $this->cacheControl->getHeaderValue());
         }
 
+        $this->response->responseDispatcherHook();
         $this->responseDispatcherHook($file);
         ResponseDispatcher::dispatchPromise($statusCode, $this->response->headers, $file);
     }
@@ -171,6 +173,7 @@ abstract class AbstractController
      */
     public function terminate(int $statusCode): never
     {
+        $this->response->responseDispatcherHook();
         $this->responseDispatcherHook(null);
         ResponseDispatcher::dispatch(new FinalizedResponse($statusCode, $this->response->headers, null, null));
     }
