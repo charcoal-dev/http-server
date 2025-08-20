@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Exceptions;
 
-use Charcoal\Http\Router\Contracts\PromiseResponseOnDispatch;
+use Charcoal\Http\Router\Contracts\Response\ResponsePromisedOnDispatch;
 
 /**
  * Class ResponseDispatchedException
@@ -18,16 +18,24 @@ class ResponseDispatchedException extends \Exception
 {
     protected bool $promiseResolved = false;
 
-    public function __construct(protected readonly ?PromiseResponseOnDispatch $promise)
+    public function __construct(protected readonly ?ResponsePromisedOnDispatch $promise)
     {
         parent::__construct("Response has already been dispatched");
     }
 
+    /**
+     * @return bool
+     * @api
+     */
     public function hasUnresolvedPromise(): bool
     {
         return !$this->promiseResolved && $this->promise;
     }
 
+    /**
+     * @return void
+     * @api
+     */
     public function resolvePromise(): void
     {
         if ($this->promiseResolved) {
