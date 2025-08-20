@@ -10,13 +10,13 @@ namespace Charcoal\Http\Router\Controller\Promise;
 
 use Charcoal\Base\Traits\ControlledSerializableTrait;
 use Charcoal\Http\Commons\Header\WritableHeaders;
-use Charcoal\Http\Router\Contracts\PromiseResponseOnDispatch;
+use Charcoal\Http\Router\Contracts\Response\ResponsePromisedOnDispatch;
 
 /**
  * Class FileDownload
  * @package Charcoal\Http\Router\Controller\Promise
  */
-class FileDownload implements PromiseResponseOnDispatch
+class FileDownload implements ResponsePromisedOnDispatch
 {
     public readonly string $filename;
 

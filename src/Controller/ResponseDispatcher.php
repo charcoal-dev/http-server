@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Controller;
 
 use Charcoal\Http\Commons\Header\WritableHeaders;
-use Charcoal\Http\Router\Contracts\PromiseResponseOnDispatch;
+use Charcoal\Http\Router\Contracts\Response\ResponsePromisedOnDispatch;
 use Charcoal\Http\Router\Exceptions\ResponseDispatchedException;
 
 /**
@@ -51,14 +51,14 @@ class ResponseDispatcher
     /**
      * @param int $statusCode
      * @param WritableHeaders $headers
-     * @param PromiseResponseOnDispatch $promise
+     * @param ResponsePromisedOnDispatch $promise
      * @return never
      * @throws ResponseDispatchedException
      */
     public static function dispatchPromise(
         int                       $statusCode,
         WritableHeaders           $headers,
-        PromiseResponseOnDispatch $promise
+        ResponsePromisedOnDispatch $promise
     ): never
     {
         // HTTP Response Code

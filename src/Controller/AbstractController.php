@@ -13,6 +13,7 @@ use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
+use Charcoal\Http\Router\Contracts\Response\ResponseResolvedInterface;
 use Charcoal\Http\Router\Controller\Promise\FileDownload;
 use Charcoal\Http\Router\Exceptions\ControllerException;
 use Charcoal\Http\Router\Request\Request;
@@ -106,6 +107,7 @@ abstract class AbstractController
     /**
      * @param AbstractResponse $response
      * @return void
+     * @api
      */
     public function swapResponseObject(AbstractResponse $response): void
     {
@@ -114,6 +116,7 @@ abstract class AbstractController
 
     /**
      * @return UnsafePayload
+     * @api
      */
     public function payload(): UnsafePayload
     {
@@ -121,8 +124,15 @@ abstract class AbstractController
     }
 
     /**
+     * @param ResponseResolvedInterface|null $response
+     * @return void
+     */
+    abstract protected function responseDispatcherHook(?ResponseResolvedInterface $response): void;
+
+    /**
      * @return never
      * @throws \Charcoal\Http\Router\Exceptions\ResponseDispatchedException
+     * @api
      */
     public function send(): never
     {
@@ -130,7 +140,9 @@ abstract class AbstractController
             $this->response->headers->set("Cache-Control", $this->cacheControl->getHeaderValue());
         }
 
-        ResponseDispatcher::dispatch($this->response->finalize());
+        $finalized = $this->response->finalize();
+        $this->responseDispatcherHook($finalized);
+        ResponseDispatcher::dispatch($finalized);
     }
 
     /**
@@ -139,6 +151,7 @@ abstract class AbstractController
      * @param CacheControl|null $cacheControl
      * @return never
      * @throws \Charcoal\Http\Router\Exceptions\ResponseDispatchedException
+     * @api
      */
     public function sendFileDownload(int $statusCode, FileDownload $file, ?CacheControl $cacheControl): never
     {
@@ -146,6 +159,7 @@ abstract class AbstractController
             $this->response->headers->set("Cache-Control", $this->cacheControl->getHeaderValue());
         }
 
+        $this->responseDispatcherHook($file);
         ResponseDispatcher::dispatchPromise($statusCode, $this->response->headers, $file);
     }
 
@@ -153,15 +167,18 @@ abstract class AbstractController
      * @param int $statusCode
      * @return void
      * @throws \Charcoal\Http\Router\Exceptions\ResponseDispatchedException
+     * @api
      */
     public function terminate(int $statusCode): void
     {
+        $this->responseDispatcherHook(null);
         ResponseDispatcher::dispatch(new FinalizedResponse($statusCode, $this->response->headers, null, null));
     }
 
     /**
      * @param AuthContextInterface $context
      * @return void
+     * @api
      */
     public function setAuthorized(AuthContextInterface $context): void
     {
@@ -176,6 +193,7 @@ abstract class AbstractController
      * @param string $controllerClass
      * @param string $entryPoint
      * @return AbstractController
+     * @api
      */
     public function forwardToController(string $controllerClass, string $entryPoint): AbstractController
     {
@@ -185,6 +203,7 @@ abstract class AbstractController
     /**
      * @param string $url
      * @param int|null $code
+     * @api
      */
     public function redirectOut(string $url, ?int $code = null): never
     {

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts;
+namespace Charcoal\Http\Router\Contracts\Response;
 
 use Charcoal\Http\Commons\Header\WritableHeaders;
 
@@ -14,7 +14,7 @@ use Charcoal\Http\Commons\Header\WritableHeaders;
  * Interface PromiseResponseOnDispatch
  * @package Charcoal\Http\Router\Contracts\Response
  */
-interface PromiseResponseOnDispatch
+interface ResponsePromisedOnDispatch extends ResponseResolvedInterface
 {
     public function setHeaders(WritableHeaders $headers): void;
 

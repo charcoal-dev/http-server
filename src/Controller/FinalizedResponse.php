@@ -11,12 +11,13 @@ namespace Charcoal\Http\Router\Controller;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Header\Headers;
+use Charcoal\Http\Router\Contracts\Response\ResponseResolvedInterface;
 
 /**
  * Class FinalizedResponse
  * @package Charcoal\Http\Router\Controller
  */
-readonly class FinalizedResponse
+readonly class FinalizedResponse implements ResponseResolvedInterface
 {
     public function __construct(
         public int                $statusCode,
