@@ -15,8 +15,9 @@ use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
 
 /**
- * Class Request
- * @package Charcoal\Http\Router\Route
+ * Represents an immutable server-side HTTP request.
+ * Extends the base functionality of AbstractRequest to include additional properties specific to server requests,
+ * such as the URL information and whether the connection is secure.
  */
 final class ServerRequest extends AbstractRequest
 {
