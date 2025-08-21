@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Request;
 
 use Charcoal\Http\Commons\Abstracts\AbstractRequest;
+use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Enums\HttpProtocol;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
@@ -21,6 +22,8 @@ use Charcoal\Http\Commons\Url\UrlInfo;
  */
 final class ServerRequest extends AbstractRequest
 {
+    public readonly ?ContentType $contentType;
+
     public function __construct(
         HttpMethod              $method,
         HttpProtocol            $protocol,
@@ -30,5 +33,6 @@ final class ServerRequest extends AbstractRequest
     )
     {
         parent::__construct($protocol, $method, $headers);
+        $this->contentType = ContentType::find($headers->get("Content-Type"));
     }
 }
