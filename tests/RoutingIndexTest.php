@@ -14,14 +14,13 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Tests\Router;
 
-use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Router\Router;
 use Charcoal\Http\Router\Routing\AppRoutes;
 use Charcoal\Http\Router\Routing\Route;
 use Charcoal\Http\Router\Routing\RouteGroup;
-use Charcoal\Http\Router\Routing\RouteGroupBuilder;
 use Charcoal\Http\Router\Routing\RoutingIndex;
+use Charcoal\Http\Tests\Router\Fixture\RoutingFixtures;
 
 /**
  * Class RoutingTest
@@ -29,113 +28,14 @@ use Charcoal\Http\Router\Routing\RoutingIndex;
 class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @return AppRoutes
-     * @throws RoutingBuilderException
-     * @noinspection PhpUndefinedClassInspection
-     */
-    protected function createTestRouteMap(): AppRoutes
-    {
-        // Disable controller existence check
-        Router::$checkControllerExists = false;
-
-        return new AppRoutes(function (RouteGroupBuilder $group) {
-            // Top-level
-            $group->route("/", HomeController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
-            $group->route("/about", PageController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
-            $group->route("/assets/:anyThing", AssetsController::class);
-
-            // Web area
-            $group->group("/web", function (RouteGroupBuilder $group) {
-                // Blog
-                $group->group("/blog", function (RouteGroupBuilder $group) {
-                    $group->route("/", BlogController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
-                    $group->route("/archive/:year/:month", BlogController::class);
-                    $group->route("/post/:slug", BlogController::class);
-
-                    $group->group("/post/:slug/edit", function (RouteGroupBuilder $group) {
-                        $group->route("/", BlogEditorController::class)
-                            ->methods(HttpMethod::GET, HttpMethod::HEAD, HttpMethod::POST, HttpMethod::PUT);
-                    });
-                });
-
-                // Shop
-                $group->group("/shop", function (RouteGroupBuilder $group) {
-                    $group->route("/products", ProductsController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
-                    $group->route("/products/:slug", ProductsController::class);
-
-                    $group->group("/cart", function (RouteGroupBuilder $group) {
-                        $group->route("/", CartController::class);
-                        $group->route("/items/:id", CartController::class)
-                            ->methods(HttpMethod::POST, HttpMethod::DELETE);
-                    });
-                });
-
-                // Account
-                $group->group("/account", function (RouteGroupBuilder $group) {
-                    $group->route("/login", AccountController::class);
-                    $group->route("/profile/:id", AccountController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
-                });
-            });
-
-            // API v1
-            $group->group("/api", function (RouteGroupBuilder $group) {
-                $group->group("/v1", function (RouteGroupBuilder $group) {
-                    $group->group("/users", function (RouteGroupBuilder $group) {
-                        $group->route("/", UsersController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
-                        $group->route("/", UsersController::class)->methods(HttpMethod::POST);
-                        $group->route("/:id", UsersController::class)->methods(HttpMethod::GET);
-                        $group->route("/:id", UsersController::class)->methods(HttpMethod::PATCH);
-                        $group->route("/:id", UsersController::class)->methods(HttpMethod::DELETE);
-                    });
-
-                    $group->group("/articles", function (RouteGroupBuilder $group) {
-                        $group->route("/", ArticlesController::class)
-                            ->methods(HttpMethod::GET, HttpMethod::HEAD, HttpMethod::POST);
-                        $group->route("/:slug", ArticlesController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
-
-                        $group->group("/:slug/comments", function (RouteGroupBuilder $group) {
-                            $group->route("/", CommentsController::class)
-                                ->methods(HttpMethod::GET, HttpMethod::HEAD, HttpMethod::POST);
-                            $group->route("/:commentId", CommentsController::class)
-                                ->methods(HttpMethod::GET, HttpMethod::HEAD);
-                        });
-                    });
-
-                    $group->route("/search/:anyThing", SearchController::class);
-                });
-
-                // API v2
-                $group->group("/v2", function (RouteGroupBuilder $group) {
-                    $group->group("/reports", function (RouteGroupBuilder $group) {
-                        $group->route("/summary", ReportsController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
-                        $group->route("/:year/:month", ReportsController::class);
-                    });
-                });
-            });
-
-            // Admin area
-            $group->group("/admin", function (RouteGroupBuilder $group) {
-                $group->route("/", AdminDashboardController::class);
-
-                $group->group("/users", function (RouteGroupBuilder $group) {
-                    $group->route("/", AdminUsersController::class);
-                    $group->route("/:id", AdminUsersController::class);
-                    $group->group("/:id/settings", function (RouteGroupBuilder $group) {
-                        $group->route("/", AdminUserSettingsController::class)
-                            ->methods(HttpMethod::GET, HttpMethod::HEAD, HttpMethod::POST, HttpMethod::PATCH);
-                    });
-                });
-            });
-        });
-    }
-
-    /**
      * @return void
      * @throws RoutingBuilderException
      */
     public function testRoutesIndex(): void
     {
-        $routes = new RoutingIndex($this->createTestRouteMap());
+        Router::$checkControllerExists = false;
+        $routes = RoutingFixtures::webBlogShipApi2AccountAdmin();
+        $routes = new RoutingIndex($routes);
 
         // First, root AppRoutes group
         $this->assertArrayHasKey("/", $routes->routes);
@@ -173,73 +73,73 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $routes->routes["/web/blog/archive/:year/:month"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/web/blog/archive/:year/:month"][0]);
 
-		// /web/blog/post/:slug
+        // /web/blog/post/:slug
         $this->assertArrayHasKey("/web/blog/post/:slug", $routes->routes);
         $this->assertCount(1, $routes->routes["/web/blog/post/:slug"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/web/blog/post/:slug"][0]);
 
-		// /web/blog/post/:slug/edit (merged group + index route)
+        // /web/blog/post/:slug/edit (merged group + index route)
         $this->assertArrayHasKey("/web/blog/post/:slug/edit", $routes->routes);
         $this->assertCount(2, $routes->routes["/web/blog/post/:slug/edit"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/web/blog/post/:slug/edit"][0]);
         $this->assertInstanceOf(Route::class, $routes->routes["/web/blog/post/:slug/edit"][1]);
         $this->assertEquals("GET,HEAD,POST,PUT", implode(",", array_keys($routes->routes["/web/blog/post/:slug/edit"][1]->methods)));
 
-		// /web/shop
+        // /web/shop
         $this->assertArrayHasKey("/web/shop", $routes->routes);
         $this->assertCount(1, $routes->routes["/web/shop"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/web/shop"][0]);
 
-		// /web/shop/products
+        // /web/shop/products
         $this->assertArrayHasKey("/web/shop/products", $routes->routes);
         $this->assertCount(1, $routes->routes["/web/shop/products"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/web/shop/products"][0]);
         $this->assertEquals("GET,HEAD", implode(",", array_keys($routes->routes["/web/shop/products"][0]->methods)));
 
-		// /web/shop/products/:slug
+        // /web/shop/products/:slug
         $this->assertArrayHasKey("/web/shop/products/:slug", $routes->routes);
         $this->assertCount(1, $routes->routes["/web/shop/products/:slug"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/web/shop/products/:slug"][0]);
 
-		// /web/shop/cart (merged group + index route)
+        // /web/shop/cart (merged group + index route)
         $this->assertArrayHasKey("/web/shop/cart", $routes->routes);
         $this->assertCount(2, $routes->routes["/web/shop/cart"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/web/shop/cart"][0]);
         $this->assertInstanceOf(Route::class, $routes->routes["/web/shop/cart"][1]);
 
-		// /web/shop/cart/items/:id
+        // /web/shop/cart/items/:id
         $this->assertArrayHasKey("/web/shop/cart/items/:id", $routes->routes);
         $this->assertCount(1, $routes->routes["/web/shop/cart/items/:id"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/web/shop/cart/items/:id"][0]);
         $this->assertEquals("DELETE,POST", implode(",", array_keys($routes->routes["/web/shop/cart/items/:id"][0]->methods)));
 
-		// /web/account
+        // /web/account
         $this->assertArrayHasKey("/web/account", $routes->routes);
         $this->assertCount(1, $routes->routes["/web/account"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/web/account"][0]);
 
-		// /web/account/login
+        // /web/account/login
         $this->assertArrayHasKey("/web/account/login", $routes->routes);
         $this->assertCount(1, $routes->routes["/web/account/login"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/web/account/login"][0]);
 
-		// /web/account/profile/:id
+        // /web/account/profile/:id
         $this->assertArrayHasKey("/web/account/profile/:id", $routes->routes);
         $this->assertCount(1, $routes->routes["/web/account/profile/:id"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/web/account/profile/:id"][0]);
         $this->assertEquals("GET,HEAD", implode(",", array_keys($routes->routes["/web/account/profile/:id"][0]->methods)));
 
-		// /api
+        // /api
         $this->assertArrayHasKey("/api", $routes->routes);
         $this->assertCount(1, $routes->routes["/api"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/api"][0]);
 
-		// /api/v1
+        // /api/v1
         $this->assertArrayHasKey("/api/v1", $routes->routes);
         $this->assertCount(1, $routes->routes["/api/v1"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/api/v1"][0]);
 
-		// /api/v1/users (merged group + index route with methods)
+        // /api/v1/users (merged group + index route with methods)
         $this->assertArrayHasKey("/api/v1/users", $routes->routes);
         $this->assertCount(3, $routes->routes["/api/v1/users"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/api/v1/users"][0]);
@@ -248,7 +148,7 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Route::class, $routes->routes["/api/v1/users"][2]);
         $this->assertEquals("POST", implode(",", array_keys($routes->routes["/api/v1/users"][2]->methods)));
 
-		// /api/v1/users/:id
+        // /api/v1/users/:id
         $this->assertArrayHasKey("/api/v1/users/:id", $routes->routes);
         $this->assertCount(3, $routes->routes["/api/v1/users/:id"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/api/v1/users/:id"][0]);
@@ -258,76 +158,76 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(Route::class, $routes->routes["/api/v1/users/:id"][2]);
         $this->assertEquals("DELETE", implode(",", array_keys($routes->routes["/api/v1/users/:id"][2]->methods)));
 
-		// /api/v1/articles (merged group + index route with methods)
+        // /api/v1/articles (merged group + index route with methods)
         $this->assertArrayHasKey("/api/v1/articles", $routes->routes);
         $this->assertCount(2, $routes->routes["/api/v1/articles"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/api/v1/articles"][0]);
         $this->assertInstanceOf(Route::class, $routes->routes["/api/v1/articles"][1]);
         $this->assertEquals("GET,HEAD,POST", implode(",", array_keys($routes->routes["/api/v1/articles"][1]->methods)));
 
-		// /api/v1/articles/:slug
+        // /api/v1/articles/:slug
         $this->assertArrayHasKey("/api/v1/articles/:slug", $routes->routes);
         $this->assertCount(1, $routes->routes["/api/v1/articles/:slug"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/api/v1/articles/:slug"][0]);
         $this->assertEquals("GET,HEAD", implode(",", array_keys($routes->routes["/api/v1/articles/:slug"][0]->methods)));
 
-		// /api/v1/articles/:slug/comments (merged group + index route with methods)
+        // /api/v1/articles/:slug/comments (merged group + index route with methods)
         $this->assertArrayHasKey("/api/v1/articles/:slug/comments", $routes->routes);
         $this->assertCount(2, $routes->routes["/api/v1/articles/:slug/comments"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/api/v1/articles/:slug/comments"][0]);
         $this->assertInstanceOf(Route::class, $routes->routes["/api/v1/articles/:slug/comments"][1]);
         $this->assertEquals("GET,HEAD,POST", implode(",", array_keys($routes->routes["/api/v1/articles/:slug/comments"][1]->methods)));
 
-		// /api/v1/articles/:slug/comments/:commentId
+        // /api/v1/articles/:slug/comments/:commentId
         $this->assertArrayHasKey("/api/v1/articles/:slug/comments/:commentId", $routes->routes);
         $this->assertCount(1, $routes->routes["/api/v1/articles/:slug/comments/:commentId"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/api/v1/articles/:slug/comments/:commentId"][0]);
         $this->assertEquals("GET,HEAD", implode(",", array_keys($routes->routes["/api/v1/articles/:slug/comments/:commentId"][0]->methods)));
 
-		// /api/v1/search/:anyThing
+        // /api/v1/search/:anyThing
         $this->assertArrayHasKey("/api/v1/search/:anyThing", $routes->routes);
         $this->assertCount(1, $routes->routes["/api/v1/search/:anyThing"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/api/v1/search/:anyThing"][0]);
 
-		// /api/v2
+        // /api/v2
         $this->assertArrayHasKey("/api/v2", $routes->routes);
         $this->assertCount(1, $routes->routes["/api/v2"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/api/v2"][0]);
 
-		// /api/v2/reports
+        // /api/v2/reports
         $this->assertArrayHasKey("/api/v2/reports", $routes->routes);
         $this->assertCount(1, $routes->routes["/api/v2/reports"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/api/v2/reports"][0]);
 
-		// /api/v2/reports/summary
+        // /api/v2/reports/summary
         $this->assertArrayHasKey("/api/v2/reports/summary", $routes->routes);
         $this->assertCount(1, $routes->routes["/api/v2/reports/summary"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/api/v2/reports/summary"][0]);
         $this->assertEquals("GET,HEAD", implode(",", array_keys($routes->routes["/api/v2/reports/summary"][0]->methods)));
 
-		// /api/v2/reports/:year/:month
+        // /api/v2/reports/:year/:month
         $this->assertArrayHasKey("/api/v2/reports/:year/:month", $routes->routes);
         $this->assertCount(1, $routes->routes["/api/v2/reports/:year/:month"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/api/v2/reports/:year/:month"][0]);
 
-		// /admin (merged group + index route)
+        // /admin (merged group + index route)
         $this->assertArrayHasKey("/admin", $routes->routes);
         $this->assertCount(2, $routes->routes["/admin"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/admin"][0]);
         $this->assertInstanceOf(Route::class, $routes->routes["/admin"][1]);
 
-		// /admin/users (merged group + index route)
+        // /admin/users (merged group + index route)
         $this->assertArrayHasKey("/admin/users", $routes->routes);
         $this->assertCount(2, $routes->routes["/admin/users"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/admin/users"][0]);
         $this->assertInstanceOf(Route::class, $routes->routes["/admin/users"][1]);
 
-		// /admin/users/:id
+        // /admin/users/:id
         $this->assertArrayHasKey("/admin/users/:id", $routes->routes);
         $this->assertCount(1, $routes->routes["/admin/users/:id"]);
         $this->assertInstanceOf(Route::class, $routes->routes["/admin/users/:id"][0]);
 
-		// /admin/users/:id/settings (merged group + index route with methods)
+        // /admin/users/:id/settings (merged group + index route with methods)
         $this->assertArrayHasKey("/admin/users/:id/settings", $routes->routes);
         $this->assertCount(2, $routes->routes["/admin/users/:id/settings"]);
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/admin/users/:id/settings"][0]);
