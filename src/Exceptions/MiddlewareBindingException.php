@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Exceptions;
 
 /**
- * Represents an exception that occurs within a middleware process.
+ * Exception thrown when there is an error in binding middleware.
  */
-class MiddlewareException extends \Exception
+class MiddlewareBindingException extends \RuntimeException
 {
 }

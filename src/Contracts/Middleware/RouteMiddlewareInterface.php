@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Contracts\Middleware;
 
 /**
- * Contract for Route-level middleware
+ * Represents a middleware specifically tailored to be used on a per-route basis.
  */
 interface RouteMiddlewareInterface extends MiddlewareInterface
 {

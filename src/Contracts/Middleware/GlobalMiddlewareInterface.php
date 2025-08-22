@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Contracts\Middleware;
 
 /**
- * Contract for Router-level middleware
+ * Represents a contract for middleware that is applied globally.
  */
-interface RouterMiddlewareInterface extends MiddlewareInterface
+interface GlobalMiddlewareInterface extends MiddlewareInterface
 {
 }

@@ -8,13 +8,13 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Contracts\Middleware\Global;
 
-use Charcoal\Http\Router\Contracts\Middleware\RouterMiddlewareInterface;
+use Charcoal\Http\Router\Contracts\Middleware\GlobalMiddlewareInterface;
 
 /**
  * An interface for resolving client IP addresses within the context
  * of a middleware-based router system.
  */
-interface ClientIpResolverInterface extends RouterMiddlewareInterface
+interface ClientIpResolverInterface extends GlobalMiddlewareInterface
 {
     public function resolveIpAddress(): string;
 }

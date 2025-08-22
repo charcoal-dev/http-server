@@ -33,6 +33,6 @@ final class ServerRequest extends AbstractRequest
     )
     {
         parent::__construct($protocol, $method, $headers);
-        $this->contentType = ContentType::find($headers->get("Content-Type"));
+        $this->contentType = ContentType::find($headers->get("Content-Type") ?? "");
     }
 }

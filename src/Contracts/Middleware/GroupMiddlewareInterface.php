@@ -10,7 +10,6 @@ namespace Charcoal\Http\Router\Contracts\Middleware;
 
 /**
  * Defines a contract for middleware that can be used in a group context.
- * Extends the functionality of the base MiddlewareInterface.
  */
 interface GroupMiddlewareInterface extends MiddlewareInterface
 {
