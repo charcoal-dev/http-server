@@ -1,13 +1,7 @@
 <?php
-/*
- * This file is a part of "charcoal-dev/http-router" package.
- * https://github.com/charcoal-dev/http-router
- *
- * Copyright (c) Furqan A. Siddiqui <hello@furqansiddiqui.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code or visit following link:
- * https://github.com/charcoal-dev/http-router/blob/main/LICENSE
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
  */
 
 declare(strict_types=1);
@@ -257,6 +251,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey("HEAD", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "HomeController", $inspect->methods["GET"]);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "HomeController", $inspect->methods["HEAD"]);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectAbout(): void
@@ -272,6 +268,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey("HEAD", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "PageController", $inspect->methods["GET"]);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "PageController", $inspect->methods["HEAD"]);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectAssetsAny(): void
@@ -285,6 +283,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AssetsController", $inspect->methods["*"]);
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("anyThing", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectWebGroup(): void
@@ -295,6 +300,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($inspect->isController);
         $this->assertNull($inspect->groupNamespace);
         $this->assertNull($inspect->methods);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectWebBlog(): void
@@ -310,6 +317,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey("HEAD", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogController", $inspect->methods["GET"]);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogController", $inspect->methods["HEAD"]);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectWebBlogArchiveAny(): void
@@ -323,6 +332,14 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogController", $inspect->methods["*"]);
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(2, $inspect->params);
+        $this->assertContains("year", $inspect->params);
+        $this->assertContains("month", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectWebBlogPostSlugAny(): void
@@ -336,6 +353,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogController", $inspect->methods["*"]);
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("slug", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectWebBlogPostSlugEdit(): void
@@ -351,6 +375,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogEditorController", $inspect->methods[$m]);
         }
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("slug", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectWebShopGroup(): void
@@ -361,6 +392,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($inspect->isController);
         $this->assertNull($inspect->groupNamespace);
         $this->assertNull($inspect->methods);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectWebShopProducts(): void
@@ -376,6 +409,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey("HEAD", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ProductsController", $inspect->methods["GET"]);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ProductsController", $inspect->methods["HEAD"]);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectWebShopProductsSlugAny(): void
@@ -389,6 +424,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ProductsController", $inspect->methods["*"]);
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("slug", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectWebShopCart(): void
@@ -402,6 +444,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CartController", $inspect->methods["*"]);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectWebShopCartItemsId(): void
@@ -417,6 +461,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CartController", $inspect->methods[$m]);
         }
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("id", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectWebAccountGroup(): void
@@ -427,6 +478,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($inspect->isController);
         $this->assertNull($inspect->groupNamespace);
         $this->assertNull($inspect->methods);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectWebAccountLoginAny(): void
@@ -440,6 +493,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AccountController", $inspect->methods["*"]);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectWebAccountProfileId(): void
@@ -455,6 +510,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey("HEAD", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AccountController", $inspect->methods["GET"]);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AccountController", $inspect->methods["HEAD"]);
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("id", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectApiGroup(): void
@@ -465,6 +527,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($inspect->isController);
         $this->assertNull($inspect->groupNamespace);
         $this->assertNull($inspect->methods);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectApiV1Group(): void
@@ -475,6 +539,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($inspect->isController);
         $this->assertNull($inspect->groupNamespace);
         $this->assertNull($inspect->methods);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectApiV1Users(): void
@@ -490,6 +556,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "UsersController", $inspect->methods[$m]);
         }
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectApiV1UsersId(): void
@@ -505,6 +573,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "UsersController", $inspect->methods[$m]);
         }
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("id", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectApiV1Articles(): void
@@ -520,6 +595,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ArticlesController", $inspect->methods[$m]);
         }
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectApiV1ArticlesSlug(): void
@@ -535,6 +612,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey("HEAD", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ArticlesController", $inspect->methods["GET"]);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ArticlesController", $inspect->methods["HEAD"]);
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("slug", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectApiV1ArticlesSlugComments(): void
@@ -550,6 +634,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CommentsController", $inspect->methods[$m]);
         }
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("slug", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectApiV1ArticlesSlugCommentsCommentId(): void
@@ -565,6 +656,14 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey("HEAD", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CommentsController", $inspect->methods["GET"]);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CommentsController", $inspect->methods["HEAD"]);
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(2, $inspect->params);
+        $this->assertContains("slug", $inspect->params);
+        $this->assertContains("commentId", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectApiV1SearchAny(): void
@@ -578,6 +677,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "SearchController", $inspect->methods["*"]);
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("anyThing", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectApiV2Group(): void
@@ -588,6 +694,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($inspect->isController);
         $this->assertNull($inspect->groupNamespace);
         $this->assertNull($inspect->methods);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectApiV2ReportsGroup(): void
@@ -598,6 +706,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($inspect->isController);
         $this->assertNull($inspect->groupNamespace);
         $this->assertNull($inspect->methods);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectApiV2ReportsSummary(): void
@@ -613,6 +723,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey("HEAD", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ReportsController", $inspect->methods["GET"]);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ReportsController", $inspect->methods["HEAD"]);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectApiV2ReportsYearMonthAny(): void
@@ -626,6 +738,14 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ReportsController", $inspect->methods["*"]);
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(2, $inspect->params);
+        $this->assertContains("year", $inspect->params);
+        $this->assertContains("month", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectAdmin(): void
@@ -639,6 +759,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AdminDashboardController", $inspect->methods["*"]);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectAdminUsers(): void
@@ -652,6 +774,8 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AdminUsersController", $inspect->methods["*"]);
+        // --- No param tokens: params must be null ---
+        $this->assertNull($inspect->params);
     }
 
     public function testInspectAdminUsersIdAny(): void
@@ -665,6 +789,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
         $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AdminUsersController", $inspect->methods["*"]);
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("id", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 
     public function testInspectAdminUsersIdSettings(): void
@@ -680,6 +811,13 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AdminUserSettingsController", $inspect->methods[$m]);
         }
+        // --- Params & regex for tokenized route ---
+        $this->assertIsArray($inspect->params);
+        $this->assertCount(1, $inspect->params);
+        $this->assertContains("id", $inspect->params);
+        $this->assertIsString($inspect->matchRegExp);
+        $this->assertNotSame("", $inspect->matchRegExp);
+        $this->assertStringContainsString("([^/]+)", $inspect->matchRegExp);
     }
 }
 
