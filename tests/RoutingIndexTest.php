@@ -12,8 +12,9 @@ use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Router\Router;
 use Charcoal\Http\Router\Routing\AppRoutes;
 use Charcoal\Http\Router\Routing\Group\RouteGroup;
-use Charcoal\Http\Router\Routing\Registry\RouteInspect;
 use Charcoal\Http\Router\Routing\Route;
+use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
+use Charcoal\Http\Router\Routing\Snapshot\RouteSnapshot;
 use Charcoal\Http\Tests\Router\Fixture\RoutingFixtures;
 
 /**
@@ -22,6 +23,7 @@ use Charcoal\Http\Tests\Router\Fixture\RoutingFixtures;
 class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 {
     private readonly AppRoutes $routes;
+    private readonly AppRoutingSnapshot $routesDto;
 
     /**
      * @return void
@@ -31,6 +33,7 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
     {
         Router::$checkControllerExists = false;
         $this->routes = RoutingFixtures::webBlogShipApi2AccountAdmin();
+        $this->routesDto = $this->routes->snapshot();
     }
 
     /**
@@ -44,7 +47,6 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertArrayHasKey("/", $routes->routes);
         $this->assertCount(2, $routes->routes["/"]);
         $this->assertInstanceOf(AppRoutes::class, $routes->routes["/"][0]);
-        $this->assertNull($routes->routes["/"][0]->namespace);
         $this->assertInstanceOf(Route::class, $routes->routes["/"][1]);
         $this->assertEquals("GET,HEAD", implode(",", array_keys($routes->routes["/"][1]->methods)));
 
@@ -240,11 +242,10 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectRoot(): void
     {
-        $inspect = $this->routes->inspect("/");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
         $this->assertIsArray($inspect->methods);
         $this->assertCount(2, $inspect->methods);
         $this->assertArrayHasKey("GET", $inspect->methods);
@@ -257,11 +258,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectAbout(): void
     {
-        $inspect = $this->routes->inspect("/about");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/about");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(2, $inspect->methods);
         $this->assertArrayHasKey("GET", $inspect->methods);
@@ -274,11 +275,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectAssetsAny(): void
     {
-        $inspect = $this->routes->inspect("/assets/:anyThing");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/assets/:anyThing");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -294,11 +295,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebGroup(): void
     {
-        $inspect = $this->routes->inspect("/web");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertFalse($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertNull($inspect->methods);
         // --- No param tokens: params must be null ---
         $this->assertNull($inspect->params);
@@ -306,11 +307,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebBlog(): void
     {
-        $inspect = $this->routes->inspect("/web/blog");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/blog");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(2, $inspect->methods);
         $this->assertArrayHasKey("GET", $inspect->methods);
@@ -323,11 +324,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebBlogArchiveAny(): void
     {
-        $inspect = $this->routes->inspect("/web/blog/archive/:year/:month");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/blog/archive/:year/:month");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -344,11 +345,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebBlogPostSlugAny(): void
     {
-        $inspect = $this->routes->inspect("/web/blog/post/:slug");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/blog/post/:slug");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -364,14 +365,14 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebBlogPostSlugEdit(): void
     {
-        $inspect = $this->routes->inspect("/web/blog/post/:slug/edit");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/blog/post/:slug/edit");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(4, $inspect->methods);
-        foreach (["GET","HEAD","POST","PUT"] as $m) {
+        foreach (["GET", "HEAD", "POST", "PUT"] as $m) {
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogEditorController", $inspect->methods[$m]);
         }
@@ -386,11 +387,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebShopGroup(): void
     {
-        $inspect = $this->routes->inspect("/web/shop");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/shop");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertFalse($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertNull($inspect->methods);
         // --- No param tokens: params must be null ---
         $this->assertNull($inspect->params);
@@ -398,11 +399,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebShopProducts(): void
     {
-        $inspect = $this->routes->inspect("/web/shop/products");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/shop/products");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(2, $inspect->methods);
         $this->assertArrayHasKey("GET", $inspect->methods);
@@ -415,11 +416,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebShopProductsSlugAny(): void
     {
-        $inspect = $this->routes->inspect("/web/shop/products/:slug");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/shop/products/:slug");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -435,11 +436,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebShopCart(): void
     {
-        $inspect = $this->routes->inspect("/web/shop/cart");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/shop/cart");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -450,14 +451,14 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebShopCartItemsId(): void
     {
-        $inspect = $this->routes->inspect("/web/shop/cart/items/:id");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/shop/cart/items/:id");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(2, $inspect->methods);
-        foreach (["DELETE","POST"] as $m) {
+        foreach (["DELETE", "POST"] as $m) {
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CartController", $inspect->methods[$m]);
         }
@@ -472,11 +473,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebAccountGroup(): void
     {
-        $inspect = $this->routes->inspect("/web/account");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/account");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertFalse($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertNull($inspect->methods);
         // --- No param tokens: params must be null ---
         $this->assertNull($inspect->params);
@@ -484,11 +485,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebAccountLoginAny(): void
     {
-        $inspect = $this->routes->inspect("/web/account/login");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/account/login");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -499,11 +500,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectWebAccountProfileId(): void
     {
-        $inspect = $this->routes->inspect("/web/account/profile/:id");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/web/account/profile/:id");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(2, $inspect->methods);
         $this->assertArrayHasKey("GET", $inspect->methods);
@@ -521,11 +522,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiGroup(): void
     {
-        $inspect = $this->routes->inspect("/api");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertFalse($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertNull($inspect->methods);
         // --- No param tokens: params must be null ---
         $this->assertNull($inspect->params);
@@ -533,11 +534,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV1Group(): void
     {
-        $inspect = $this->routes->inspect("/api/v1");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v1");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertFalse($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertNull($inspect->methods);
         // --- No param tokens: params must be null ---
         $this->assertNull($inspect->params);
@@ -545,14 +546,14 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV1Users(): void
     {
-        $inspect = $this->routes->inspect("/api/v1/users");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v1/users");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(3, $inspect->methods);
-        foreach (["GET","HEAD","POST"] as $m) {
+        foreach (["GET", "HEAD", "POST"] as $m) {
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "UsersController", $inspect->methods[$m]);
         }
@@ -562,14 +563,14 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV1UsersId(): void
     {
-        $inspect = $this->routes->inspect("/api/v1/users/:id");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v1/users/:id");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(3, $inspect->methods);
-        foreach (["DELETE","GET","PATCH"] as $m) {
+        foreach (["DELETE", "GET", "PATCH"] as $m) {
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "UsersController", $inspect->methods[$m]);
         }
@@ -584,14 +585,14 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV1Articles(): void
     {
-        $inspect = $this->routes->inspect("/api/v1/articles");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v1/articles");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(3, $inspect->methods);
-        foreach (["GET","HEAD","POST"] as $m) {
+        foreach (["GET", "HEAD", "POST"] as $m) {
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ArticlesController", $inspect->methods[$m]);
         }
@@ -601,11 +602,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV1ArticlesSlug(): void
     {
-        $inspect = $this->routes->inspect("/api/v1/articles/:slug");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v1/articles/:slug");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(2, $inspect->methods);
         $this->assertArrayHasKey("GET", $inspect->methods);
@@ -623,14 +624,14 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV1ArticlesSlugComments(): void
     {
-        $inspect = $this->routes->inspect("/api/v1/articles/:slug/comments");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v1/articles/:slug/comments");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(3, $inspect->methods);
-        foreach (["GET","HEAD","POST"] as $m) {
+        foreach (["GET", "HEAD", "POST"] as $m) {
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CommentsController", $inspect->methods[$m]);
         }
@@ -645,11 +646,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV1ArticlesSlugCommentsCommentId(): void
     {
-        $inspect = $this->routes->inspect("/api/v1/articles/:slug/comments/:commentId");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v1/articles/:slug/comments/:commentId");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(2, $inspect->methods);
         $this->assertArrayHasKey("GET", $inspect->methods);
@@ -668,11 +669,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV1SearchAny(): void
     {
-        $inspect = $this->routes->inspect("/api/v1/search/:anyThing");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v1/search/:anyThing");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -688,11 +689,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV2Group(): void
     {
-        $inspect = $this->routes->inspect("/api/v2");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v2");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertFalse($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertNull($inspect->methods);
         // --- No param tokens: params must be null ---
         $this->assertNull($inspect->params);
@@ -700,11 +701,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV2ReportsGroup(): void
     {
-        $inspect = $this->routes->inspect("/api/v2/reports");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v2/reports");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertFalse($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertNull($inspect->methods);
         // --- No param tokens: params must be null ---
         $this->assertNull($inspect->params);
@@ -712,11 +713,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV2ReportsSummary(): void
     {
-        $inspect = $this->routes->inspect("/api/v2/reports/summary");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v2/reports/summary");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(2, $inspect->methods);
         $this->assertArrayHasKey("GET", $inspect->methods);
@@ -729,11 +730,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectApiV2ReportsYearMonthAny(): void
     {
-        $inspect = $this->routes->inspect("/api/v2/reports/:year/:month");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/api/v2/reports/:year/:month");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -750,11 +751,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectAdmin(): void
     {
-        $inspect = $this->routes->inspect("/admin");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/admin");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -765,11 +766,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectAdminUsers(): void
     {
-        $inspect = $this->routes->inspect("/admin/users");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/admin/users");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -780,11 +781,11 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectAdminUsersIdAny(): void
     {
-        $inspect = $this->routes->inspect("/admin/users/:id");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/admin/users/:id");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertFalse($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
@@ -800,14 +801,14 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 
     public function testInspectAdminUsersIdSettings(): void
     {
-        $inspect = $this->routes->inspect("/admin/users/:id/settings");
-        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $inspect = $this->routesDto->inspect("/admin/users/:id/settings");
+        $this->assertInstanceOf(RouteSnapshot::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
-        $this->assertNull($inspect->groupNamespace);
+
         $this->assertIsArray($inspect->methods);
         $this->assertCount(4, $inspect->methods);
-        foreach (["GET","HEAD","PATCH","POST"] as $m) {
+        foreach (["GET", "HEAD", "PATCH", "POST"] as $m) {
             $this->assertArrayHasKey($m, $inspect->methods);
             $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AdminUserSettingsController", $inspect->methods[$m]);
         }
