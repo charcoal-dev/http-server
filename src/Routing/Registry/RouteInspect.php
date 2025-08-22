@@ -20,22 +20,18 @@ final readonly class RouteInspect
 {
     public bool $isGroup;
     public bool $isController;
-    public ?array $groupNamespace;
     public ?array $methods;
+    public string $matchRegExp;
+    public ?array $params;
 
     public function __construct(public int $index, public string $path, array $node)
     {
         $isGroup = false;
         $isRoute = false;
-        $groupNamespace = [];
         $methods = [];
         foreach ($node as $leaf) {
             if ($leaf instanceof AbstractRouteGroup) {
                 $isGroup = true;
-                if ($leaf->namespace) {
-                    $groupNamespace[] = $leaf->namespace;
-                }
-
                 continue;
             }
 
@@ -49,7 +45,20 @@ final readonly class RouteInspect
 
         $this->isGroup = $isGroup;
         $this->isController = $isRoute;
-        $this->groupNamespace = $groupNamespace ?: null;
         $this->methods = $methods ?: null;
+
+        $params = [];
+        $matchRegExp = preg_quote($this->path, "~");
+        $matchRegExp = preg_replace_callback(
+            "/\\\\:([A-Za-z0-9_]+)/",
+            function ($match) use (&$params) {
+                $params[] = $match[1];
+                return "([^/]+)";
+            },
+            $matchRegExp
+        );
+
+        $this->matchRegExp = "~^" . $matchRegExp . "$~";
+        $this->params = $params ?: null;
     }
 }
