@@ -8,12 +8,11 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing;
 
-use Charcoal\Http\Router\Enums\Routing;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
 use Charcoal\Http\Router\Routing\Group\RouteGroupBuilder;
-use Charcoal\Http\Router\Routing\Registry\RouteInspect;
 use Charcoal\Http\Router\Routing\Registry\RoutingIndex;
+use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
 
 /**
  * Represents a collection of application routes grouped together.
@@ -22,11 +21,7 @@ use Charcoal\Http\Router\Routing\Registry\RoutingIndex;
 final readonly class AppRoutes extends AbstractRouteGroup
 {
     /** @var RoutingIndex */
-    private RoutingIndex $index;
-    /** @var array<string, int> */
-    private array $indexKeys;
-    /** @var array<RouteInspect> */
-    private array $inspects;
+    private RoutingIndex $registry;
 
     /**
      * @param \Closure(RouteGroupBuilder $group): void $declaration
@@ -45,32 +40,7 @@ final readonly class AppRoutes extends AbstractRouteGroup
     protected function build(RouteGroupBuilder $group): void
     {
         parent::build($group);
-        $this->index = new RoutingIndex($this);
-        $inspections = [];
-        $c = -1;
-        foreach ($this->index->routes as $path => $node) {
-            $c++;
-            $inspections[] = new RouteInspect($c, $path, $node);
-        }
-
-        $this->indexKeys = array_combine(array_keys($this->index->routes),
-            range(0, count($this->index->routes) - 1));
-        $this->inspects = $inspections;
-    }
-
-    /**
-     * @param int|string $pathIndex
-     * @return RouteInspect|null
-     * @api
-     */
-    public function inspect(int|string $pathIndex): ?RouteInspect
-    {
-        if (is_int($pathIndex)) {
-            return $pathIndex > -1 && $pathIndex < count($this->inspects) ?
-                $this->inspects[$pathIndex] : null;
-        }
-
-        return $this->inspects[$this->indexKeys[$pathIndex] ?? null] ?? null;
+        $this->registry = new RoutingIndex($this);
     }
 
     /**
@@ -78,11 +48,14 @@ final readonly class AppRoutes extends AbstractRouteGroup
      */
     public function manifest(): RoutingIndex
     {
-        return $this->index;
+        return $this->registry;
     }
 
-    public function match(string $path, Routing $mode = Routing::Precise): ?RouteInspect
+    /**
+     * Creates and returns a new instance of AppRoutingSnapshot using the current registry.
+     */
+    public function snapshot(): AppRoutingSnapshot
     {
-        $canonical = $path ?? "/";
+        return new AppRoutingSnapshot($this->registry);
     }
 }

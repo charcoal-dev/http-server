@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing\Registry;
+namespace Charcoal\Http\Router\Routing\Snapshot;
 
 use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
 use Charcoal\Http\Router\Routing\Route;
@@ -16,7 +16,7 @@ use Charcoal\Http\Router\Routing\Route;
  * This class provides metadata about a route or route group, including its
  * path, type, associated methods, and grouping namespace if applicable.
  */
-final readonly class RouteInspect
+final readonly class RouteSnapshot
 {
     public bool $isGroup;
     public bool $isController;
