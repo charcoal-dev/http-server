@@ -244,15 +244,34 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals("GET,HEAD,PATCH,POST", implode(",", array_keys($routes->routes["/admin/users/:id/settings"][1]->methods)));
     }
 
-    public function testInspectMethod(): void
+    public function testInspectRoot(): void
     {
         $inspect = $this->routes->inspect("/");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
         $this->assertTrue($inspect->isGroup);
         $this->assertTrue($inspect->isController);
         $this->assertNull($inspect->groupNamespace);
         $this->assertIsArray($inspect->methods);
         $this->assertCount(2, $inspect->methods);
-        $this->assertEquals($inspect->methods["GET"], RoutingFixtures::FAKE_NAMESPACE . "HomeController");
+        $this->assertArrayHasKey("GET", $inspect->methods);
+        $this->assertArrayHasKey("HEAD", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "HomeController", $inspect->methods["GET"]);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "HomeController", $inspect->methods["HEAD"]);
+    }
+
+    public function testInspectAbout(): void
+    {
+        $inspect = $this->routes->inspect("/about");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(2, $inspect->methods);
+        $this->assertArrayHasKey("GET", $inspect->methods);
+        $this->assertArrayHasKey("HEAD", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "PageController", $inspect->methods["GET"]);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "PageController", $inspect->methods["HEAD"]);
     }
 
     public function testInspectAssetsAny(): void
@@ -265,10 +284,402 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertIsArray($inspect->methods);
         $this->assertCount(1, $inspect->methods);
         $this->assertArrayHasKey("*", $inspect->methods);
-        $this->assertEquals(
-            RoutingFixtures::FAKE_NAMESPACE . "AssetsController",
-            $inspect->methods["*"]
-        );
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AssetsController", $inspect->methods["*"]);
+    }
+
+    public function testInspectWebGroup(): void
+    {
+        $inspect = $this->routes->inspect("/web");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertFalse($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertNull($inspect->methods);
+    }
+
+    public function testInspectWebBlog(): void
+    {
+        $inspect = $this->routes->inspect("/web/blog");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(2, $inspect->methods);
+        $this->assertArrayHasKey("GET", $inspect->methods);
+        $this->assertArrayHasKey("HEAD", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogController", $inspect->methods["GET"]);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogController", $inspect->methods["HEAD"]);
+    }
+
+    public function testInspectWebBlogArchiveAny(): void
+    {
+        $inspect = $this->routes->inspect("/web/blog/archive/:year/:month");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogController", $inspect->methods["*"]);
+    }
+
+    public function testInspectWebBlogPostSlugAny(): void
+    {
+        $inspect = $this->routes->inspect("/web/blog/post/:slug");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogController", $inspect->methods["*"]);
+    }
+
+    public function testInspectWebBlogPostSlugEdit(): void
+    {
+        $inspect = $this->routes->inspect("/web/blog/post/:slug/edit");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(4, $inspect->methods);
+        foreach (["GET","HEAD","POST","PUT"] as $m) {
+            $this->assertArrayHasKey($m, $inspect->methods);
+            $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "BlogEditorController", $inspect->methods[$m]);
+        }
+    }
+
+    public function testInspectWebShopGroup(): void
+    {
+        $inspect = $this->routes->inspect("/web/shop");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertFalse($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertNull($inspect->methods);
+    }
+
+    public function testInspectWebShopProducts(): void
+    {
+        $inspect = $this->routes->inspect("/web/shop/products");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(2, $inspect->methods);
+        $this->assertArrayHasKey("GET", $inspect->methods);
+        $this->assertArrayHasKey("HEAD", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ProductsController", $inspect->methods["GET"]);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ProductsController", $inspect->methods["HEAD"]);
+    }
+
+    public function testInspectWebShopProductsSlugAny(): void
+    {
+        $inspect = $this->routes->inspect("/web/shop/products/:slug");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ProductsController", $inspect->methods["*"]);
+    }
+
+    public function testInspectWebShopCart(): void
+    {
+        $inspect = $this->routes->inspect("/web/shop/cart");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CartController", $inspect->methods["*"]);
+    }
+
+    public function testInspectWebShopCartItemsId(): void
+    {
+        $inspect = $this->routes->inspect("/web/shop/cart/items/:id");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(2, $inspect->methods);
+        foreach (["DELETE","POST"] as $m) {
+            $this->assertArrayHasKey($m, $inspect->methods);
+            $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CartController", $inspect->methods[$m]);
+        }
+    }
+
+    public function testInspectWebAccountGroup(): void
+    {
+        $inspect = $this->routes->inspect("/web/account");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertFalse($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertNull($inspect->methods);
+    }
+
+    public function testInspectWebAccountLoginAny(): void
+    {
+        $inspect = $this->routes->inspect("/web/account/login");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AccountController", $inspect->methods["*"]);
+    }
+
+    public function testInspectWebAccountProfileId(): void
+    {
+        $inspect = $this->routes->inspect("/web/account/profile/:id");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(2, $inspect->methods);
+        $this->assertArrayHasKey("GET", $inspect->methods);
+        $this->assertArrayHasKey("HEAD", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AccountController", $inspect->methods["GET"]);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AccountController", $inspect->methods["HEAD"]);
+    }
+
+    public function testInspectApiGroup(): void
+    {
+        $inspect = $this->routes->inspect("/api");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertFalse($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertNull($inspect->methods);
+    }
+
+    public function testInspectApiV1Group(): void
+    {
+        $inspect = $this->routes->inspect("/api/v1");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertFalse($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertNull($inspect->methods);
+    }
+
+    public function testInspectApiV1Users(): void
+    {
+        $inspect = $this->routes->inspect("/api/v1/users");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(3, $inspect->methods);
+        foreach (["GET","HEAD","POST"] as $m) {
+            $this->assertArrayHasKey($m, $inspect->methods);
+            $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "UsersController", $inspect->methods[$m]);
+        }
+    }
+
+    public function testInspectApiV1UsersId(): void
+    {
+        $inspect = $this->routes->inspect("/api/v1/users/:id");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(3, $inspect->methods);
+        foreach (["DELETE","GET","PATCH"] as $m) {
+            $this->assertArrayHasKey($m, $inspect->methods);
+            $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "UsersController", $inspect->methods[$m]);
+        }
+    }
+
+    public function testInspectApiV1Articles(): void
+    {
+        $inspect = $this->routes->inspect("/api/v1/articles");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(3, $inspect->methods);
+        foreach (["GET","HEAD","POST"] as $m) {
+            $this->assertArrayHasKey($m, $inspect->methods);
+            $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ArticlesController", $inspect->methods[$m]);
+        }
+    }
+
+    public function testInspectApiV1ArticlesSlug(): void
+    {
+        $inspect = $this->routes->inspect("/api/v1/articles/:slug");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(2, $inspect->methods);
+        $this->assertArrayHasKey("GET", $inspect->methods);
+        $this->assertArrayHasKey("HEAD", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ArticlesController", $inspect->methods["GET"]);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ArticlesController", $inspect->methods["HEAD"]);
+    }
+
+    public function testInspectApiV1ArticlesSlugComments(): void
+    {
+        $inspect = $this->routes->inspect("/api/v1/articles/:slug/comments");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(3, $inspect->methods);
+        foreach (["GET","HEAD","POST"] as $m) {
+            $this->assertArrayHasKey($m, $inspect->methods);
+            $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CommentsController", $inspect->methods[$m]);
+        }
+    }
+
+    public function testInspectApiV1ArticlesSlugCommentsCommentId(): void
+    {
+        $inspect = $this->routes->inspect("/api/v1/articles/:slug/comments/:commentId");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(2, $inspect->methods);
+        $this->assertArrayHasKey("GET", $inspect->methods);
+        $this->assertArrayHasKey("HEAD", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CommentsController", $inspect->methods["GET"]);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "CommentsController", $inspect->methods["HEAD"]);
+    }
+
+    public function testInspectApiV1SearchAny(): void
+    {
+        $inspect = $this->routes->inspect("/api/v1/search/:anyThing");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "SearchController", $inspect->methods["*"]);
+    }
+
+    public function testInspectApiV2Group(): void
+    {
+        $inspect = $this->routes->inspect("/api/v2");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertFalse($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertNull($inspect->methods);
+    }
+
+    public function testInspectApiV2ReportsGroup(): void
+    {
+        $inspect = $this->routes->inspect("/api/v2/reports");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertFalse($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertNull($inspect->methods);
+    }
+
+    public function testInspectApiV2ReportsSummary(): void
+    {
+        $inspect = $this->routes->inspect("/api/v2/reports/summary");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(2, $inspect->methods);
+        $this->assertArrayHasKey("GET", $inspect->methods);
+        $this->assertArrayHasKey("HEAD", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ReportsController", $inspect->methods["GET"]);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ReportsController", $inspect->methods["HEAD"]);
+    }
+
+    public function testInspectApiV2ReportsYearMonthAny(): void
+    {
+        $inspect = $this->routes->inspect("/api/v2/reports/:year/:month");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "ReportsController", $inspect->methods["*"]);
+    }
+
+    public function testInspectAdmin(): void
+    {
+        $inspect = $this->routes->inspect("/admin");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AdminDashboardController", $inspect->methods["*"]);
+    }
+
+    public function testInspectAdminUsers(): void
+    {
+        $inspect = $this->routes->inspect("/admin/users");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AdminUsersController", $inspect->methods["*"]);
+    }
+
+    public function testInspectAdminUsersIdAny(): void
+    {
+        $inspect = $this->routes->inspect("/admin/users/:id");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AdminUsersController", $inspect->methods["*"]);
+    }
+
+    public function testInspectAdminUsersIdSettings(): void
+    {
+        $inspect = $this->routes->inspect("/admin/users/:id/settings");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertTrue($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(4, $inspect->methods);
+        foreach (["GET","HEAD","PATCH","POST"] as $m) {
+            $this->assertArrayHasKey($m, $inspect->methods);
+            $this->assertEquals(RoutingFixtures::FAKE_NAMESPACE . "AdminUserSettingsController", $inspect->methods[$m]);
+        }
     }
 }
 
