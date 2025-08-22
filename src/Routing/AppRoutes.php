@@ -9,6 +9,11 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Routing;
 
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
+use Charcoal\Http\Router\Request\ServerRequest;
+use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
+use Charcoal\Http\Router\Routing\Group\RouteGroupBuilder;
+use Charcoal\Http\Router\Routing\Registry\RouteInspect;
+use Charcoal\Http\Router\Routing\Registry\RoutingIndex;
 
 /**
  * Represents a collection of application routes grouped together.
@@ -16,6 +21,13 @@ use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
  */
 final readonly class AppRoutes extends AbstractRouteGroup
 {
+    /** @var RoutingIndex */
+    private RoutingIndex $index;
+    /** @var array<string, int> */
+    private array $indexKeys;
+    /** @var array<RouteInspect> */
+    private array $inspects;
+
     /**
      * @param \Closure(RouteGroupBuilder $group): void $declaration
      * @throws RoutingBuilderException
@@ -25,9 +37,52 @@ final readonly class AppRoutes extends AbstractRouteGroup
         parent::__construct(null, "/", $declaration);
     }
 
+    /**
+     * @param RouteGroupBuilder $group
+     * @return void
+     * @throws RoutingBuilderException
+     */
     protected function build(RouteGroupBuilder $group): void
     {
         parent::build($group);
-        // Todo: build index
+        $this->index = new RoutingIndex($this);
+        $inspections = [];
+        $c = -1;
+        foreach ($this->index->routes as $path => $node) {
+            $c++;
+            $inspections[] = new RouteInspect($c, $path, $node);
+        }
+
+        $this->indexKeys = array_combine(array_keys($this->index->routes),
+            range(0, count($this->index->routes) - 1));
+        $this->inspects = $inspections;
+    }
+
+    /**
+     * @param int|string $pathIndex
+     * @return RouteInspect|null
+     * @api
+     */
+    public function inspect(int|string $pathIndex): ?RouteInspect
+    {
+        if (is_int($pathIndex)) {
+            return $pathIndex > -1 && $pathIndex < count($this->inspects) ?
+                $this->inspects[$pathIndex] : null;
+        }
+
+        return $this->inspects[$this->indexKeys[$pathIndex] ?? null] ?? null;
+    }
+
+    /**
+     * @return RoutingIndex
+     */
+    public function manifest(): RoutingIndex
+    {
+        return $this->index;
+    }
+
+    public function match(ServerRequest $request)
+    {
+
     }
 }

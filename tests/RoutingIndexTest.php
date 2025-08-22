@@ -17,9 +17,9 @@ namespace Charcoal\Http\Tests\Router;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Router\Router;
 use Charcoal\Http\Router\Routing\AppRoutes;
+use Charcoal\Http\Router\Routing\Group\RouteGroup;
+use Charcoal\Http\Router\Routing\Registry\RouteInspect;
 use Charcoal\Http\Router\Routing\Route;
-use Charcoal\Http\Router\Routing\RouteGroup;
-use Charcoal\Http\Router\Routing\RoutingIndex;
 use Charcoal\Http\Tests\Router\Fixture\RoutingFixtures;
 
 /**
@@ -27,15 +27,24 @@ use Charcoal\Http\Tests\Router\Fixture\RoutingFixtures;
  */
 class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 {
+    private readonly AppRoutes $routes;
+
     /**
      * @return void
      * @throws RoutingBuilderException
      */
-    public function testRoutesIndex(): void
+    public function setUp(): void
     {
         Router::$checkControllerExists = false;
-        $routes = RoutingFixtures::webBlogShipApi2AccountAdmin();
-        $routes = new RoutingIndex($routes);
+        $this->routes = RoutingFixtures::webBlogShipApi2AccountAdmin();
+    }
+
+    /**
+     * @return void
+     */
+    public function testRoutesIndex(): void
+    {
+        $routes = $this->routes->manifest();
 
         // First, root AppRoutes group
         $this->assertArrayHasKey("/", $routes->routes);
@@ -233,6 +242,33 @@ class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(RouteGroup::class, $routes->routes["/admin/users/:id/settings"][0]);
         $this->assertInstanceOf(Route::class, $routes->routes["/admin/users/:id/settings"][1]);
         $this->assertEquals("GET,HEAD,PATCH,POST", implode(",", array_keys($routes->routes["/admin/users/:id/settings"][1]->methods)));
+    }
+
+    public function testInspectMethod(): void
+    {
+        $inspect = $this->routes->inspect("/");
+        $this->assertTrue($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(2, $inspect->methods);
+        $this->assertEquals($inspect->methods["GET"], RoutingFixtures::FAKE_NAMESPACE . "HomeController");
+    }
+
+    public function testInspectAssetsAny(): void
+    {
+        $inspect = $this->routes->inspect("/assets/:anyThing");
+        $this->assertInstanceOf(RouteInspect::class, $inspect);
+        $this->assertFalse($inspect->isGroup);
+        $this->assertTrue($inspect->isController);
+        $this->assertNull($inspect->groupNamespace);
+        $this->assertIsArray($inspect->methods);
+        $this->assertCount(1, $inspect->methods);
+        $this->assertArrayHasKey("*", $inspect->methods);
+        $this->assertEquals(
+            RoutingFixtures::FAKE_NAMESPACE . "AssetsController",
+            $inspect->methods["*"]
+        );
     }
 }
 

@@ -6,15 +6,16 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing;
+namespace Charcoal\Http\Router\Routing\Group;
 
 use Charcoal\Http\Router\Contracts\Middleware\GroupMiddlewareInterface;
 use Charcoal\Http\Router\Controller\AbstractController;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
+use Charcoal\Http\Router\Routing\RouteBuilder;
 
 /**
- * Class GroupPolicyBuilder
- * @package Charcoal\Http\Router\Routing
+ * Class RouteGroupBuilder
+ * @package Charcoal\Http\Router\Routing\Group
  */
 final class RouteGroupBuilder
 {

@@ -6,7 +6,11 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing;
+namespace Charcoal\Http\Router\Routing\Registry;
+
+use Charcoal\Http\Router\Routing\AppRoutes;
+use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
+use Charcoal\Http\Router\Routing\Route;
 
 /**
  * Class CascadingRouteMap

@@ -11,7 +11,7 @@ namespace Charcoal\Http\Tests\Router\Fixture;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Router\Routing\AppRoutes;
-use Charcoal\Http\Router\Routing\RouteGroupBuilder;
+use Charcoal\Http\Router\Routing\Group\RouteGroupBuilder;
 
 /**
  * Class RoutingFixtures
@@ -19,6 +19,8 @@ use Charcoal\Http\Router\Routing\RouteGroupBuilder;
  */
 final class RoutingFixtures
 {
+    public const string FAKE_NAMESPACE = "Charcoal\Http\Tests\Router\Fixture\\";
+
     /**
      * @throws RoutingBuilderException
      * @noinspection PhpUndefinedClassInspection

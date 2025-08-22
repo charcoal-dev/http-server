@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing;
+namespace Charcoal\Http\Router\Routing\Group;
 
 /**
  * Represents a group of routes with an optional namespace and nested children.

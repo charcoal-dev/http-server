@@ -6,9 +6,11 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing;
+namespace Charcoal\Http\Router\Routing\Group;
 
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
+use Charcoal\Http\Router\Routing\Route;
+use Charcoal\Http\Router\Routing\RouteBuilder;
 
 /**
  * Abstract class that represents a group of routes.
