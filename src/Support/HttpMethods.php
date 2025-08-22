@@ -14,7 +14,7 @@ use Charcoal\Http\Commons\Enums\HttpMethod;
 /**
  * Represents a collection of HTTP methods as an enumeration vector.
  */
-class HttpMethods extends AbstractEnumVector
+final class HttpMethods extends AbstractEnumVector
 {
     public function __construct(HttpMethod ...$methods)
     {
