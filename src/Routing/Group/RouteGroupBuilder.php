@@ -19,22 +19,11 @@ use Charcoal\Http\Router\Routing\RouteBuilder;
  */
 final class RouteGroupBuilder
 {
-    protected ?string $namespace = null;
     protected array $children = [];
     protected array $pipelines = [];
 
     public function __construct(protected readonly AbstractRouteGroup $group)
     {
-    }
-
-    /**
-     * @param string $namespace
-     * @return $this
-     */
-    public function namespace(string $namespace): self
-    {
-        $this->namespace = $namespace;
-        return $this;
     }
 
     /**
@@ -70,11 +59,11 @@ final class RouteGroupBuilder
     }
 
     /**
-     * @return array{0: ?string, 1: list<RouteBuilder|RouteGroup>, 2: list<string|GroupMiddlewareInterface>}
+     * @return array{1: list<RouteBuilder|RouteGroup>, 2: list<string|GroupMiddlewareInterface>}
      * @internal
      */
     public function attributes(): array
     {
-        return [$this->namespace, $this->children, $this->pipelines];
+        return [$this->children, $this->pipelines];
     }
 }

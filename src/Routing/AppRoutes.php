@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing;
 
+use Charcoal\Http\Router\Enums\Routing;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
-use Charcoal\Http\Router\Request\ServerRequest;
 use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
 use Charcoal\Http\Router\Routing\Group\RouteGroupBuilder;
 use Charcoal\Http\Router\Routing\Registry\RouteInspect;
@@ -81,8 +81,8 @@ final readonly class AppRoutes extends AbstractRouteGroup
         return $this->index;
     }
 
-    public function match(ServerRequest $request)
+    public function match(string $path, Routing $mode = Routing::Precise): ?RouteInspect
     {
-
+        $canonical = $path ?? "/";
     }
 }

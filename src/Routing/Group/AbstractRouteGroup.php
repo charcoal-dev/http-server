@@ -20,7 +20,6 @@ use Charcoal\Http\Router\Routing\RouteBuilder;
 abstract readonly class AbstractRouteGroup
 {
     public string $path;
-    public ?string $namespace;
     public array $children;
 
     /**
@@ -56,20 +55,10 @@ abstract readonly class AbstractRouteGroup
         $children = [];
         $groupPolicies = $group->attributes();
 
-        // Namespace?
-        $namespace = $groupPolicies[0];
-        if (!is_null($namespace)) {
-            if (!preg_match('/^[A-Za-z0-9_]+(\\\\[A-Za-z0-9_]+)*(\\\\\*)$/', $namespace)) {
-                throw new \InvalidArgumentException("Namespace contains an illegal character");
-            }
-        }
-
-        $this->namespace = $namespace;
-
         // Children
         $tracker = [];
         $num = 0;
-        foreach ($groupPolicies[1] as $child) {
+        foreach ($groupPolicies[0] as $child) {
             $num++;
             try {
                 if ($child instanceof RouteBuilder) {
