@@ -10,6 +10,7 @@ namespace Charcoal\Http\Router\Routing;
 
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Http\Router\Controller\AbstractController;
+use Charcoal\Http\Router\Router;
 use Charcoal\Http\Router\Support\HttpMethods;
 
 /**
@@ -27,16 +28,17 @@ final readonly class Route
     public function __construct(
         string       $path,
         string       $classname,
-        ?HttpMethods $methods,
-        bool         $checkClass = true
+        ?HttpMethods $methods
     )
     {
-        $path = "/" . trim(strtolower($path), "/");
-        if (!preg_match('/^(\/[A-Za-z0-9_\-.]*[A-Za-z0-9]|\/:[A-Za-z0-9]+)+$/', $path)) {
-            throw new \InvalidArgumentException("Route prefix is invalid");
-        }
+        $path = trim($path, "/");
+        $this->path = match (true) {
+            $path === "" => "/",
+            (bool)preg_match('/^(?:[A-Za-z0-9_.-]*[A-Za-z0-9]|:[A-Za-z0-9]+)(?:\/(?:[A-Za-z0-9_.-]*[A-Za-z0-9]|:[A-Za-z0-9]+))*$/', $path) => $path,
+            default => throw new \InvalidArgumentException("Route prefix is invalid: " . $path),
+        };
 
-        if ($checkClass) {
+        if (Router::$checkControllerExists) {
             if (!class_exists($classname) ||
                 !is_subclass_of($classname, AbstractController::class, true)) {
                 throw new \InvalidArgumentException("Controller class does not exist or is not a subclass of " .
@@ -48,8 +50,18 @@ final readonly class Route
             }
         }
 
-        $this->path = $path;
+        // Canonicalize methods
+        $methods = array_unique(array_map(fn($m) => $m->name, $methods?->getArray() ?? []));
+        sort($methods, SORT_STRING);
+        $this->methods = array_fill_keys($methods, true);
         $this->classname = $classname;
-        $this->methods = array_fill_keys(array_map(fn($m) => $m->name, $methods?->getArray() ?? []), true);
+    }
+
+    /**
+     * @return array
+     */
+    public function __debugInfo(): array
+    {
+        return [$this->path, $this->classname, $this->methods];
     }
 }

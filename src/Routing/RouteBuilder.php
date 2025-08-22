@@ -24,8 +24,7 @@ final class RouteBuilder
 
     public function __construct(
         public readonly string $path,
-        public readonly string $classname,
-        public readonly bool   $checkClass = true,
+        public readonly string $classname
     )
     {
     }
@@ -50,9 +49,10 @@ final class RouteBuilder
 
     /**
      * @return array{0: ?HttpMethods, 1: list<string|RouteMiddlewareInterface>}
+     * @internal
      */
     public function attributes(): array
     {
-        return [$this->methods, $this->pipelines ?? []];
+        return [$this->methods, $this->pipelines];
     }
 }
