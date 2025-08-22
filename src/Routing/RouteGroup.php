@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing;
 
-
 /**
  * Represents a group of routes with an optional namespace and nested children.
  * It provides a mechanism to define and organize related routes hierarchically.
