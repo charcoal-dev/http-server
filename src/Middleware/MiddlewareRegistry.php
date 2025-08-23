@@ -15,6 +15,7 @@ use Charcoal\Http\Router\Contracts\Middleware\MiddlewareTrustPolicyInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\RouteMiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
+use Charcoal\Http\Router\Exceptions\Middleware\MiddlewareResolverException;
 use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
 
 /**
@@ -23,14 +24,8 @@ use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
  */
 final class MiddlewareRegistry
 {
-    /** @var array<class-string,MiddlewareInterface */
+    /** @var array<class-string<non-empty-string>,MiddlewareInterface */
     private array $resolved = [
-        Scope::Kernel->name => [],
-        Scope::Group->name => [],
-        Scope::Route->name => [],
-    ];
-
-    private array $factories = [
         Scope::Kernel->name => [],
         Scope::Group->name => [],
         Scope::Route->name => [],
@@ -45,29 +40,40 @@ final class MiddlewareRegistry
     {
     }
 
-    public function lock(): void
+    /**
+     * @return void
+     * @internal
+     */
+    public function setLock(): void
     {
         $this->isLocked = true;
     }
 
-
+    /**
+     * @param Scope $scope
+     * @param class-string<non-empty-string> $contract
+     * @param array $context
+     * @internal
+     */
     public function resolve(
-        string $binds,
         Scope  $scope,
+        string $contract,
         array  $context = []
     ): MiddlewareInterface
     {
-        $resolved = $this->resolved[$scope->name][$binds] ??
-            $this->resolver->resolve($binds, $context) ?? null;
+        $resolved = $this->resolved[$scope->name][$contract] ??
+            $this->resolver->resolve($contract, $context) ?? null;
 
-
+        throw new MiddlewareResolverException($scope, $contract, $context);
     }
 
     /**
      * Registers instanced middleware within the specified scope if it meets all validation requirements.
+     * @param class-string<non-empty-string> $contract
+     * @api
      */
     public function registerInstanced(
-        string              $binds,
+        string              $contract,
         MiddlewareInterface $middleware,
         Scope               $scope
     ): void
@@ -88,21 +94,21 @@ final class MiddlewareRegistry
             throw new \OutOfBoundsException("Middleware does not meet scope requirement: " . $contractScope->name);
         }
 
-        if (!interface_exists($binds) || !$middleware instanceof $binds) {
-            throw new \BadMethodCallException("Middleware does not implement the contract: " . $binds);
+        if (!interface_exists($contract) || !$middleware instanceof $contract) {
+            throw new \BadMethodCallException("Middleware does not implement the contract: " . $contract);
         }
 
-        if (!in_array($binds, $scope->getRegisteredPipelines())) {
+        if (!in_array($contract, $scope->getRegisteredPipelines())) {
             if ($this->trustPolicy?->isTrusted($middleware, $scope) !== true) {
                 throw new \DomainException("Middleware is not registered nor whitelisted: " . $middleware::class);
             }
         }
 
-        if (isset($this->resolved[$scope->name][$binds]) ||
-            isset($this->factories[$scope->name][$binds])) {
-            throw new \DomainException("Middleware for the contract is already registered: " . $binds);
+        if (isset($this->resolved[$scope->name][$contract]) ||
+            isset($this->factories[$scope->name][$contract])) {
+            throw new \DomainException("Middleware for the contract is already registered: " . $contract);
         }
 
-        $this->resolved[$scope->name][$binds] = $middleware;
+        $this->resolved[$scope->name][$contract] = $middleware;
     }
 }
