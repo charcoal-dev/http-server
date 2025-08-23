@@ -32,10 +32,6 @@ final readonly class ControllerValidated
         bool          $isTesting = false
     )
     {
-        if (!$entryPoints) {
-            throw new \InvalidArgumentException("No entrypoint provided for controller: " . $this->classname);
-        }
-
         if ($isTesting) {
             $this->entryPoints = $entryPoints;
             $this->defaultEntrypoint = null;
