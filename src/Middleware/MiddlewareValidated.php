@@ -23,7 +23,7 @@ use Charcoal\Http\Router\Enums\Middleware\Scope;
  * to specific scopes and interface requirements during instantiation.
  * @property string<class-string<MiddlewareInterface>> $classname
  */
-final readonly class MiddlewareConstructor
+final readonly class MiddlewareValidated
 {
     /** @var array<class-string<MiddlewareInterface>> */
     public array $binds;
