@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Middleware\Bag;
 
 use Charcoal\Base\Traits\NoDumpTrait;
-use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
+use Charcoal\Http\Router\Middleware\MiddlewareConstructor;
 
 /**
  * Represents a sealed container for two middleware bags: an "own" bag and an "inherited" bag.
@@ -19,9 +19,9 @@ final readonly class SealedBag
 {
     use NoDumpTrait;
 
-    /** @var array<MiddlewareInterface> */
+    /** @var array<MiddlewareConstructor> */
     public array $own;
-    /** @var array<MiddlewareInterface> */
+    /** @var array<MiddlewareConstructor> */
     public array $inherited;
 
     public function __construct(
