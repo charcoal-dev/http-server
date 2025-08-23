@@ -16,8 +16,8 @@ use Charcoal\Http\Commons\Data\UrlInfo;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Header\Headers;
-use Charcoal\Http\Router\Controller\AbstractController;
-use Charcoal\Http\Router\Request\Request;
+use Charcoal\Http\Router\Controllers\AbstractControllerOld;
+use Charcoal\Http\Router\Request\ServerRequest;
 
 /**
  * Class HttpServer
@@ -27,7 +27,7 @@ readonly class HttpServer
 {
     /**
      * @param Router $router
-     * @param \Closure(AbstractController): void $closure
+     * @param \Closure(AbstractControllerOld): void $closure
      * @return void
      * @throws Exceptions\RoutingException
      * @throws \Charcoal\Base\Exceptions\WrappedException
@@ -145,7 +145,7 @@ readonly class HttpServer
         );
 
         // Get Controller
-        $controller = $router->try(new Request($method, $url, $headers, $payload, $body));
+        $controller = $router->try(new ServerRequest($method, $url, $headers, $payload, $body));
 
         // Callback Close
         call_user_func($closure, $controller);

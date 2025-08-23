@@ -9,12 +9,13 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Contracts\Middleware\Global;
 
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
+use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInterface;
 
 /**
  * An interface for resolving client IP addresses within the context
  * of a middleware-based router system.
  */
-interface ClientIpResolverInterface extends GlobalMiddlewareInterface
+interface ClientIpResolverInterface extends GlobalMiddlewareInterface, MiddlewareConstructableInterface
 {
     public function __invoke(HeadersImmutable $headers): string|false;
 }

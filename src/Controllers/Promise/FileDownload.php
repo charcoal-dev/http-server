@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Controller\Promise;
+namespace Charcoal\Http\Router\Controllers\Promise;
 
 use Charcoal\Base\Traits\ControlledSerializableTrait;
 use Charcoal\Http\Commons\Header\WritableHeaders;

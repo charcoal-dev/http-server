@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Response\Headers;
+namespace Charcoal\Http\Router\Response;
 
 use Charcoal\Http\Router\Enums\CacheStoreDirective;
 

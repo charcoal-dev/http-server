@@ -10,7 +10,6 @@ namespace Charcoal\Http\Router\Middleware\Global;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Attributes\BindsTo;
-use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Global\UrlEncodingEnforcerInterface;
 
 /**
@@ -19,7 +18,7 @@ use Charcoal\Http\Router\Contracts\Middleware\Global\UrlEncodingEnforcerInterfac
  * an exception is thrown to indicate a violation.
  */
 #[BindsTo(UrlEncodingEnforcerInterface::class)]
-final class UrlEncodingEnforcer implements UrlEncodingEnforcerInterface, MiddlewareConstructableInterface
+final class UrlEncodingEnforcer implements UrlEncodingEnforcerInterface
 {
     /**
      * Constructor as required by MiddlewareConstructableInterface

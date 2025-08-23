@@ -15,7 +15,7 @@ use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
 use Charcoal\Http\Router\Contracts\Auth\AuthenticatorInterface;
 use Charcoal\Http\Router\Contracts\Auth\AuthRealmEnum;
 use Charcoal\Http\Router\Exceptions\AuthenticationException;
-use Charcoal\Http\Router\Request\Request;
+use Charcoal\Http\Router\Request\ServerRequest;
 
 /**
  * Class AbstractBasicAuth
@@ -38,11 +38,11 @@ abstract class AbstractBasicAuth extends AbstractAuthorization implements Authen
     abstract protected function tryUserPassword(string $username, string $password): bool;
 
     /**
-     * @param Request $request
+     * @param ServerRequest $request
      * @return bool
      * @throws AuthenticationException
      */
-    public function authenticate(Request $request): bool
+    public function authenticate(ServerRequest $request): bool
     {
         $scheme = $this->scheme->value;
         if (!is_string($scheme) || !$scheme) {

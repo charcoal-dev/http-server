@@ -11,7 +11,6 @@ namespace Charcoal\Http\Router\Middleware\Global;
 use Charcoal\Buffers\Frames\Bytes16;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Router\Attributes\BindsTo;
-use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Global\RequestIdResolverInterface;
 
 /**
@@ -21,7 +20,7 @@ use Charcoal\Http\Router\Contracts\Middleware\Global\RequestIdResolverInterface;
  * a new random ID is generated and returned.
  */
 #[BindsTo(RequestIdResolverInterface::class)]
-final class RequestIdResolver implements RequestIdResolverInterface, MiddlewareConstructableInterface
+final class RequestIdResolver implements RequestIdResolverInterface
 {
     /**
      * Constructor as required by MiddlewareConstructableInterface

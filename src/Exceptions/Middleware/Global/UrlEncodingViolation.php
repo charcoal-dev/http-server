@@ -13,6 +13,10 @@ use Charcoal\Http\Router\Exceptions\Middleware\GlobalMiddlewareException;
 /**
  * Represents an exception thrown when there is a violation in URL encoding.
  */
-class UrlEncodingViolation extends GlobalMiddlewareException
+final class UrlEncodingViolation extends GlobalMiddlewareException
 {
+    public function __construct(string $message)
+    {
+        parent::__construct($message, 400);
+    }
 }

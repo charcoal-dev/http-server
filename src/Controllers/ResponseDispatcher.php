@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Controller;
+namespace Charcoal\Http\Router\Controllers;
 
 use Charcoal\Http\Commons\Header\WritableHeaders;
 use Charcoal\Http\Router\Contracts\Response\ResponsePromisedOnDispatch;
