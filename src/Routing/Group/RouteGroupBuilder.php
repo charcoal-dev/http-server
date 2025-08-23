@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing\Group;
 
-use Charcoal\Http\Router\Contracts\Middleware\GroupMiddlewareInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Group\GroupMiddlewareInterface;
 use Charcoal\Http\Router\Controller\AbstractController;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Router\Routing\RouteBuilder;

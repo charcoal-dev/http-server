@@ -10,6 +10,7 @@ namespace Charcoal\Http\Router\Routing;
 
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Http\Router\Controller\AbstractController;
+use Charcoal\Http\Router\Middleware\MiddlewareBag;
 use Charcoal\Http\Router\Router;
 use Charcoal\Http\Router\Support\HttpMethods;
 
@@ -24,11 +25,14 @@ final readonly class Route
     public string $classname;
     /** @var array<non-empty-string,true> */
     public array $methods;
+    /** @var ?array<string> */
+    public ?array $middleware;
 
     public function __construct(
-        string       $path,
-        string       $classname,
-        ?HttpMethods $methods
+        string        $path,
+        string        $classname,
+        ?HttpMethods  $methods,
+        MiddlewareBag $middleware,
     )
     {
         $path = trim($path, "/");
@@ -55,6 +59,7 @@ final readonly class Route
         sort($methods, SORT_STRING);
         $this->methods = array_fill_keys($methods, true);
         $this->classname = $classname;
+        $this->middleware = $middleware->all() ?: null;
     }
 
     /**

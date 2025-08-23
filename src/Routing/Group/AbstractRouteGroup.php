@@ -63,7 +63,7 @@ abstract readonly class AbstractRouteGroup
             try {
                 if ($child instanceof RouteBuilder) {
                     $routePolicies = $child->attributes();
-                    $route = new Route($child->path, $child->classname, $routePolicies[0]);
+                    $route = new Route($child->path, $child->classname, $routePolicies[0], $routePolicies[1]);
                     $this->appendChild($children, $tracker, $route);
                 }
 

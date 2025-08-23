@@ -9,7 +9,8 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Routing;
 
 use Charcoal\Http\Commons\Enums\HttpMethod;
-use Charcoal\Http\Router\Contracts\Middleware\RouteMiddlewareInterface;
+use Charcoal\Http\Router\Enums\Middleware\Scope;
+use Charcoal\Http\Router\Middleware\MiddlewareBag;
 use Charcoal\Http\Router\Support\HttpMethods;
 
 /**
@@ -19,14 +20,14 @@ final class RouteBuilder
 {
     /** @var HttpMethods|null */
     protected ?HttpMethods $methods = null;
-    /** @var list<string|RouteMiddlewareInterface> */
-    protected array $pipelines = [];
+    private MiddlewareBag $middleware;
 
     public function __construct(
         public readonly string $path,
         public readonly string $classname
     )
     {
+        $this->middleware = new MiddlewareBag(Scope::Route);
     }
 
     /**
@@ -41,18 +42,18 @@ final class RouteBuilder
     /**
      * @api
      */
-    public function pipelines(string|RouteMiddlewareInterface ...$pipelines): self
+    public function pipelines(string ...$pipelines): self
     {
-        $this->pipelines[] = $pipelines;
+        $this->middleware->set(...$pipelines);
         return $this;
     }
 
     /**
-     * @return array{0: ?HttpMethods, 1: list<string|RouteMiddlewareInterface>}
+     * @return array{0: ?HttpMethods, 1: MiddlewareBag}
      * @internal
      */
     public function attributes(): array
     {
-        return [$this->methods, $this->pipelines];
+        return [$this->methods, $this->middleware];
     }
 }
