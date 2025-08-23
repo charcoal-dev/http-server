@@ -31,7 +31,7 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
      */
     public function setUp(): void
     {
-        Router::$checkControllerExists = false;
+        Router::$validateControllerClasses = false;
         $this->routes = RoutingFixtures::webBlogShipApi2AccountAdmin();
         $this->routesDto = $this->routes->snapshot();
     }
