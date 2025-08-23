@@ -12,13 +12,13 @@ use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Vectors\AbstractVector;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
-use Charcoal\Http\Router\Middleware\MiddlewareValidated;
+use Charcoal\Http\Router\Middleware\MiddlewareConstructor;
 
 /**
  * A storage bag for managing middleware components.
  * This class provides a structure to hold and manage an array of middleware
  * used in an application. Middleware usually refers to the components that process
- * @template T of MiddlewareValidated
+ * @template T of MiddlewareConstructor
  */
 final class Bag extends AbstractVector
 {
@@ -54,18 +54,11 @@ final class Bag extends AbstractVector
     /**
      * @param bool $testMode
      * @return void
+     * @internal
      */
     public static function setTestMode(bool $testMode): void
     {
         self::$testMode = $testMode;
-    }
-
-    /**
-     * @return bool
-     */
-    public static function getTestMode(): bool
-    {
-        return self::$testMode;
     }
 
     /**
@@ -102,7 +95,7 @@ final class Bag extends AbstractVector
         }
 
         foreach ($middleware as $m) {
-            $this->values[] = new MiddlewareValidated($this->scope, $m, isTesting: self::$testMode);
+            $this->values[] = new MiddlewareConstructor($this->scope, $m, isTesting: self::$testMode);
         }
 
         return $this;
@@ -120,7 +113,7 @@ final class Bag extends AbstractVector
             throw new \BadMethodCallException("Middleware bag is locked and cannot be modified");
         }
 
-        $this->values[] = new MiddlewareValidated(
+        $this->values[] = new MiddlewareConstructor(
             $this->scope,
             $classname,
             $arguments,
