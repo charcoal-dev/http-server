@@ -13,6 +13,7 @@ use Charcoal\Base\Vectors\AbstractVector;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 use Charcoal\Http\Router\Middleware\MiddlewareConstructor;
+use Charcoal\Http\Router\Router;
 
 /**
  * A storage bag for managing middleware components.
@@ -24,7 +25,6 @@ final class Bag extends AbstractVector
 {
     use NoDumpTrait;
 
-    private static bool $testMode = false;
     private bool $locked = false;
 
     /**
@@ -33,7 +33,7 @@ final class Bag extends AbstractVector
      */
     public static function create(Scope $scope): self
     {
-        return new self($scope, [], self::$testMode);
+        return new self($scope, [], Router::$validateMiddlewareClasses);
     }
 
     /**
@@ -48,17 +48,7 @@ final class Bag extends AbstractVector
             $collection = [...$collection, ...$bag->getArray()];
         }
 
-        return new self($scope, $collection, self::$testMode);
-    }
-
-    /**
-     * @param bool $testMode
-     * @return void
-     * @internal
-     */
-    public static function setTestMode(bool $testMode): void
-    {
-        self::$testMode = $testMode;
+        return new self($scope, $collection, Router::$validateMiddlewareClasses);
     }
 
     /**
@@ -95,7 +85,7 @@ final class Bag extends AbstractVector
         }
 
         foreach ($middleware as $m) {
-            $this->values[] = new MiddlewareConstructor($this->scope, $m, isTesting: self::$testMode);
+            $this->values[] = new MiddlewareConstructor($this->scope, $m, isTesting: Router::$validateMiddlewareClasses);
         }
 
         return $this;
@@ -117,7 +107,7 @@ final class Bag extends AbstractVector
             $this->scope,
             $classname,
             $arguments,
-            isTesting: self::$testMode
+            isTesting: Router::$validateMiddlewareClasses
         );
 
         return $this;
