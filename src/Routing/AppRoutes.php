@@ -10,9 +10,8 @@ namespace Charcoal\Http\Router\Routing;
 
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
-use Charcoal\Http\Router\Routing\Group\RouteGroup;
 use Charcoal\Http\Router\Routing\Group\RouteGroupBuilder;
-use Charcoal\Http\Router\Routing\Registry\RoutingIndex;
+use Charcoal\Http\Router\Routing\Registry\ConsolidatedRoutes;
 use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
 
 /**
@@ -21,8 +20,7 @@ use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
  */
 final readonly class AppRoutes extends AbstractRouteGroup
 {
-    /** @var RoutingIndex */
-    private RoutingIndex $registry;
+    private ConsolidatedRoutes $compiled;
 
     /**
      * @param \Closure(RouteGroupBuilder $group): void $declaration
@@ -41,15 +39,15 @@ final readonly class AppRoutes extends AbstractRouteGroup
     protected function build(RouteGroupBuilder $group): void
     {
         parent::build($group);
-        $this->registry = new RoutingIndex($this);
+        $this->compiled = new ConsolidatedRoutes($this);
     }
 
     /**
-     * @return RoutingIndex
+     * @return ConsolidatedRoutes
      */
-    public function manifest(): RoutingIndex
+    public function inspect(): ConsolidatedRoutes
     {
-        return $this->registry;
+        return $this->compiled;
     }
 
     /**
@@ -57,36 +55,6 @@ final readonly class AppRoutes extends AbstractRouteGroup
      */
     public function snapshot(): AppRoutingSnapshot
     {
-        return new AppRoutingSnapshot($this->registry);
-    }
-
-    /**
-     * Generates a unique identifier for a route or route group based on its path and additional chain context.
-     */
-    public function generateUniqueId(Route|AbstractRouteGroup $child, array $chain): string
-    {
-        $complete = match (true) {
-            $child->path === "/" => "/",
-            default => implode("/", $chain) . "/" . $child->path,
-        };
-
-        return $this->pathUniqueIdGenerator($complete,
-            $child instanceof RouteGroup ? "group" : "route",
-            $child instanceof Route && $child->methods ? array_keys($child->methods) : null
-        );
-    }
-
-    /**
-     * Generates a unique identifier based on the provided path, prefix, and HTTP methods.
-     */
-    private function pathUniqueIdGenerator(string $path, string $prefix, ?array $methods): string
-    {
-        if ($methods) {
-            sort($methods, SORT_STRING);
-            $methods = "@" . implode(",", $methods);
-        }
-
-        $id = sprintf("%s[%s]%s", $prefix, $path, $methods ?? "");
-        return strtolower(preg_replace("/:[A-Za-z0-9_]+/", "{token}", $id));
+        return $this->compiled->snapshot();
     }
 }

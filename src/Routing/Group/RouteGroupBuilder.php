@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing\Group;
 
-use Charcoal\Http\Router\Controller\AbstractController;
+use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Router\Routing\RouteBuilder;
 
@@ -37,7 +37,7 @@ final class RouteGroupBuilder
 
     /**
      * @param string $path
-     * @param class-string<AbstractController> $classname
+     * @param class-string<ControllerInterface> $classname
      * @return RouteBuilder
      */
     public function route(string $path, string $classname): RouteBuilder
