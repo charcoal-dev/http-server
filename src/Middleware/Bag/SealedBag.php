@@ -14,19 +14,15 @@ use Charcoal\Http\Router\Middleware\MiddlewareConstructor;
 /**
  * Represents a sealed container for two middleware bags: an "own" bag and an "inherited" bag.
  * Ensures that both bags are in a locked state upon instantiation.
+ * @implements \IteratorAggregate<MiddlewareConstructor>
  */
 final readonly class SealedBag implements \IteratorAggregate, \Countable
 {
     use NoDumpTrait;
 
     /** @var array<MiddlewareConstructor> */
-    public array $own;
-    /** @var array<MiddlewareConstructor> */
-    public array $inherited;
-    /** @var array<MiddlewareConstructor> */
-    public array $combined;
-    /** @var int */
-    public int $count;
+    private array $combined;
+    private int $count;
 
     public function __construct(
         Bag $own,
@@ -39,10 +35,26 @@ final readonly class SealedBag implements \IteratorAggregate, \Countable
             throw new \RuntimeException("Inherited middleware bag is not locked");
         }
 
-        $this->own = $own->getArray();
-        $this->inherited = $inherited->getArray();
-        $this->combined = array_merge($this->inherited, $this->own);
+        $mapO = $this->openBag($own);
+        $mapI = $this->openBag($inherited);
+        $this->combined = array_replace($mapO, $mapI);
         $this->count = count($this->combined);
+    }
+
+    /**
+     * @param Bag $bag
+     * @return array<non-empty-string, MiddlewareConstructor>
+     */
+    private function openBag(Bag $bag): array
+    {
+        $map = [];
+        foreach ($bag->getArray() as $ctr) {
+            foreach ($ctr->binds as $contract) {
+                $map[$contract] = $ctr;
+            }
+        }
+
+        return $map;
     }
 
     /**
@@ -50,7 +62,7 @@ final readonly class SealedBag implements \IteratorAggregate, \Countable
      */
     public function getArray(): array
     {
-        return array_merge($this->own, $this->inherited);
+        return $this->combined;
     }
 
     /**
