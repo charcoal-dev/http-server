@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Middleware;
 
-use Charcoal\Http\Router\Contracts\Middleware\Global\GlobalMiddlewareInterface;
-use Charcoal\Http\Router\Contracts\Middleware\GlobalMiddlewareResolverInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
+use Charcoal\Http\Router\Contracts\Middleware\MiddlewareResolverInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Group\GroupMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareTrustPolicyInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
@@ -23,23 +23,24 @@ use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
  */
 final class MiddlewareRegistry
 {
+    /** @var array<class-string,MiddlewareInterface */
     private array $resolved = [
-        Scope::Global->name => [],
+        Scope::Kernel->name => [],
         Scope::Group->name => [],
         Scope::Route->name => [],
     ];
 
     private array $factories = [
-        Scope::Global->name => [],
+        Scope::Kernel->name => [],
         Scope::Group->name => [],
         Scope::Route->name => [],
     ];
 
     public function __construct(
-        AppRoutingSnapshot                                   $routingSnapshot,
-        protected readonly GlobalMiddlewareResolverInterface $resolver,
-        protected readonly ?MiddlewareTrustPolicyInterface   $trustPolicy = null,
-        protected bool                                       $isLocked = false,
+        AppRoutingSnapshot                                 $routingSnapshot,
+        protected readonly MiddlewareResolverInterface     $resolver,
+        protected readonly ?MiddlewareTrustPolicyInterface $trustPolicy = null,
+        protected bool                                     $isLocked = false,
     )
     {
     }
@@ -49,8 +50,21 @@ final class MiddlewareRegistry
         $this->isLocked = true;
     }
 
+
+    public function resolve(
+        string $binds,
+        Scope  $scope,
+        array  $context = []
+    ): MiddlewareInterface
+    {
+        $resolved = $this->resolved[$scope->name][$binds] ??
+            $this->resolver->resolve($binds, $context) ?? null;
+
+
+    }
+
     /**
-     * There will not be persist.
+     * Registers instanced middleware within the specified scope if it meets all validation requirements.
      */
     public function registerInstanced(
         string              $binds,
@@ -63,18 +77,18 @@ final class MiddlewareRegistry
         }
 
         $contractScope = match (true) {
-            $middleware instanceof GlobalMiddlewareInterface => Scope::Global,
+            $middleware instanceof KernelMiddlewareInterface => Scope::Kernel,
             $middleware instanceof GroupMiddlewareInterface => Scope::Group,
             $middleware instanceof RouteMiddlewareInterface => Scope::Route,
             default => throw new \InvalidArgumentException("Middleware must implement one of: " .
-                "GlobalMiddlewareInterface, GroupMiddlewareInterface, RouteMiddlewareInterface"),
+                "KernelMiddlewareInterface, GroupMiddlewareInterface, RouteMiddlewareInterface"),
         };
 
         if ($contractScope !== $scope) {
             throw new \OutOfBoundsException("Middleware does not meet scope requirement: " . $contractScope->name);
         }
 
-        if (!$middleware instanceof $binds) {
+        if (!interface_exists($binds) || !$middleware instanceof $binds) {
             throw new \BadMethodCallException("Middleware does not implement the contract: " . $binds);
         }
 
@@ -90,11 +104,5 @@ final class MiddlewareRegistry
         }
 
         $this->resolved[$scope->name][$binds] = $middleware;
-    }
-
-
-    public function resolve(string $binds, Scope $scope): void
-    {
-
     }
 }

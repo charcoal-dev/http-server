@@ -6,11 +6,11 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Middleware\Global;
+namespace Charcoal\Http\Router\Middleware\Kernel;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Attributes\BindsTo;
-use Charcoal\Http\Router\Contracts\Middleware\Global\UrlEncodingEnforcerInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Kernel\UrlEncodingEnforcerInterface;
 
 /**
  * This class ensures that the given URL path complies with proper URL encoding

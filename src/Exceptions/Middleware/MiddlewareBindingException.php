@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Exceptions;
+namespace Charcoal\Http\Router\Exceptions\Middleware;
 
 /**
  * Exception thrown when there is an error in binding middleware.

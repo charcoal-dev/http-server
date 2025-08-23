@@ -8,12 +8,10 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Exceptions\Middleware;
 
-use Charcoal\Http\Router\Exceptions\MiddlewareException;
-
 /**
  * Represents a specific type of middleware-related exception that occurs
- * within the global middleware processing pipeline.
+ * within the kernel middleware processing pipeline.
  */
-class GlobalMiddlewareException extends MiddlewareException
+class KernelMiddlewareException extends MiddlewareException
 {
 }

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts\Middleware\Global;
+namespace Charcoal\Http\Router\Contracts\Middleware\Kernel;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInterface;
@@ -16,7 +16,7 @@ use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInt
  * with specific encoding standards. If the URL does not meet the required
  * criteria, an exception may be thrown.
  */
-interface UrlEncodingEnforcerInterface extends GlobalMiddlewareInterface, MiddlewareConstructableInterface
+interface UrlEncodingEnforcerInterface extends KernelMiddlewareInterface, MiddlewareConstructableInterface
 {
 
     public function __invoke(UrlInfo $url): void;

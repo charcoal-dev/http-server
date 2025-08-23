@@ -6,12 +6,12 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Middleware\Global;
+namespace Charcoal\Http\Router\Middleware\Kernel;
 
 use Charcoal\Buffers\Frames\Bytes16;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Router\Attributes\BindsTo;
-use Charcoal\Http\Router\Contracts\Middleware\Global\RequestIdResolverInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Kernel\RequestIdResolverInterface;
 
 /**
  * This class implements a method to extract a specific request ID

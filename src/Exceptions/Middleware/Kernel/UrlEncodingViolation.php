@@ -6,14 +6,14 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Exceptions\Middleware\Global;
+namespace Charcoal\Http\Router\Exceptions\Middleware\Kernel;
 
-use Charcoal\Http\Router\Exceptions\Middleware\GlobalMiddlewareException;
+use Charcoal\Http\Router\Exceptions\Middleware\KernelMiddlewareException;
 
 /**
  * Represents an exception thrown when there is a violation in URL encoding.
  */
-final class UrlEncodingViolation extends GlobalMiddlewareException
+final class UrlEncodingViolation extends KernelMiddlewareException
 {
     public function __construct(string $message)
     {

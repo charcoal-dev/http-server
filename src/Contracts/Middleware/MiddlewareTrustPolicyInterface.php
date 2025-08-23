@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Contracts\Middleware;
 
+use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Group\GroupMiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 
@@ -30,13 +31,13 @@ interface MiddlewareTrustPolicyInterface
 
     /**
      * Determines whether the given middleware is trusted based on the provided scope.
-     * @param GlobalMiddlewareResolverInterface|GroupMiddlewareInterface|RouteMiddlewareInterface $middleware
+     * @param KernelMiddlewareInterface|GroupMiddlewareInterface|RouteMiddlewareInterface $middleware
      * @param Scope $scope
      * @return bool
      * @api
      */
     public function isTrusted(
-        GlobalMiddlewareResolverInterface|GroupMiddlewareInterface|RouteMiddlewareInterface $middleware,
-        Scope                                                                               $scope
+        KernelMiddlewareInterface|GroupMiddlewareInterface|RouteMiddlewareInterface $middleware,
+        Scope                                                                       $scope
     ): bool;
 }

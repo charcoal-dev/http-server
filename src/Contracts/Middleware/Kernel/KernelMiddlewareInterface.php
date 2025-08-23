@@ -6,13 +6,13 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts\Middleware\Global;
+namespace Charcoal\Http\Router\Contracts\Middleware\Kernel;
 
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 
 /**
- * Represents a contract for middleware that is applied globally.
+ * Represents a contract for middleware that is applied on kernel level.
  */
-interface GlobalMiddlewareInterface extends MiddlewareInterface
+interface KernelMiddlewareInterface extends MiddlewareInterface
 {
 }

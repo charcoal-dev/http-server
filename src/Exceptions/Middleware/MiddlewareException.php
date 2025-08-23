@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Exceptions;
+namespace Charcoal\Http\Router\Exceptions\Middleware;
 
 /**
  * Represents an exception that occurs within a middleware process.

@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router;
 
-use Charcoal\Http\Router\Contracts\Middleware\Global\GlobalMiddlewareInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Internal\RouterTestableTrait;
 use Charcoal\Http\Router\Middleware\MiddlewareRegistry;
 use Charcoal\Http\Router\Request\RequestContext;
@@ -25,12 +25,15 @@ final class Router
 
     public readonly AppRoutingSnapshot $snapshot;
 
-    public function __construct(AppRoutes $routes, MiddlewareRegistry $middlewareRegistry)
+    public function __construct(
+        AppRoutes $routes,
+        MiddlewareRegistry $middlewareRegistry
+    )
     {
         $this->snapshot = $routes->snapshot();
     }
 
-    public function middleware(GlobalMiddlewareInterface ...$pipelines): self
+    public function middleware(KernelMiddlewareInterface ...$pipelines): self
     {
         return $this;
     }

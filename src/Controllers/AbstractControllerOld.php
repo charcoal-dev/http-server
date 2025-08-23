@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Controller;
+namespace Charcoal\Http\Router\Controllers;
 
 use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
@@ -14,18 +14,18 @@ use Charcoal\Base\Traits\NotSerializableTrait;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Router\Contracts\Auth\AuthContextInterface;
 use Charcoal\Http\Router\Contracts\Response\ResponseResolvedInterface;
-use Charcoal\Http\Router\Controller\Promise\FileDownload;
+use Charcoal\Http\Router\Controllers\Promise\FileDownload;
 use Charcoal\Http\Router\Exceptions\ControllerException;
-use Charcoal\Http\Router\Request\Request;
+use Charcoal\Http\Router\Request\ServerRequest;
 use Charcoal\Http\Router\Response\AbstractResponse;
-use Charcoal\Http\Router\Response\Headers\CacheControl;
-use Charcoal\Http\Router\Route;
+use Charcoal\Http\Router\Response\CacheControl;
+use Charcoal\Http\Router\Routing\Route;
 
 /**
  * Class AbstractController
  * @package Charcoal\Http\Router\Controllers
  */
-abstract class AbstractController
+abstract class AbstractControllerOld
 {
     private ?AbstractResponse $response;
     private ?CacheControl $cacheControl = null;
@@ -37,18 +37,18 @@ abstract class AbstractController
 
     /**
      * @param Route $route
-     * @param Request $request
-     * @param AbstractController|null $previous
+     * @param ServerRequest $request
+     * @param AbstractControllerOld|null $previous
      * @param string|null $entryPoint
      * @param array $constructorArgs
      * @throws ControllerException
      */
     public function __construct(
-        public readonly Route   $route,
-        public readonly Request $request,
-        ?AbstractController     $previous = null,
-        protected ?string       $entryPoint = null,
-        array                   $constructorArgs = [],
+        public readonly Route         $route,
+        public readonly ServerRequest $request,
+        ?AbstractControllerOld        $previous = null,
+        protected ?string             $entryPoint = null,
+        array                         $constructorArgs = [],
     )
     {
         $this->response = $previous?->getResponseObject() ?? $this->createResponseObject();
@@ -195,10 +195,10 @@ abstract class AbstractController
     /**
      * @param string $controllerClass
      * @param string $entryPoint
-     * @return AbstractController
+     * @return AbstractControllerOld
      * @api
      */
-    public function forwardToController(string $controllerClass, string $entryPoint): AbstractController
+    public function forwardToController(string $controllerClass, string $entryPoint): AbstractControllerOld
     {
         return $this->route->router->createControllerInstance($controllerClass, $this->request, $this, $entryPoint);
     }

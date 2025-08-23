@@ -6,11 +6,11 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Middleware\Global;
+namespace Charcoal\Http\Router\Middleware\Kernel;
 
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Router\Attributes\BindsTo;
-use Charcoal\Http\Router\Contracts\Middleware\Global\ClientIpResolverInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Kernel\ClientIpResolverInterface;
 
 /**
  * Provides functionality to resolve the IP address of the client making the request.
