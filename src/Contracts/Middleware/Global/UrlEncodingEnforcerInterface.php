@@ -18,8 +18,6 @@ use Charcoal\Http\Router\Exceptions\Middleware\Global\UrlEncodingViolation;
  */
 interface UrlEncodingEnforcerInterface extends GlobalMiddlewareInterface
 {
-    /**
-     * @throws UrlEncodingViolation
-     */
+
     public function __invoke(UrlInfo $url): void;
 }
