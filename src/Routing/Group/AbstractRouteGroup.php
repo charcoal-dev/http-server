@@ -76,7 +76,7 @@ abstract readonly class AbstractRouteGroup implements PathHolderInterface
         $this->uniqueId = $root->generateUniqueId($this, $chain);
         $middleware = $this->getAggregatedMiddleware();
         array_pop($middleware);
-        $middlewareAgr = Bag::merge(Scope::Group, ...$middleware);
+        $middlewareAgr = Bag::merge(Scope::Group, ...$middleware)->lock();
         $this->middleware = new SealedBag($this->uniqueId, $this->middlewareOwn, $middlewareAgr);
 
         // Children
