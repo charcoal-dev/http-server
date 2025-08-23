@@ -90,6 +90,7 @@ final readonly class ControllerValidated
             throw new \InvalidArgumentException("Controller class must implement: " . ControllerContextInterface::class);
         }
 
+        $this->entryPoints = $entryPoints;
         $this->validated = true;
     }
 }
