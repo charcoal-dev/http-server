@@ -20,7 +20,7 @@ use Charcoal\Http\Tests\Router\Fixture\RoutingFixtures;
 /**
  * Class RoutingTest
  */
-class RoutingIndexTest extends \PHPUnit\Framework\TestCase
+final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 {
     private readonly AppRoutes $routes;
     private readonly AppRoutingSnapshot $routesDto;
