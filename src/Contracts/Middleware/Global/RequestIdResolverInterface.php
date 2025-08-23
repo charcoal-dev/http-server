@@ -10,7 +10,6 @@ namespace Charcoal\Http\Router\Contracts\Middleware\Global;
 
 use Charcoal\Buffers\Frames\Bytes16;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
-use Charcoal\Http\Router\Contracts\Middleware\GlobalMiddlewareInterface;
 
 /**
  * This interface is responsible for resolving a unique request ID for each incoming request.

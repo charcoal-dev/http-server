@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Contracts\Middleware\Global;
 
-use Charcoal\Http\Router\Contracts\Middleware\GlobalMiddlewareInterface;
+use Charcoal\Http\Commons\Headers\HeadersImmutable;
 
 /**
  * An interface for resolving client IP addresses within the context
@@ -16,5 +16,5 @@ use Charcoal\Http\Router\Contracts\Middleware\GlobalMiddlewareInterface;
  */
 interface ClientIpResolverInterface extends GlobalMiddlewareInterface
 {
-    public function resolveIpAddress(): string;
+    public function __invoke(HeadersImmutable $headers): string|false;
 }

@@ -6,7 +6,9 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts\Middleware;
+namespace Charcoal\Http\Router\Contracts\Middleware\Group;
+
+use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 
 /**
  * Defines a contract for middleware that can be used in a group context.

@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Contracts\Middleware\Global;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
-use Charcoal\Http\Router\Contracts\Middleware\GlobalMiddlewareInterface;
 use Charcoal\Http\Router\Exceptions\Middleware\Global\UrlEncodingViolation;
 
 /**
