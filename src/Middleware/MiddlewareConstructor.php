@@ -27,7 +27,7 @@ final readonly class MiddlewareConstructor
 {
     /** @var array<class-string<MiddlewareInterface>> */
     public array $binds;
-    public array $arguments;
+    public ?array $arguments;
     public bool $validated;
 
     /**
@@ -43,7 +43,7 @@ final readonly class MiddlewareConstructor
         bool          $isTesting = false,
     )
     {
-        $this->arguments = DtoHelper::createFrom($arguments, maxDepth: 2);
+        $this->arguments = $arguments ? DtoHelper::createFrom($arguments, maxDepth: 2) : null;
 
         if ($isTesting) {
             $this->validated = false;
