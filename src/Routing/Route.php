@@ -11,7 +11,7 @@ namespace Charcoal\Http\Router\Routing;
 use Charcoal\Base\Support\Helpers\ObjectHelper;
 use Charcoal\Http\Router\Contracts\PathHolderInterface;
 use Charcoal\Http\Router\Controller\AbstractController;
-use Charcoal\Http\Router\Middleware\SealedMiddlewareBag;
+use Charcoal\Http\Router\Middleware\Bag\SealedBag;
 use Charcoal\Http\Router\Router;
 use Charcoal\Http\Router\Support\HttpMethods;
 
@@ -27,8 +27,8 @@ final readonly class Route implements PathHolderInterface
     public string $classname;
     /** @var array<non-empty-string,true> */
     public array $methods;
-    /** @var SealedMiddlewareBag */
-    public SealedMiddlewareBag $middleware;
+    /** @var SealedBag */
+    public SealedBag $middleware;
 
     public function __construct(
         string       $path,
@@ -74,7 +74,7 @@ final readonly class Route implements PathHolderInterface
      * Sets the unique identifier. (This is a readonly class)
      * @internal
      */
-    public function finalize(SealedMiddlewareBag $bag): void
+    public function finalize(SealedBag $bag): void
     {
         $this->uniqueId = $bag->owner;
         $this->middleware = $bag;
@@ -89,9 +89,9 @@ final readonly class Route implements PathHolderInterface
     }
 
     /**
-     * @return SealedMiddlewareBag
+     * @return SealedBag
      */
-    public function pipelines(): SealedMiddlewareBag
+    public function pipelines(): SealedBag
     {
         return $this->middleware;
     }

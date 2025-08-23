@@ -10,7 +10,7 @@ namespace Charcoal\Http\Router\Routing;
 
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
-use Charcoal\Http\Router\Middleware\MiddlewareBag;
+use Charcoal\Http\Router\Middleware\Bag\Bag;
 use Charcoal\Http\Router\Support\HttpMethods;
 
 /**
@@ -20,14 +20,14 @@ final class RouteBuilder
 {
     /** @var HttpMethods|null */
     protected ?HttpMethods $methods = null;
-    private MiddlewareBag $middleware;
+    private Bag $middleware;
 
     public function __construct(
         public readonly string $path,
         public readonly string $classname
     )
     {
-        $this->middleware = MiddlewareBag::create(Scope::Route);
+        $this->middleware = Bag::create(Scope::Route);
     }
 
     /**
@@ -49,7 +49,7 @@ final class RouteBuilder
     }
 
     /**
-     * @return array{0: ?HttpMethods, 1: MiddlewareBag}
+     * @return array{0: ?HttpMethods, 1: Bag}
      * @internal
      */
     public function attributes(): array

@@ -11,8 +11,8 @@ namespace Charcoal\Http\Router\Routing\Group;
 use Charcoal\Http\Router\Contracts\PathHolderInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
-use Charcoal\Http\Router\Middleware\MiddlewareBag;
-use Charcoal\Http\Router\Middleware\SealedMiddlewareBag;
+use Charcoal\Http\Router\Middleware\Bag\Bag;
+use Charcoal\Http\Router\Middleware\Bag\SealedBag;
 use Charcoal\Http\Router\Routing\AppRoutes;
 use Charcoal\Http\Router\Routing\Route;
 use Charcoal\Http\Router\Routing\RouteBuilder;
@@ -27,8 +27,8 @@ abstract readonly class AbstractRouteGroup implements PathHolderInterface
     public string $path;
     public array $children;
     public string $uniqueId;
-    protected MiddlewareBag $middlewareOwn;
-    protected SealedMiddlewareBag $middleware;
+    protected Bag $middlewareOwn;
+    protected SealedBag $middleware;
 
     /**
      * @param RouteGroup|null $parent
@@ -51,7 +51,7 @@ abstract readonly class AbstractRouteGroup implements PathHolderInterface
         };
 
         try {
-            $this->middlewareOwn = MiddlewareBag::create(Scope::Group);
+            $this->middlewareOwn = Bag::create(Scope::Group);
             $groupPolicy = new RouteGroupBuilder($this);
             $declaration($groupPolicy);
             $this->middlewareOwn->lock();
@@ -76,7 +76,7 @@ abstract readonly class AbstractRouteGroup implements PathHolderInterface
         $this->uniqueId = $root->generateUniqueId($this, $chain);
         $middleware = $this->getAggregatedMiddleware();
         array_pop($middleware);
-        $middleware = MiddlewareBag::merge(Scope::Group, ...$middleware);
+        $middleware = Bag::merge(Scope::Group, ...$middleware);
 
         // Children
         $tracker = [];
@@ -94,7 +94,7 @@ abstract readonly class AbstractRouteGroup implements PathHolderInterface
                     $routePipelines->lock();
                     $route = new Route($child->path, $child->classname, $routePolicies[0]);
                     $uniqueId = $root->generateUniqueId($route, $chain);
-                    $route->finalize(new SealedMiddlewareBag($uniqueId, $routePipelines, $middleware));
+                    $route->finalize(new SealedBag($uniqueId, $routePipelines, $middleware));
                     $this->appendChild($children, $tracker, $route, $uniqueId);
                 }
 
@@ -151,7 +151,7 @@ abstract readonly class AbstractRouteGroup implements PathHolderInterface
     protected function getAggregatedMiddleware(): array
     {
         if (!$this->parent) {
-            return [MiddlewareBag::create(Scope::Group)->lock()];
+            return [Bag::create(Scope::Group)->lock()];
         }
 
         return [...$this->parent->getAggregatedMiddleware(), $this->middlewareOwn->lock()];
