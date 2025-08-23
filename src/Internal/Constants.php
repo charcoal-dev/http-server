@@ -13,5 +13,6 @@ namespace Charcoal\Http\Router\Internal;
  */
 class Constants
 {
+    /** @var string Wildcard placeholder for "default" or "any" HTTP methods */
     public const string METHOD_ANY = "(*)";
 }
