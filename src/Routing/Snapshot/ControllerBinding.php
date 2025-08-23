@@ -21,7 +21,7 @@ final readonly class ControllerBinding
 
     public function __construct(
         public ControllerValidated $controller,
-        public array|true          $method,
+        public array|true          $methods,
         ?SealedBag                 $middleware,
     )
     {
