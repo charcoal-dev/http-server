@@ -25,7 +25,6 @@ final readonly class SealedBag
     public array $inherited;
 
     public function __construct(
-        public string $owner,
         Bag           $own,
         Bag           $inherited,
     )
