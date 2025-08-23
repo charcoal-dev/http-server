@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing\Snapshot;
 
-use Charcoal\Http\Router\Controllers\ControllerValidated;
 use Charcoal\Http\Router\Internal\Constants;
 
 /**
@@ -26,7 +25,7 @@ final readonly class RouteSnapshot
 
     public function __construct(
         public string       $path,
-        ControllerValidated ...$controllers
+        ControllerBinding ...$controllers
     )
     {
         $params = [];

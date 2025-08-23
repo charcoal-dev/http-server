@@ -126,7 +126,7 @@ final readonly class ConsolidatedRoutes
                 }
 
                 $pathBindings[] = new ControllerBinding(
-                    $route->classname,
+                    $this->controllers[$route->classname],
                     $route->methods?->getArray() ?? true,
                     $route->middleware
                 );
