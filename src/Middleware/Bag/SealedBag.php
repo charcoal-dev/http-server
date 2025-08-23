@@ -16,9 +16,9 @@ use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
  */
 final readonly class SealedBag
 {
-    /** @var array<class-string<MiddlewareInterface>> */
+    /** @var array<MiddlewareInterface> */
     public array $own;
-    /** @var array<class-string<MiddlewareInterface>> */
+    /** @var array<MiddlewareInterface> */
     public array $inherited;
 
     public function __construct(
@@ -33,7 +33,7 @@ final readonly class SealedBag
             throw new \RuntimeException("Inherited middleware bag is not locked");
         }
 
-        $this->own = array_unique($own->all());
-        $this->inherited = array_unique($inherited->all());
+        $this->own = $own->getArray();
+        $this->inherited = $inherited->getArray();
     }
 }
