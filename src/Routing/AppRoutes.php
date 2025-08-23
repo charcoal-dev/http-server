@@ -10,6 +10,7 @@ namespace Charcoal\Http\Router\Routing;
 
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
+use Charcoal\Http\Router\Routing\Group\RouteGroup;
 use Charcoal\Http\Router\Routing\Group\RouteGroupBuilder;
 use Charcoal\Http\Router\Routing\Registry\RoutingIndex;
 use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
@@ -57,5 +58,23 @@ final readonly class AppRoutes extends AbstractRouteGroup
     public function snapshot(): AppRoutingSnapshot
     {
         return new AppRoutingSnapshot($this->registry);
+    }
+
+    /**
+     * Generates a unique identifier for a route or route group based on its path and additional chain context.
+     */
+    public function generateUniqueId(Route|AbstractRouteGroup $child, array $chain): string
+    {
+        $complete = match (true) {
+            $child->path === "/" => "/",
+            default => implode("/", $chain) . "/" . $child->path,
+        };
+
+        // Methods are already canonicalized when stored in Route instance
+        $id = sprintf("%s[%s]%s",
+            $child instanceof RouteGroup ? "group" : "route",
+            $complete,
+            $child instanceof Route && $child->methods ? ("@" . implode(",", array_keys($child->methods))) : "");
+        return strtolower(preg_replace("/:[A-Za-z0-9_]+/", "{token}", $id));
     }
 }

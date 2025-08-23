@@ -8,7 +8,11 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing\Group;
 
+use Charcoal\Http\Router\Contracts\PathHolderInterface;
+use Charcoal\Http\Router\Enums\Middleware\Scope;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
+use Charcoal\Http\Router\Middleware\MiddlewareBag;
+use Charcoal\Http\Router\Routing\AppRoutes;
 use Charcoal\Http\Router\Routing\Route;
 use Charcoal\Http\Router\Routing\RouteBuilder;
 
@@ -17,10 +21,12 @@ use Charcoal\Http\Router\Routing\RouteBuilder;
  * Provides functionality to define namespaces, paths, and manage child routes
  * or route groups within a larger routing structure.
  */
-abstract readonly class AbstractRouteGroup
+abstract readonly class AbstractRouteGroup implements PathHolderInterface
 {
     public string $path;
     public array $children;
+    protected MiddlewareBag $middleware;
+    public string $uniqueId;
 
     /**
      * @param RouteGroup|null $parent
@@ -29,9 +35,9 @@ abstract readonly class AbstractRouteGroup
      * @throws RoutingBuilderException
      */
     public function __construct(
-        ?AbstractRouteGroup $parent,
-        string              $path,
-        \Closure            $declaration,
+        protected ?AbstractRouteGroup $parent,
+        string                        $path,
+        \Closure                      $declaration,
     )
     {
         $path = trim($path, "/");
@@ -42,6 +48,7 @@ abstract readonly class AbstractRouteGroup
             default => throw new \InvalidArgumentException("Route prefix is invalid " . $path),
         };
 
+        $this->middleware = new MiddlewareBag(Scope::Group);
         $groupPolicy = new RouteGroupBuilder($this);
         $declaration($groupPolicy);
         $this->build($groupPolicy);
@@ -54,6 +61,11 @@ abstract readonly class AbstractRouteGroup
     {
         $children = [];
         $groupPolicies = $group->attributes();
+        $root = $this->getRootNode();
+        $chain = $this->getAggregatedPath();
+        $this->uniqueId = $root->generateUniqueId($this, $chain);
+        $chain[] = $this->path;
+        $middleware = $this->getAggregatedMiddleware();
 
         // Children
         $tracker = [];
@@ -61,14 +73,19 @@ abstract readonly class AbstractRouteGroup
         foreach ($groupPolicies[0] as $child) {
             $num++;
             try {
+                if (!$child instanceof RouteBuilder && !$child instanceof RouteGroup) {
+                    throw new \UnexpectedValueException("Unsupported child element: " . get_debug_type($child));
+                }
+
+                $uniqueId = $root->generateUniqueId($child, $chain);
                 if ($child instanceof RouteBuilder) {
                     $routePolicies = $child->attributes();
-                    $route = new Route($child->path, $child->classname, $routePolicies[0], $routePolicies[1]);
-                    $this->appendChild($children, $tracker, $route);
+                    $route = new Route($uniqueId, $child->path, $child->classname, $routePolicies[0], $routePolicies[1]);
+                    $this->appendChild($children, $tracker, $route, $uniqueId);
                 }
 
                 if ($child instanceof RouteGroup) {
-                    $this->appendChild($children, $tracker, $child);
+                    $this->appendChild($children, $tracker, $child, $uniqueId);
                 }
             } catch (\Throwable $t) {
                 throw new RoutingBuilderException("Group [" . $this->path . "][#" . $num . "]: " .
@@ -80,31 +97,74 @@ abstract readonly class AbstractRouteGroup
     }
 
     /**
-     * @param Route|RouteGroup $child
-     * @return string
+     * @param string ...$pipelines
+     * @return $this
      */
-    private function generatePseudoId(Route|RouteGroup $child): string
+    public function pipelines(string ...$pipelines): self
     {
-        // Methods are already canonicalized when stored in Route instance
-        $id = sprintf("[%s][%s]%s", $this->path, $child->path,
-            $child instanceof Route && $child->methods ? "@" . implode(",", array_keys($child->methods)) : "");
-        return strtolower(preg_replace("/:[A-Za-z0-9_]+/", "{token}", $id));
+        $this->middleware->set(...$pipelines);
+        return $this;
+    }
+
+    /**
+     * @return AppRoutes
+     */
+    protected function getRootNode(): AppRoutes
+    {
+        if ($this instanceof AppRoutes) {
+            return $this;
+        }
+
+        return $this->parent->getRootNode();
+    }
+
+    /**
+     * @return array
+     */
+    protected function getAggregatedPath(): array
+    {
+        if ($this->path === "/") {
+            return [""];
+        }
+
+        return [...$this->parent?->getAggregatedPath() ?? []];
+    }
+
+    /**
+     * @return array
+     */
+    protected function getAggregatedMiddleware(): array
+    {
+        $total = $this->middleware->lock()->all();
+        if ($this->parent) {
+            $total = [...$total, ...$this->parent->getAggregatedMiddleware()];
+        }
+
+        return $total;
     }
 
     /**
      * @param array $children
      * @param array $tracker
      * @param Route|RouteGroup $child
+     * @param string $uniqueId
      * @return void
      */
-    private function appendChild(array &$children, array &$tracker, Route|RouteGroup $child): void
+    private function appendChild(array &$children, array &$tracker, Route|RouteGroup $child, string $uniqueId): void
     {
-        $pseudoId = $this->generatePseudoId($child);
-        if (isset($tracker[$pseudoId])) {
+        if (isset($tracker[$uniqueId])) {
             throw new \OutOfBoundsException("Duplicate route path: " . $child->path);
         }
 
-        $tracker[$pseudoId] = true;
+        $tracker[$uniqueId] = true;
         $children[] = $child;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUniqueId(): string
+    {
+        return $this->uniqueId;
     }
 }

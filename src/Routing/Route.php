@@ -29,6 +29,7 @@ final readonly class Route
     public ?array $middleware;
 
     public function __construct(
+        public string $uniqueId,
         string        $path,
         string        $classname,
         ?HttpMethods  $methods,
