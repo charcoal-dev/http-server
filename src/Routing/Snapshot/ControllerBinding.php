@@ -17,11 +17,14 @@ use Charcoal\Http\Router\Middleware\Bag\SealedBag;
  */
 final readonly class ControllerBinding
 {
+    public ?SealedBag $middleware;
+
     public function __construct(
         public ControllerValidated $controller,
         public array|true          $method,
-        public ?SealedBag          $middleware,
+        ?SealedBag                 $middleware,
     )
     {
+        $this->middleware = $middleware->own || $middleware->inherited ? $middleware : null;
     }
 }
