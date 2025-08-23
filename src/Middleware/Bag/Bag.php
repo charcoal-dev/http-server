@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Middleware\Bag;
 
+use Charcoal\Base\Vectors\AbstractVector;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 use Charcoal\Http\Router\Middleware\MiddlewareConstructor;
@@ -16,13 +17,11 @@ use Charcoal\Http\Router\Middleware\MiddlewareConstructor;
  * A storage bag for managing middleware components.
  * This class provides a structure to hold and manage an array of middleware
  * used in an application. Middleware usually refers to the components that process
+ * @template T of MiddlewareConstructor
  */
-final class Bag
+final class Bag extends AbstractVector
 {
-    protected static bool $testMode = false;
-
-    /** @var array<MiddlewareConstructor> */
-    private array $middleware;
+    private static bool $testMode = false;
     private bool $locked = false;
 
     /**
@@ -43,7 +42,7 @@ final class Bag
     {
         $collection = [];
         foreach ($bags as $bag) {
-            $collection = [...$collection, ...$bag->middleware];
+            $collection = [...$collection, ...$bag->getArray()];
         }
 
         return new self($scope, $collection, self::$testMode);
@@ -77,7 +76,7 @@ final class Bag
         public readonly bool  $testing = false
     )
     {
-        $this->middleware = $previous;
+        parent::__construct($previous);
     }
 
     /**
@@ -87,14 +86,6 @@ final class Bag
     {
         $this->locked = true;
         return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function all(): array
-    {
-        return $this->middleware;
     }
 
     /**
@@ -108,7 +99,7 @@ final class Bag
         }
 
         foreach ($middleware as $m) {
-            $this->middleware[] = new MiddlewareConstructor($this->scope, $m, isTesting: self::$testMode);
+            $this->values[] = new MiddlewareConstructor($this->scope, $m, isTesting: self::$testMode);
         }
 
         return $this;
@@ -126,7 +117,7 @@ final class Bag
             throw new \BadMethodCallException("Middleware bag is locked and cannot be modified");
         }
 
-        $this->middleware[] = new MiddlewareConstructor(
+        $this->values[] = new MiddlewareConstructor(
             $this->scope,
             $classname,
             $arguments,
