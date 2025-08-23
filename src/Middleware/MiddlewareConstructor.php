@@ -37,7 +37,7 @@ final readonly class MiddlewareConstructor
      * @param bool $isTesting
      */
     public function __construct(
-        Scope         $scope,
+        public Scope  $scope,
         public string $classname,
         ?array        $arguments = null,
         bool          $isTesting = false,
