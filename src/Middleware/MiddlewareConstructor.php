@@ -52,7 +52,7 @@ final readonly class MiddlewareConstructor
         }
 
         if (!class_exists($classname)) {
-            throw new \InvalidArgumentException("Middleware class does not exist");
+            throw new \InvalidArgumentException("Middleware class does not exist:" . $classname);
         }
 
         $reflect = new \ReflectionClass($classname);

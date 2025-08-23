@@ -99,7 +99,7 @@ final readonly class ConsolidatedRoutes
             $validatedControllers[$classname] = new ControllerValidated(
                 $classname,
                 $methods,
-                !Router::$checkControllerExists
+                !Router::$validateControllerClasses
             );
         }
 

@@ -32,6 +32,8 @@ final readonly class ControllerValidated
         bool          $isTesting = false
     )
     {
+        $entryPoints = array_unique($entryPoints);
+
         if ($isTesting) {
             $this->entryPoints = $entryPoints;
             $this->defaultEntrypoint = null;
