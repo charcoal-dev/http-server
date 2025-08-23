@@ -25,6 +25,6 @@ final readonly class ControllerBinding
         ?SealedBag                 $middleware,
     )
     {
-        $this->middleware = $middleware->own || $middleware->inherited ? $middleware : null;
+        $this->middleware = $middleware->count() ? $middleware : null;
     }
 }

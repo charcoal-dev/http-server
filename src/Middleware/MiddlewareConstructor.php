@@ -14,25 +14,25 @@ use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInt
 use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareFactoryInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Group\GroupMiddlewareInterface;
-use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\RouteMiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 
 /**
  * Represents a constructor for middleware, validating and ensuring its adherence
  * to specific scopes and interface requirements during instantiation.
- * @property string<class-string<MiddlewareInterface>> $classname
+ * @property string<non-empty-string> $classname
  */
 final readonly class MiddlewareConstructor
 {
-    /** @var array<class-string<MiddlewareInterface>> */
+    /** @var array<non-empty-string> */
     public array $binds;
     public ?array $arguments;
+    public bool $isFactory;
     public bool $validated;
 
     /**
      * @param Scope $scope
-     * @param class-string<MiddlewareInterface> $classname
+     * @param non-empty-string $classname
      * @param array|null $arguments scalar values only
      * @param bool $isTesting
      */
@@ -46,6 +46,7 @@ final readonly class MiddlewareConstructor
         $this->arguments = $arguments ? DtoHelper::createFrom($arguments, maxDepth: 2) : null;
 
         if ($isTesting) {
+            $this->isFactory = false;
             $this->validated = false;
             $this->binds = $this->tryCheckBindings($classname);
             return;
@@ -75,11 +76,13 @@ final readonly class MiddlewareConstructor
         }
 
         // Implements one of our known constructor interfaces
-        if (!$reflect->implementsInterface(MiddlewareConstructableInterface::class) &&
-            !$reflect->implementsInterface(MiddlewareFactoryInterface::class)) {
-            throw new \InvalidArgumentException("Middleware class must implement one of the following interfaces: " .
-                MiddlewareConstructableInterface::class . " or " . MiddlewareFactoryInterface::class);
-        }
+        $this->isFactory = match (true) {
+            $reflect->implementsInterface(MiddlewareConstructableInterface::class) => false,
+            $reflect->implementsInterface(MiddlewareFactoryInterface::class) => true,
+            default => throw new \InvalidArgumentException(
+                "Middleware class must implement one of the following interfaces: " .
+                MiddlewareConstructableInterface::class . " or " . MiddlewareFactoryInterface::class)
+        };
 
         // Get bindings
         $binds = array_map(fn($a) => $a->newInstance()->contract, $reflect->getAttributes(BindsTo::class));
@@ -103,6 +106,10 @@ final readonly class MiddlewareConstructor
         $this->validated = true;
     }
 
+    /**
+     * @param string $classname
+     * @return array<non-empty-string>
+     */
     private function tryCheckBindings(string $classname): array
     {
         try {
@@ -113,6 +120,6 @@ final readonly class MiddlewareConstructor
         } catch (\Exception) {
         }
 
-        return [];
+        return [$classname];
     }
 }

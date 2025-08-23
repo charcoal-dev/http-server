@@ -15,22 +15,26 @@ use Charcoal\Http\Router\Contracts\Middleware\MiddlewareTrustPolicyInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\RouteMiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
-use Charcoal\Http\Router\Exceptions\Middleware\MiddlewareResolverException;
 use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
 
 /**
- * Manages the registration and handling of middleware components.
- * Provides functionalities to resolve, allowlist, and enable middleware processing.
+ * Manages middleware registration and resolution within a specified scope.
+ * Handles middleware validation, scope matching, and trusted policy checks.
+ * Provides mechanisms to lock the registry to prevent further modifications.
  */
 final class MiddlewareRegistry
 {
-    /** @var array<class-string<non-empty-string>,MiddlewareInterface */
+    /** @var array<non-empty-string,MiddlewareInterface */
     private array $resolved = [
         Scope::Kernel->name => [],
         Scope::Group->name => [],
         Scope::Route->name => [],
     ];
 
+    /**
+     * Manages the registration and handling of middleware components.
+     * Provides functionalities to resolve, allowlist, and enable middleware processing.
+     */
     public function __construct(
         AppRoutingSnapshot                                 $routingSnapshot,
         protected readonly MiddlewareResolverInterface     $resolver,
@@ -38,6 +42,15 @@ final class MiddlewareRegistry
         protected bool                                     $isLocked = false,
     )
     {
+        foreach ($routingSnapshot as $routeDto) {
+            foreach ($routeDto->controllers as $controllerDto) {
+                if (!$controllerDto->middleware) {
+                    continue;
+                }
+
+                $getBag = $controllerDto->middleware;
+            }
+        }
     }
 
     /**
@@ -51,8 +64,9 @@ final class MiddlewareRegistry
 
     /**
      * @param Scope $scope
-     * @param class-string<non-empty-string> $contract
+     * @param non-empty-string $contract
      * @param array $context
+     * @return MiddlewareInterface
      * @internal
      */
     public function resolve(
@@ -62,14 +76,14 @@ final class MiddlewareRegistry
     ): MiddlewareInterface
     {
         $resolved = $this->resolved[$scope->name][$contract] ??
-            $this->resolver->resolve($contract, $context) ?? null;
-
-        throw new MiddlewareResolverException($scope, $contract, $context);
+            $this->resolver->resolve($contract, $context);
+        $this->resolved[$scope->name][$contract] = $resolved;
+        return $resolved;
     }
 
     /**
      * Registers instanced middleware within the specified scope if it meets all validation requirements.
-     * @param class-string<non-empty-string> $contract
+     * @param non-empty-string $contract
      * @api
      */
     public function registerInstanced(

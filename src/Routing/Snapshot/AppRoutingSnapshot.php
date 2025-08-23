@@ -9,8 +9,10 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Routing\Snapshot;
 
 /**
- * Class AppRoutingSnapshot
- * @package Charcoal\Http\Router\Routing\Snapshot
+ * Represents a snapshot of the application's routing structure, allowing
+ * for inspection, counting, iteration, and serialization of routes.
+ * Upon instantiation, ensures that all provided route snapshots contain unique paths.
+ * @implements \IteratorAggregate<RouteSnapshot>
  */
 final readonly class AppRoutingSnapshot implements \IteratorAggregate, \Countable
 {
@@ -63,7 +65,7 @@ final readonly class AppRoutingSnapshot implements \IteratorAggregate, \Countabl
     }
 
     /**
-     * @return \Traversable
+     * @return \Traversable<RouteSnapshot>
      */
     public function getIterator(): \Traversable
     {

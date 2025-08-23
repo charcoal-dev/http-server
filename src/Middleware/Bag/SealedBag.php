@@ -37,7 +37,7 @@ final readonly class SealedBag implements \IteratorAggregate, \Countable
 
         $mapO = $this->openBag($own);
         $mapI = $this->openBag($inherited);
-        $this->combined = array_replace($mapO, $mapI);
+        $this->combined = array_replace($mapI, $mapO);
         $this->count = count($this->combined);
     }
 

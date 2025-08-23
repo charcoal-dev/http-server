@@ -19,7 +19,8 @@ use Charcoal\Http\Router\Router;
  * A storage bag for managing middleware components.
  * This class provides a structure to hold and manage an array of middleware
  * used in an application. Middleware usually refers to the components that process
- * @template T of MiddlewareConstructor
+ * @implements \IteratorAggregate<MiddlewareConstructor>
+ * @implements AbstractVector<MiddlewareConstructor>
  */
 final class Bag extends AbstractVector
 {

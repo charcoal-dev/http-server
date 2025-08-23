@@ -26,7 +26,7 @@ final class Router
     public readonly AppRoutingSnapshot $snapshot;
 
     public function __construct(
-        AppRoutes $routes,
+        AppRoutes          $routes,
         MiddlewareRegistry $middlewareRegistry
     )
     {
@@ -38,7 +38,7 @@ final class Router
         return $this;
     }
 
-    public function accept(ServerRequest $request): void
+    public function handle(ServerRequest $request): void
     {
         $processor = new RequestContext($this, $request);
     }

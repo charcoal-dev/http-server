@@ -19,5 +19,5 @@ interface MiddlewareResolverInterface extends MiddlewareFactoryInterface
     /**
      * Resolves a middleware instance based on the provided contract and context.
      */
-    public function resolve(string $contract, array $context = []): ?MiddlewareInterface;
+    public function resolve(string $contract, array $context = []): MiddlewareInterface;
 }

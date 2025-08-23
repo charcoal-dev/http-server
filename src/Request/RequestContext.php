@@ -21,6 +21,5 @@ final class RequestContext
     )
     {
         // 1. Resolve a unique request ID
-        $this->requestI
     }
 }
