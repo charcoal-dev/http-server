@@ -48,10 +48,16 @@ abstract readonly class AbstractRouteGroup implements PathHolderInterface
             default => throw new \InvalidArgumentException("Route prefix is invalid " . $path),
         };
 
-        $this->middleware = new MiddlewareBag(Scope::Group);
-        $groupPolicy = new RouteGroupBuilder($this);
-        $declaration($groupPolicy);
-        $this->build($groupPolicy);
+        try {
+            $this->middleware = new MiddlewareBag(Scope::Group);
+            $groupPolicy = new RouteGroupBuilder($this);
+            $declaration($groupPolicy);
+            $this->build($groupPolicy);
+        } catch (RoutingBuilderException $e) {
+            throw $e;
+        } catch (\Throwable $t) {
+            throw new RoutingBuilderException("Group [" . $this->path . "]: " . $t->getMessage(), previous: $t);
+        }
     }
 
     /**
