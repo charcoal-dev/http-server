@@ -8,13 +8,11 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Contracts\Middleware;
 
-use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareFactoryInterface;
-
 /**
  * Defines a contract for creating middleware components.
  * Extends the MiddlewareFactoryInterface to include specific resolver methods.
  */
-interface MiddlewareResolverInterface extends MiddlewareFactoryInterface
+interface MiddlewareResolverInterface
 {
     /**
      * Resolves a middleware instance based on the provided contract and context.

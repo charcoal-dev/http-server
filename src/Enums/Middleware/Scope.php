@@ -8,10 +8,6 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Enums\Middleware;
 
-use Charcoal\Http\Router\Contracts\Middleware\Kernel\ClientIpResolverInterface;
-use Charcoal\Http\Router\Contracts\Middleware\Kernel\RequestIdResolverInterface;
-use Charcoal\Http\Router\Contracts\Middleware\Kernel\UrlEncodingEnforcerInterface;
-
 /**
  * Enumeration representing the scope at which middleware can be applied.
  */
@@ -24,14 +20,9 @@ enum Scope
     public function getRegisteredPipelines(): array
     {
         return match ($this) {
-            Scope::Kernel => [
-                RequestIdResolverInterface::class,
-                UrlEncodingEnforcerInterface::class,
-                ClientIpResolverInterface::class,
-            ],
+            Scope::Kernel => KernelPipelines::contractsFqcn(),
             Scope::Group,
-            Scope::Route => [
-            ],
+            Scope::Route => [],
         };
     }
 }
