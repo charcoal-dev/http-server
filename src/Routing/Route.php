@@ -9,8 +9,9 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Routing;
 
 use Charcoal\Base\Support\Helpers\ObjectHelper;
+use Charcoal\Http\Router\Contracts\PathHolderInterface;
 use Charcoal\Http\Router\Controller\AbstractController;
-use Charcoal\Http\Router\Middleware\MiddlewareBag;
+use Charcoal\Http\Router\Middleware\SealedMiddlewareBag;
 use Charcoal\Http\Router\Router;
 use Charcoal\Http\Router\Support\HttpMethods;
 
@@ -18,7 +19,7 @@ use Charcoal\Http\Router\Support\HttpMethods;
  * Represents an HTTP Route configuration.
  * This class is immutable and defines a route's path, supported HTTP methods, and middleware pipelines.
  */
-final readonly class Route
+final readonly class Route implements PathHolderInterface
 {
     public string $uniqueId;
     public string $path;
@@ -26,14 +27,14 @@ final readonly class Route
     public string $classname;
     /** @var array<non-empty-string,true> */
     public array $methods;
-    /** @var ?array<string> */
-    public ?array $middleware;
+    /** @var SealedMiddlewareBag */
+    public SealedMiddlewareBag $middleware;
 
     public function __construct(
-        string        $path,
-        string        $classname,
-        ?HttpMethods  $methods,
-        MiddlewareBag $middleware,
+        string              $path,
+        string              $classname,
+        ?HttpMethods        $methods,
+        SealedMiddlewareBag $middleware,
     )
     {
         $path = trim($path, "/");
@@ -60,12 +61,7 @@ final readonly class Route
         sort($methods, SORT_STRING);
         $this->methods = array_fill_keys($methods, true);
         $this->classname = $classname;
-        $this->middleware = $middleware->all() ?: null;
-    }
-
-    public function setUniqueId(string $uniqueId): void
-    {
-        $this->uniqueId = $uniqueId;
+        $this->middleware = $middleware;
     }
 
     /**
@@ -74,5 +70,30 @@ final readonly class Route
     public function __debugInfo(): array
     {
         return [$this->path, $this->classname, $this->methods];
+    }
+
+    /**
+     * Sets the unique identifier. (This is a readonly class)
+     * @internal
+     */
+    public function setUniqueId(string $uniqueId): void
+    {
+        $this->uniqueId = $uniqueId;
+    }
+
+    /**
+     * Retrieves the unique identifier.
+     */
+    public function getUniqueId(): string
+    {
+        return $this->uniqueId;
+    }
+
+    /**
+     * @return SealedMiddlewareBag
+     */
+    public function pipelines(): SealedMiddlewareBag
+    {
+        return $this->middleware;
     }
 }
