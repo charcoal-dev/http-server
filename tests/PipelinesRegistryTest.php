@@ -86,14 +86,17 @@ final class PipelinesRegistryTest extends \PHPUnit\Framework\TestCase
     /** @return list<class-string> */
     private function mwFlatten(?SealedBag $bag): array
     {
-        if ($bag === null) { return []; }
-
-        $out = [];
-        foreach ($bag as $ctor) {
-            $this->assertInstanceOf(MiddlewareConstructor::class, $ctor);
-            $out[] = $ctor->classname;
+        if ($bag === null) {
+            return [];
         }
-        return $out;
+
+        // Collect classnames from each MiddlewareConstructor in execution order
+        /** @var list<MiddlewareConstructor> $ctors */
+        $ctors = iterator_to_array($bag, false);
+        return array_map(
+            static fn (MiddlewareConstructor $c) => $c->classname,
+            $ctors
+        );
     }
 
     /**

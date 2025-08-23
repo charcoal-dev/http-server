@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpUndefinedClassInspection */
+<?php
 /**
  * Part of the "charcoal-dev/http-router" package.
  * @link https://github.com/charcoal-dev/http-router
