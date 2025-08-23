@@ -31,10 +31,9 @@ final readonly class Route implements PathHolderInterface
     public SealedMiddlewareBag $middleware;
 
     public function __construct(
-        string              $path,
-        string              $classname,
-        ?HttpMethods        $methods,
-        SealedMiddlewareBag $middleware,
+        string       $path,
+        string       $classname,
+        ?HttpMethods $methods,
     )
     {
         $path = trim($path, "/");
@@ -61,7 +60,6 @@ final readonly class Route implements PathHolderInterface
         sort($methods, SORT_STRING);
         $this->methods = array_fill_keys($methods, true);
         $this->classname = $classname;
-        $this->middleware = $middleware;
     }
 
     /**
@@ -76,9 +74,10 @@ final readonly class Route implements PathHolderInterface
      * Sets the unique identifier. (This is a readonly class)
      * @internal
      */
-    public function setUniqueId(string $uniqueId): void
+    public function finalize(SealedMiddlewareBag $bag): void
     {
-        $this->uniqueId = $uniqueId;
+        $this->uniqueId = $bag->owner;
+        $this->middleware = $bag;
     }
 
     /**

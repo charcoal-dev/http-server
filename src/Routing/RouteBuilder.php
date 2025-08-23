@@ -27,7 +27,7 @@ final class RouteBuilder
         public readonly string $classname
     )
     {
-        $this->middleware = new MiddlewareBag(Scope::Route);
+        $this->middleware = MiddlewareBag::create(Scope::Route);
     }
 
     /**
