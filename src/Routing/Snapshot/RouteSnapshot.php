@@ -35,7 +35,7 @@ final readonly class RouteSnapshot
             Constants::PARAM_NAME_CAPTURE_REGEXP,
             function ($match) use (&$params) {
                 $params[] = $match[1];
-                return "([^/]+)";
+                return Constants::PARAM_NAME_PLACEHOLDER;
             },
             $matchRegExp
         );
