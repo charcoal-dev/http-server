@@ -68,10 +68,7 @@ abstract readonly class AbstractRouteGroup
     {
         $children = [];
         $groupPolicies = $group->attributes();
-        $chain = $this->getAggregatedPath();
-        array_pop($chain);
         $middleware = $this->getAggregatedMiddleware();
-        array_pop($middleware);
         $middlewareAgr = Bag::merge(Scope::Group, ...$middleware)->lock();
         $this->middleware = new SealedBag($this->middlewareOwn, $middlewareAgr);
 
@@ -113,18 +110,6 @@ abstract readonly class AbstractRouteGroup
     {
         $this->middlewareOwn->set(...$pipelines);
         return $this;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getAggregatedPath(): array
-    {
-        if (!$this->parent) {
-            return [""];
-        }
-
-        return [...$this->parent->getAggregatedPath(), $this->path];
     }
 
     /**
