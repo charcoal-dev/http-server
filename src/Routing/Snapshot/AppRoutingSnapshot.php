@@ -8,14 +8,13 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing\Snapshot;
 
-use Charcoal\Http\Router\Contracts\Routing\AppRoutingSnapshotInterface;
 use Charcoal\Http\Router\Routing\Registry\RoutingIndex;
 
 /**
  * Class AppRoutingSnapshot
  * @package Charcoal\Http\Router\Routing\Snapshot
  */
-final readonly class AppRoutingSnapshot implements AppRoutingSnapshotInterface
+final readonly class AppRoutingSnapshot
 {
     /** @var array<RouteSnapshot> */
     public array $routes;
