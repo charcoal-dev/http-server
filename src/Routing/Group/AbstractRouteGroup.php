@@ -77,14 +77,16 @@ abstract readonly class AbstractRouteGroup implements PathHolderInterface
                     throw new \UnexpectedValueException("Unsupported child element: " . get_debug_type($child));
                 }
 
-                $uniqueId = $root->generateUniqueId($child, $chain);
                 if ($child instanceof RouteBuilder) {
                     $routePolicies = $child->attributes();
-                    $route = new Route($uniqueId, $child->path, $child->classname, $routePolicies[0], $routePolicies[1]);
+                    $route = new Route($child->path, $child->classname, $routePolicies[0], $routePolicies[1]);
+                    $uniqueId = $root->generateUniqueId($route, $chain);
+                    $route->setUniqueId($uniqueId);
                     $this->appendChild($children, $tracker, $route, $uniqueId);
                 }
 
                 if ($child instanceof RouteGroup) {
+                    $uniqueId = $child->getUniqueId();
                     $this->appendChild($children, $tracker, $child, $uniqueId);
                 }
             } catch (\Throwable $t) {

@@ -70,11 +70,23 @@ final readonly class AppRoutes extends AbstractRouteGroup
             default => implode("/", $chain) . "/" . $child->path,
         };
 
-        // Methods are already canonicalized when stored in Route instance
-        $id = sprintf("%s[%s]%s",
+        return $this->pathUniqueIdGenerator($complete,
             $child instanceof RouteGroup ? "group" : "route",
-            $complete,
-            $child instanceof Route && $child->methods ? ("@" . implode(",", array_keys($child->methods))) : "");
+            $child instanceof Route && $child->methods ? array_keys($child->methods) : null
+        );
+    }
+
+    /**
+     * Generates a unique identifier based on the provided path, prefix, and HTTP methods.
+     */
+    private function pathUniqueIdGenerator(string $path, string $prefix, ?array $methods): string
+    {
+        if ($methods) {
+            sort($methods, SORT_STRING);
+            $methods = "@" . implode(",", $methods);
+        }
+
+        $id = sprintf("%s[%s]%s", $prefix, $path, $methods ?? "");
         return strtolower(preg_replace("/:[A-Za-z0-9_]+/", "{token}", $id));
     }
 }

@@ -20,6 +20,7 @@ use Charcoal\Http\Router\Support\HttpMethods;
  */
 final readonly class Route
 {
+    public string $uniqueId;
     public string $path;
     /** @var class-string<AbstractController> */
     public string $classname;
@@ -29,7 +30,6 @@ final readonly class Route
     public ?array $middleware;
 
     public function __construct(
-        public string $uniqueId,
         string        $path,
         string        $classname,
         ?HttpMethods  $methods,
@@ -61,6 +61,11 @@ final readonly class Route
         $this->methods = array_fill_keys($methods, true);
         $this->classname = $classname;
         $this->middleware = $middleware->all() ?: null;
+    }
+
+    public function setUniqueId(string $uniqueId): void
+    {
+        $this->uniqueId = $uniqueId;
     }
 
     /**
