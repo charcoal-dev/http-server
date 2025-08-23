@@ -8,9 +8,10 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing\Group;
 
-use Charcoal\Http\Router\Contracts\Middleware\Group\GroupMiddlewareInterface;
 use Charcoal\Http\Router\Controller\AbstractController;
+use Charcoal\Http\Router\Enums\Middleware\Scope;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
+use Charcoal\Http\Router\Middleware\MiddlewareBag;
 use Charcoal\Http\Router\Routing\RouteBuilder;
 
 /**
@@ -20,20 +21,21 @@ use Charcoal\Http\Router\Routing\RouteBuilder;
 final class RouteGroupBuilder
 {
     protected array $children = [];
-    protected array $pipelines = [];
+    protected MiddlewareBag $middleware;
 
     public function __construct(protected readonly AbstractRouteGroup $group)
     {
+        $this->middleware = new MiddlewareBag(Scope::Group);
     }
 
     /**
-     * @param string|GroupMiddlewareInterface ...$pipelines
+     * @param string ...$pipelines
      * @return $this
      * @api
      */
-    public function pipelines(string|GroupMiddlewareInterface ...$pipelines): self
+    public function pipelines(string ...$pipelines): self
     {
-        $this->pipelines[] = $pipelines;
+        $this->middleware->set(...$pipelines);
         return $this;
     }
 
@@ -59,11 +61,11 @@ final class RouteGroupBuilder
     }
 
     /**
-     * @return array{1: list<RouteBuilder|RouteGroup>, 2: list<string|GroupMiddlewareInterface>}
+     * @return array{1: list<RouteBuilder|RouteGroup>, 2: MiddlewareBag}
      * @internal
      */
     public function attributes(): array
     {
-        return [$this->children, $this->pipelines];
+        return [$this->children, $this->middleware->lock()];
     }
 }

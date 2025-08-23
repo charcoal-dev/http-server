@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing\Snapshot;
 
+use Charcoal\Http\Router\Contracts\Middleware\RouteMiddlewareInterface;
+use Charcoal\Http\Router\Controller\AbstractController;
 use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
 use Charcoal\Http\Router\Routing\Route;
 
@@ -20,9 +22,13 @@ final readonly class RouteSnapshot
 {
     public bool $isGroup;
     public bool $isController;
+    /** @var null|array<string,class-string<AbstractController>> */
     public ?array $methods;
     public string $matchRegExp;
+    /** @var null|array<string,string> */
     public ?array $params;
+    /** @var null|array<class-string<RouteMiddlewareInterface>> */
+    public ?array $middleware;
 
     public function __construct(public int $index, public string $path, array $node)
     {

@@ -54,6 +54,6 @@ final class RouteBuilder
      */
     public function attributes(): array
     {
-        return [$this->methods, $this->middleware];
+        return [$this->methods, $this->middleware->lock()];
     }
 }
