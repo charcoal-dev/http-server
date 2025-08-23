@@ -45,8 +45,8 @@ final readonly class AppRoutingSnapshot
     public function inspect(int|string $pathIndex): ?RouteSnapshot
     {
         if (is_int($pathIndex)) {
-            return $pathIndex > -1 && $pathIndex < count($this->index) ?
-                $this->index[$pathIndex] : null;
+            return $pathIndex > -1 && $pathIndex < count($this->routes) ?
+                $this->routes[$pathIndex] : null;
         }
 
         return $this->routes[$this->index[$pathIndex] ?? null] ?? null;
