@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Tests\Router\Enums;
 
 use Charcoal\Http\Router\Enums\CacheStoreDirective;
-use Charcoal\Http\Router\Response\Headers\CacheControl;
+use Charcoal\Http\Router\Response\CacheControl;
 use PHPUnit\Framework\TestCase;
 
 /**

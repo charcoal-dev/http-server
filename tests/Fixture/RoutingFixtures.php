@@ -111,7 +111,7 @@ final class RoutingFixtures
                 $group->group("/v2", function (RouteGroupBuilder $group) {
                     $group->group("/reports", function (RouteGroupBuilder $group) {
                         $group->route("/summary", ReportsController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
-                        $group->route("/:year/:month", ReportsController::class);
+                        $group->route("/:year/:month", ReportsController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
                     });
                 });
             });
