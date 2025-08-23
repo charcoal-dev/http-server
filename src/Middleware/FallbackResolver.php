@@ -46,7 +46,7 @@ final readonly class FallbackResolver implements MiddlewareResolverInterface
         return match ($pipeline) {
             KernelPipelines::RequestID_Resolver => new RequestIdResolver(),
             KernelPipelines::URL_EncodingEnforcer => new UrlEncodingEnforcer(),
-            KernelPipelines::ClientIp_Resolver => new ClientIpResolver(),
+            KernelPipelines::ClientIP_Resolver => new ClientIpResolver(),
         };
     }
 }

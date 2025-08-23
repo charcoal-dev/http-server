@@ -22,7 +22,7 @@ enum KernelPipelines: string implements MiddlewareEnumInterface
 {
     case RequestID_Resolver = RequestIdResolverInterface::class;
     case URL_EncodingEnforcer = UrlEncodingEnforcerInterface::class;
-    case ClientIp_Resolver = ClientIpResolverInterface::class;
+    case ClientIP_Resolver = ClientIpResolverInterface::class;
 
     /**
      * @return array<class-string>
