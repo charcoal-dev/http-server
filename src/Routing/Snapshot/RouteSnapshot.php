@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Routing\Snapshot;
 
 use Charcoal\Http\Router\Controllers\ControllerValidated;
+use Charcoal\Http\Router\Internal\Constants;
 
 /**
  * Represents inspection details of a route or route group.
@@ -31,7 +32,7 @@ final readonly class RouteSnapshot
         $params = [];
         $matchRegExp = preg_quote($this->path, "~");
         $matchRegExp = preg_replace_callback(
-            "/\\\\:([A-Za-z0-9_]+)/",
+            Constants::PARAM_NAME_CAPTURE_REGEXP,
             function ($match) use (&$params) {
                 $params[] = $match[1];
                 return "([^/]+)";

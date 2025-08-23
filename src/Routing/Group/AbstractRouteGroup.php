@@ -10,6 +10,7 @@ namespace Charcoal\Http\Router\Routing\Group;
 
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
+use Charcoal\Http\Router\Internal\Constants;
 use Charcoal\Http\Router\Middleware\Bag\Bag;
 use Charcoal\Http\Router\Middleware\Bag\SealedBag;
 use Charcoal\Http\Router\Routing\Route;
@@ -43,7 +44,7 @@ abstract readonly class AbstractRouteGroup
         $this->path = match (true) {
             !$parent && $path === "" => "/",
             !$parent && $path => throw new \InvalidArgumentException("Root route must be '/' precise"),
-            $path && preg_match('/^(?:[A-Za-z0-9_.-]*[A-Za-z0-9]|:[A-Za-z0-9]+)(?:\/(?:[A-Za-z0-9_.-]*[A-Za-z0-9]|:[A-Za-z0-9]+))*$/', $path) => $path,
+            $path && preg_match(Constants::PATH_VALIDATION_REGEXP, $path) => $path,
             default => throw new \InvalidArgumentException("Route prefix is invalid " . $path),
         };
 

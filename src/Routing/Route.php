@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Routing;
 
 use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
+use Charcoal\Http\Router\Internal\Constants;
 use Charcoal\Http\Router\Middleware\Bag\SealedBag;
 use Charcoal\Http\Router\Support\HttpMethods;
 
@@ -33,7 +34,7 @@ final readonly class Route
         $path = trim($path, "/");
         $this->path = match (true) {
             $path === "" => "/",
-            (bool)preg_match('/^(?:[A-Za-z0-9_.-]*[A-Za-z0-9]|:[A-Za-z0-9]+)(?:\/(?:[A-Za-z0-9_.-]*[A-Za-z0-9]|:[A-Za-z0-9]+))*$/', $path) => $path,
+            (bool)preg_match(Constants::PATH_VALIDATION_REGEXP, $path) => $path,
             default => throw new \InvalidArgumentException("Route prefix is invalid: " . $path),
         };
 
