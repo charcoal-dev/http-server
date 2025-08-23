@@ -8,34 +8,36 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing\Snapshot;
 
-use Charcoal\Http\Router\Routing\Registry\RoutingIndex;
-
 /**
  * Class AppRoutingSnapshot
  * @package Charcoal\Http\Router\Routing\Snapshot
  */
-final readonly class AppRoutingSnapshot
+final readonly class AppRoutingSnapshot implements \IteratorAggregate, \Countable
 {
     /** @var array<RouteSnapshot> */
-    public array $routes;
+    private array $routes;
     /** @var array<string, int> */
-    public array $index;
+    private array $index;
+    private int $count;
 
-    /**
-     * @param RoutingIndex $index
-     */
-    public function __construct(RoutingIndex $index)
+    public function __construct(RouteSnapshot ...$snapshot)
     {
-        $inspections = [];
-        $c = -1;
-        foreach ($index->routes as $path => $node) {
-            $c++;
-            $inspections[] = new RouteSnapshot($c, $path, $node);
+        /** @var array<RouteSnapshot> $routes */
+        $routes = [];
+        /** @var array<string,true> $table */
+        $table = [];
+        foreach ($snapshot as $route) {
+            if (isset($table[$route->path])) {
+                throw new \UnexpectedValueException("Duplicate route: " . $route->path);
+            }
+
+            $table[$route->path] = true;
+            $routes[] = $route;
         }
 
-        $this->index = array_combine(array_keys($index->routes),
-            range(0, count($index->routes) - 1));
-        $this->routes = $inspections;
+        $this->count = count($routes);
+        $this->index = array_combine(array_keys($table), range(0, $this->count - 1));
+        $this->routes = $routes;
     }
 
     /**
@@ -53,6 +55,14 @@ final readonly class AppRoutingSnapshot
     }
 
     /**
+     * @return int
+     */
+    public function count(): int
+    {
+        return $this->count;
+    }
+
+    /**
      * @return \Traversable
      */
     public function getIterator(): \Traversable
@@ -65,7 +75,9 @@ final readonly class AppRoutingSnapshot
      */
     public function __serialize(): array
     {
-        return ["routes" => $this->routes, "index" => $this->index];
+        return ["routes" => $this->routes,
+            "index" => $this->index,
+            "count" => $this->count];
     }
 
     /**
@@ -76,5 +88,6 @@ final readonly class AppRoutingSnapshot
     {
         $this->routes = $data["routes"];
         $this->index = $data["index"];
+        $this->count = $data["count"];
     }
 }
