@@ -33,7 +33,7 @@ final class Bag extends AbstractVector
      */
     public static function create(Scope $scope): self
     {
-        return new self($scope, [], Router::$validateMiddlewareClasses);
+        return new self($scope, [], !Router::$validateMiddlewareClasses);
     }
 
     /**
@@ -48,7 +48,7 @@ final class Bag extends AbstractVector
             $collection = [...$collection, ...$bag->getArray()];
         }
 
-        return new self($scope, $collection, Router::$validateMiddlewareClasses);
+        return new self($scope, $collection, !Router::$validateMiddlewareClasses);
     }
 
     /**
@@ -85,7 +85,7 @@ final class Bag extends AbstractVector
         }
 
         foreach ($middleware as $m) {
-            $this->values[] = new MiddlewareConstructor($this->scope, $m, isTesting: Router::$validateMiddlewareClasses);
+            $this->values[] = new MiddlewareConstructor($this->scope, $m, isTesting: !Router::$validateMiddlewareClasses);
         }
 
         return $this;
@@ -107,7 +107,7 @@ final class Bag extends AbstractVector
             $this->scope,
             $classname,
             $arguments,
-            isTesting: Router::$validateMiddlewareClasses
+            isTesting: !Router::$validateMiddlewareClasses
         );
 
         return $this;
