@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Middleware;
+namespace Charcoal\Http\Router\Middleware\Bag;
 
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 
@@ -14,7 +14,7 @@ use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
  * Represents a sealed container for two middleware bags: an "own" bag and an "inherited" bag.
  * Ensures that both bags are in a locked state upon instantiation.
  */
-final readonly class SealedMiddlewareBag
+final readonly class SealedBag
 {
     /** @var array<class-string<MiddlewareInterface>> */
     public array $own;
@@ -23,8 +23,8 @@ final readonly class SealedMiddlewareBag
 
     public function __construct(
         public string $owner,
-        MiddlewareBag $own,
-        MiddlewareBag $inherited,
+        Bag           $own,
+        Bag           $inherited,
     )
     {
         if (!$own->isLocked()) {

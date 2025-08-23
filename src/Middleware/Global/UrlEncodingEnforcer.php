@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Middleware\Global;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
+use Charcoal\Http\Router\Attributes\BindsTo;
 use Charcoal\Http\Router\Contracts\Middleware\Global\UrlEncodingEnforcerInterface;
 use Charcoal\Http\Router\Exceptions\Middleware\Global\UrlEncodingViolation;
 
@@ -17,6 +18,7 @@ use Charcoal\Http\Router\Exceptions\Middleware\Global\UrlEncodingViolation;
  * standards. If the path does not correctly roundup between encoding and decoding,
  * an exception is thrown to indicate a violation.
  */
+#[BindsTo(UrlEncodingEnforcerInterface::class)]
 final class UrlEncodingEnforcer implements UrlEncodingEnforcerInterface
 {
     public function __invoke(UrlInfo $url): void

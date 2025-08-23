@@ -10,6 +10,7 @@ namespace Charcoal\Http\Router\Middleware\Global;
 
 use Charcoal\Buffers\Frames\Bytes16;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
+use Charcoal\Http\Router\Attributes\BindsTo;
 use Charcoal\Http\Router\Contracts\Middleware\Global\RequestIdResolverInterface;
 
 /**
@@ -18,6 +19,7 @@ use Charcoal\Http\Router\Contracts\Middleware\Global\RequestIdResolverInterface;
  * expected format, it is returned as a Bytes16 instance. Otherwise,
  * a new random ID is generated and returned.
  */
+#[BindsTo(RequestIdResolverInterface::class)]
 final class RequestIdResolver implements RequestIdResolverInterface
 {
     public function __invoke(HeadersImmutable $headers): Bytes16
