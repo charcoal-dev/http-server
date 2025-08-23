@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Routing\Group;
 
 use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareFactoryInterface;
 use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Router\Routing\RouteBuilder;
 
@@ -25,7 +26,7 @@ final class RouteGroupBuilder
     }
 
     /**
-     * @param string ...$pipelines
+     * @param class-string<MiddlewareFactoryInterface> ...$pipelines
      * @return $this
      * @api
      */
