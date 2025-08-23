@@ -8,134 +8,40 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router;
 
-use Charcoal\Base\Traits\NoDumpTrait;
-use Charcoal\Base\Traits\NotCloneableTrait;
-use Charcoal\Base\Traits\NotSerializableTrait;
-use Charcoal\Http\Router\Contracts\RoutingInterface;
-use Charcoal\Http\Router\Controller\AbstractController;
-use Charcoal\Http\Router\Exceptions\RoutingException;
-use Charcoal\Http\Router\Policy\RouterPolicy;
-use Charcoal\Http\Router\Request\Request;
+use Charcoal\Http\Router\Contracts\Middleware\Global\GlobalMiddlewareInterface;
+use Charcoal\Http\Router\Internal\RouterTestableTrait;
+use Charcoal\Http\Router\Middleware\MiddlewareRegistry;
+use Charcoal\Http\Router\Request\RequestContext;
+use Charcoal\Http\Router\Request\ServerRequest;
+use Charcoal\Http\Router\Routing\AppRoutes;
+use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
 
 /**
- * Class Router
- * @package Charcoal\Http\Router
+ * Represents a router responsible for handling application routing and middleware pipelines.
  */
-class Router implements RoutingInterface
+final class Router
 {
-    /** @var array<Route> */
-    private array $routes = [];
-    private int $count = 0;
+    use RouterTestableTrait;
 
+    public readonly AppRoutingSnapshot $snapshot;
 
-    /** @var null|string */
-    private ?string $fallbackController = null;
-    /** @var array */
-    private array $controllersArgs = [];
-
-    use NoDumpTrait;
-    use NotCloneableTrait;
-    use NotSerializableTrait;
-
-    public function __construct(
-        public readonly RouterPolicy $policy
-    )
+    public function __construct(AppRoutes $routes, MiddlewareRegistry $middlewareRegistry)
     {
+        $this->snapshot = $routes->snapshot();
     }
 
-    public function routerCount(): int
+    public function middleware(GlobalMiddlewareInterface ...$pipelines): self
     {
-        return $this->count;
-    }
-
-    /**
-     * @param array $args
-     * @return void
-     */
-    public function setControllersArgs(array $args): void
-    {
-        $this->controllersArgs = $args;
-    }
-
-    /**
-     * Gets all defined routes in an array
-     * @return array
-     */
-    public function routesArray(): array
-    {
-        return $this->routes;
-    }
-
-    /**
-     * Fallback/default controller class, this class is invoked when a request cannot be routed to any controller
-     * @param string $controller
-     * @return $this
-     */
-    public function fallbackController(string $controller): static
-    {
-        if (!class_exists($controller)) {
-            throw new \InvalidArgumentException('Default router fallback controller class is invalid or does not exist');
-        }
-
-        $this->fallbackController = $controller;
         return $this;
     }
 
-    /**
-     * @param string $path
-     * @param string $controllerClassOrNamespace
-     * @return Route
-     */
-    public function route(string $path, string $controllerClassOrNamespace): Route
+    public function accept(ServerRequest $request): void
     {
-        $route = new Route($this, $path, $controllerClassOrNamespace);
-        $this->routes[] = $route;
-        $this->count++;
-        return $route;
+        $processor = new RequestContext($this, $request);
     }
 
-    /**
-     * @param Request $request
-     * @return AbstractController
-     * @throws RoutingException
-     */
-    public function try(Request $request): AbstractController
+    public function pipelines()
     {
-        // Find controller
-        $controller = null;
-        foreach ($this->routes as $route) {
-            $controller = $route->try($request);
-            if ($controller) {
-                break;
-            }
-        }
 
-        $controller = $controller ?? $this->fallbackController;
-        if (!$controller) {
-            throw new RoutingException('Could not route request to any controller');
-        }
-
-        return $this->createControllerInstance($controller, $request);
-    }
-
-    /**
-     * @param class-string<AbstractController> $controllerClass
-     * @param Request $request
-     * @param AbstractController|null $previous
-     * @param string|null $entryPoint
-     * @return AbstractController
-     */
-    public function createControllerInstance(
-        string              $controllerClass,
-        Request             $request,
-        ?AbstractController $previous = null,
-        ?string             $entryPoint = null
-    ): AbstractController
-    {
-        if (!is_subclass_of($controllerClass, AbstractController::class, true)) {
-            throw new \DomainException('Controller class does not extend "' . AbstractController::class . '"');
-        }
-
-        return new $controllerClass($this, $request, $previous, $entryPoint, $this->controllersArgs);
     }
 }
