@@ -10,6 +10,7 @@ namespace Charcoal\Http\Router\Middleware\Global;
 
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Router\Attributes\BindsTo;
+use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Global\ClientIpResolverInterface;
 
 /**
@@ -17,8 +18,15 @@ use Charcoal\Http\Router\Contracts\Middleware\Global\ClientIpResolverInterface;
  * Implements the ClientIpResolverInterface to ensure consistency in implementation.
  */
 #[BindsTo(ClientIpResolverInterface::class)]
-final class ClientIpResolver implements ClientIpResolverInterface
+final class ClientIpResolver implements ClientIpResolverInterface, MiddlewareConstructableInterface
 {
+    /**
+     * Constructor as required by MiddlewareConstructableInterface
+     */
+    public function __construct()
+    {
+    }
+
     /**
      * Resolves and returns the client's IP address from the server variables.
      */

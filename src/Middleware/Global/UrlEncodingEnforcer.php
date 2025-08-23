@@ -10,8 +10,8 @@ namespace Charcoal\Http\Router\Middleware\Global;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Attributes\BindsTo;
+use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Global\UrlEncodingEnforcerInterface;
-use Charcoal\Http\Router\Exceptions\Middleware\Global\UrlEncodingViolation;
 
 /**
  * This class ensures that the given URL path complies with proper URL encoding
@@ -19,8 +19,18 @@ use Charcoal\Http\Router\Exceptions\Middleware\Global\UrlEncodingViolation;
  * an exception is thrown to indicate a violation.
  */
 #[BindsTo(UrlEncodingEnforcerInterface::class)]
-final class UrlEncodingEnforcer implements UrlEncodingEnforcerInterface
+final class UrlEncodingEnforcer implements UrlEncodingEnforcerInterface, MiddlewareConstructableInterface
 {
+    /**
+     * Constructor as required by MiddlewareConstructableInterface
+     */
+    public function __construct()
+    {
+    }
+
+    /**
+     * Ensures that the given URL path complies with proper URL encoding standards.
+     */
     public function __invoke(UrlInfo $url): void
     {
         if (is_null($url->path) || $url->path === "/") {
@@ -28,15 +38,15 @@ final class UrlEncodingEnforcer implements UrlEncodingEnforcerInterface
         }
 
         if (preg_match('/[\x00-\x1F\x7F]/', $url->path)) {
-            throw new UrlEncodingViolation("Control character in path");
+            throw new \InvalidArgumentException("URL path contains invalid characters");
         }
 
         if (preg_match("/%(?![0-9A-Fa-f]{2})/", $url->path)) {
-            throw new UrlEncodingViolation("Bad percent-encoding in path");
+            throw new \InvalidArgumentException("Bad percent-encoding in path");
         }
 
         if ($url->path !== rawurldecode(rawurlencode($url->path))) {
-            throw new UrlEncodingViolation("Malformed URL path");
+            throw new \InvalidArgumentException("Malformed URL path");
         }
     }
 }
