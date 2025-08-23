@@ -105,9 +105,12 @@ final readonly class MiddlewareConstructor
 
     private function tryCheckBindings(string $classname): array
     {
-        if (class_exists($classname)) {
-            $reflect = new \ReflectionClass($classname);
-            return array_map(fn($a) => $a->newInstance()->contract, $reflect->getAttributes(BindsTo::class));
+        try {
+            if (class_exists($classname)) {
+                $reflect = new \ReflectionClass($classname);
+                return array_map(fn($a) => $a->newInstance()->contract, $reflect->getAttributes(BindsTo::class));
+            }
+        } catch (\Exception) {
         }
 
         return [];
