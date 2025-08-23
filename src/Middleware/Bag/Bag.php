@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Middleware\Bag;
 
+use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Vectors\AbstractVector;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
@@ -21,6 +22,8 @@ use Charcoal\Http\Router\Middleware\MiddlewareConstructor;
  */
 final class Bag extends AbstractVector
 {
+    use NoDumpTrait;
+
     private static bool $testMode = false;
     private bool $locked = false;
 
