@@ -8,9 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing\Snapshot;
 
-use Charcoal\Http\Router\Controller\AbstractController;
-use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
-use Charcoal\Http\Router\Routing\Route;
+use Charcoal\Http\Router\Controllers\ControllerValidated;
 
 /**
  * Represents inspection details of a route or route group.
@@ -19,37 +17,17 @@ use Charcoal\Http\Router\Routing\Route;
  */
 final readonly class RouteSnapshot
 {
-    public bool $isGroup;
-    public bool $isController;
-    /** @var null|array<string,class-string<AbstractController>> */
-    public ?array $methods;
     public string $matchRegExp;
-    /** @var null|array<string,string> */
+    /** @var array<ControllerBinding> */
+    public array $controllers;
+    /** @var null|array<string> */
     public ?array $params;
 
-    public function __construct(public int $index, public string $path, array $node)
+    public function __construct(
+        public string       $path,
+        ControllerValidated ...$controllers
+    )
     {
-        $isGroup = false;
-        $isRoute = false;
-        $methods = [];
-        foreach ($node as $leaf) {
-            if ($leaf instanceof AbstractRouteGroup) {
-                $isGroup = true;
-                continue;
-            }
-
-            if ($leaf instanceof Route) {
-                $isRoute = true;
-                foreach ($leaf->methods ?: ["*" => true] as $method => $bool) {
-                    $methods[$method] = $leaf->classname;
-                }
-            }
-        }
-
-        $this->isGroup = $isGroup;
-        $this->isController = $isRoute;
-        $this->methods = $methods ?: null;
-
         $params = [];
         $matchRegExp = preg_quote($this->path, "~");
         $matchRegExp = preg_replace_callback(
@@ -63,5 +41,6 @@ final readonly class RouteSnapshot
 
         $this->matchRegExp = "~^" . $matchRegExp . "$~";
         $this->params = $params ?: null;
+        $this->controllers = $controllers;
     }
 }
