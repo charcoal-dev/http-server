@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Exceptions;
 
 use Charcoal\Http\Router\Enums\RequestError;
+use Charcoal\Http\Router\Request\Result\RedirectUrl;
 
 /**
  * An exception specifically designed to handle errors related to the request context.
@@ -20,7 +21,7 @@ class RequestContextException extends \Exception
     public function __construct(
         public readonly RequestError $error,
         \Throwable                   $previous,
-        public readonly ?array       $redirectTo = null,
+        public readonly ?RedirectUrl $redirectTo = null,
     )
     {
         parent::__construct($previous->getMessage(), 0, $previous);
