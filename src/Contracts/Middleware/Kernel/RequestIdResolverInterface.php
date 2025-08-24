@@ -14,7 +14,7 @@ use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInt
 
 /**
  * This interface is responsible for resolving a unique request ID for each incoming request.
- * It extends the KernelMiddlewareInterface, ensuring its operations align with kernel` middleware behavior.
+ * It extends the KernelMiddlewareInterface, ensuring its operations align with kernel middleware behavior.
  */
 interface RequestIdResolverInterface extends KernelMiddlewareInterface, MiddlewareConstructableInterface
 {

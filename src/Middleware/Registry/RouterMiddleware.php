@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Internal;
+namespace Charcoal\Http\Router\Middleware\Registry;
 
 use Charcoal\Http\Router\Contracts\Middleware\Group\GroupMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
@@ -24,7 +24,7 @@ use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
  * Provides mechanisms to lock the registry to prevent further modifications.
  * @internal
  */
-final class MiddlewareRegistry
+final class RouterMiddleware
 {
     /** @var array<non-empty-string,MiddlewareInterface> */
     private array $resolved = [
@@ -40,17 +40,20 @@ final class MiddlewareRegistry
         Scope::Route->name => [],
     ];
 
+    private ResolverFacade $resolverIndex;
+
     /**
      * Manages the registration and handling of middleware components.
      * Provides functionalities to resolve, allowlist, and enable middleware processing.
      */
     public function __construct(
-        AppRoutingSnapshot                                 $routingSnapshot,
-        protected readonly MiddlewareResolverInterface     $resolver,
-        protected readonly ?MiddlewareTrustPolicyInterface $trustPolicy = null,
-        protected bool                                     $isLocked = false,
+        AppRoutingSnapshot                               $routingSnapshot,
+        private readonly MiddlewareResolverInterface     $resolver,
+        private readonly ?MiddlewareTrustPolicyInterface $trustPolicy = null,
+        private bool                                     $isLocked = false,
     )
     {
+        $this->resolverIndex = new ResolverFacade($this);
         foreach ($routingSnapshot as $routeDto) {
             foreach ($routeDto->controllers as $controllerDto) {
                 if (!$controllerDto->middleware) {
@@ -71,6 +74,14 @@ final class MiddlewareRegistry
                 }
             }
         }
+    }
+
+    /**
+     * @return ResolverFacade
+     */
+    public function facade(): ResolverFacade
+    {
+        return $this->resolverIndex;
     }
 
     /**
