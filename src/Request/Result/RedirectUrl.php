@@ -27,20 +27,25 @@ final readonly class RedirectUrl
     }
 
     /**
-     * Constructs and returns a URL string based on the provided path, query, fragment,
-     * scheme, host, and port details. It supports both absolute and relative URLs.
-     * @return string The constructed URL based on the current object's properties.
+     * Constructs and returns a URL based on the provided parameters.
+     * @api
      */
-    public function getUrl(?UrlInfo $previous): string
+    public function getUrl(
+        ?UrlInfo $previous,
+        ?bool    $absolute = null,
+        ?bool    $queryStr = null
+    ): string
     {
         $previous ??= $this->previous;
+        $absolute ??= $this->absolute;
+        $queryStr ??= $this->queryStr;
         $redirectTo = "/" . ltrim($this->path, "/");
-        if ($this->queryStr) {
+        if ($queryStr) {
             $redirectTo .= $previous->query ? ("?" . $previous->query) : "";
             $redirectTo .= $previous->fragment ? ("#" . $previous->fragment) : "";
         }
 
-        return $this->absolute && ($previous->scheme && $previous->host) ?
+        return $absolute && ($previous->scheme && $previous->host) ?
             (($previous->scheme . "://") .
                 ((str_contains($previous->host, ":") && $previous->host[0] !== "[") ?
                     ("[" . $previous->host . "]") : $previous->host) .
