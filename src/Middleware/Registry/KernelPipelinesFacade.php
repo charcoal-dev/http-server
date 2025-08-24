@@ -8,8 +8,9 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Middleware\Registry;
 
+use Charcoal\Http\Commons\Headers\HeadersImmutable;
+use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
-use Charcoal\Http\Router\Contracts\Middleware\Kernel\RequestIdResolverInterface;
 use Charcoal\Http\Router\Enums\Middleware\KernelPipelines;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 
@@ -26,19 +27,38 @@ final readonly class KernelPipelinesFacade
      * Resolves and returns the KernelMiddlewareInterface instance from the registry
      * based on the provided pipeline and optional context.
      */
-    public function resolve(KernelPipelines $pipeline, array $context = []): KernelMiddlewareInterface
+    public function resolve(KernelPipelines $pipeline, array $context = []): KernelMiddlewareInterface|callable
     {
-        /** @var KernelMiddlewareInterface */
         return $this->registry->resolve(Scope::Kernel, $pipeline->value, $context);
     }
 
     /**
      * Resolves and returns the RequestIdResolverInterface instance from the registry
      * using the specified scope and interface class.
+     * @return callable(HeadersImmutable $headers): string
      */
-    public function requestIdResolver(): RequestIdResolverInterface
+    public function requestIdResolver(): callable
     {
-        /** @var RequestIdResolverInterface */
         return $this->resolve(KernelPipelines::RequestID_Resolver);
+    }
+
+    /**
+     * Resolves and returns the UrlEncodingEnforcer instance from the registry
+     * using the specified scope and interface class.
+     * @return callable(UrlInfo $url): ?string
+     */
+    public function urlEncodingEnforcer(): callable
+    {
+        return $this->resolve(KernelPipelines::URL_EncodingEnforcer);
+    }
+
+    /**
+     * Resolves and returns the UrlEncodingEnforcer instance from the registry
+     * using the specified scope and interface class.
+     * @return callable(HeadersImmutable $headers): ?string
+     */
+    public function clientIpResolver(): callable
+    {
+        return $this->resolve(KernelPipelines::ClientIP_Resolver);
     }
 }

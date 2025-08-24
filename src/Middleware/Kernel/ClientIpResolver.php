@@ -29,7 +29,7 @@ final class ClientIpResolver implements ClientIpResolverInterface
     /**
      * Resolves and returns the client's IP address from the server variables.
      */
-    public function __invoke(HeadersImmutable $headers): string|false
+    public function __invoke(HeadersImmutable $headers): string
     {
         return $_SERVER["REMOTE_ADDR"] ?:
             throw new \RuntimeException("Unable to resolve client IP address");

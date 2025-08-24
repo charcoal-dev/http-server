@@ -17,5 +17,5 @@ use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInt
  */
 interface ClientIpResolverInterface extends KernelMiddlewareInterface, MiddlewareConstructableInterface
 {
-    public function __invoke(HeadersImmutable $headers): string|false;
+    public function __invoke(HeadersImmutable $headers): string;
 }

@@ -1,0 +1,28 @@
+<?php
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
+ */
+
+declare(strict_types=1);
+
+namespace Charcoal\Http\Router\Exceptions;
+
+use Charcoal\Http\Router\Enums\RequestError;
+
+/**
+ * An exception specifically designed to handle errors related to the request context.
+ * It extends the base Exception class and provides additional details such as the request error instance
+ * and an optional redirect target.
+ */
+class RequestContextException extends \Exception
+{
+    public function __construct(
+        public readonly RequestError $error,
+        \Throwable                   $previous,
+        public readonly ?array       $redirectTo = null,
+    )
+    {
+        parent::__construct($previous->getMessage(), 0, $previous);
+    }
+}
