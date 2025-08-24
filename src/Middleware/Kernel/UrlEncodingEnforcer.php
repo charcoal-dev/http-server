@@ -11,6 +11,7 @@ namespace Charcoal\Http\Router\Middleware\Kernel;
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Attributes\BindsTo;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\UrlEncodingEnforcerInterface;
+use Charcoal\Http\Router\Request\Result\RedirectUrl;
 
 /**
  * This class ensures that the given URL path complies with proper URL encoding
@@ -30,7 +31,7 @@ final class UrlEncodingEnforcer implements UrlEncodingEnforcerInterface
     /**
      * Ensures that the given URL path complies with proper URL encoding standards.
      */
-    public function __invoke(UrlInfo $url): ?string
+    public function __invoke(UrlInfo $url): ?RedirectUrl
     {
         if (is_null($url->path) || $url->path === "/") {
             return null;
@@ -50,7 +51,7 @@ final class UrlEncodingEnforcer implements UrlEncodingEnforcerInterface
 
         $normalized = preg_replace("/\/+/", "/", "/" . trim($url->path, "/"));
         if ($normalized !== rtrim($url->path, "/")) {
-            return $normalized; // Redirect suggested
+            return new RedirectUrl($url, 308, $normalized, false, true);
         }
 
         // Only ASCII chars (with ._-) are allowed, Dot segments are not allowed

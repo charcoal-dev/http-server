@@ -16,14 +16,24 @@ use Charcoal\Http\Router\Request\Result\RedirectUrl;
  * It extends the base Exception class and provides additional details such as the request error instance
  * and an optional redirect target.
  */
-class RequestContextException extends \Exception
+final class RequestContextException extends \Exception
 {
     public function __construct(
         public readonly RequestError $error,
-        \Throwable                   $previous,
+        ?\Throwable                  $previous,
         public readonly ?RedirectUrl $redirectTo = null,
     )
     {
         parent::__construct($previous->getMessage(), 0, $previous);
+    }
+
+    /**
+     * @param RequestError $error
+     * @param RedirectUrl $redirectTo
+     * @return self
+     */
+    public static function forRedirect(RequestError $error, RedirectUrl $redirectTo): self
+    {
+        return new self($error, null, $redirectTo);
     }
 }

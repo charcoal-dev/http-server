@@ -10,14 +10,14 @@ namespace Charcoal\Http\Router\Contracts\Middleware\Kernel;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInterface;
+use Charcoal\Http\Router\Request\Result\RedirectUrl;
 
 /**
- * This interface acts as middleware, ensuring that the provided URL complies
- * with specific encoding standards. If the URL does not meet the required
- * criteria, an exception may be thrown. If redirection is required, the
- * middleware may return a new URL string or NULL
+ * Interface that defines a contract for enforcing proper URL encoding rules.
+ * This ensures that URLs meet specific encoding standards and can optionally
+ * provide a redirection URL if a change is required.
  */
 interface UrlEncodingEnforcerInterface extends KernelMiddlewareInterface, MiddlewareConstructableInterface
 {
-    public function __invoke(UrlInfo $url): ?string;
+    public function __invoke(UrlInfo $url): ?RedirectUrl;
 }
