@@ -18,6 +18,5 @@ use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInt
  */
 interface UrlEncodingEnforcerInterface extends KernelMiddlewareInterface, MiddlewareConstructableInterface
 {
-
     public function __invoke(UrlInfo $url): void;
 }
