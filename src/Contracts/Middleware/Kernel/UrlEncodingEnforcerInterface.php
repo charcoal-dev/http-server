@@ -14,9 +14,10 @@ use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInt
 /**
  * This interface acts as middleware, ensuring that the provided URL complies
  * with specific encoding standards. If the URL does not meet the required
- * criteria, an exception may be thrown.
+ * criteria, an exception may be thrown. If redirection is required, the
+ * middleware may return a new URL string or NULL
  */
 interface UrlEncodingEnforcerInterface extends KernelMiddlewareInterface, MiddlewareConstructableInterface
 {
-    public function __invoke(UrlInfo $url): void;
+    public function __invoke(UrlInfo $url): ?string;
 }

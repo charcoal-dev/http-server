@@ -30,22 +30,34 @@ final class UrlEncodingEnforcer implements UrlEncodingEnforcerInterface
     /**
      * Ensures that the given URL path complies with proper URL encoding standards.
      */
-    public function __invoke(UrlInfo $url): void
+    public function __invoke(UrlInfo $url): ?string
     {
         if (is_null($url->path) || $url->path === "/") {
-            return;
+            return null;
         }
 
-        if (preg_match('/[\x00-\x1F\x7F]/', $url->path)) {
-            throw new \InvalidArgumentException("URL path contains invalid characters");
+        if (strlen($url->path) > 256) {
+            throw new \InvalidArgumentException("URL path is too long; Maximum 256 bytes allowed", 414);
         }
 
-        if (preg_match("/%(?![0-9A-Fa-f]{2})/", $url->path)) {
-            throw new \InvalidArgumentException("Bad percent-encoding in path");
+        if (preg_match("/[\x00-\x1F\x7F]/", $url->path)) {
+            throw new \InvalidArgumentException("Control character in path");
         }
 
-        if ($url->path !== rawurldecode(rawurlencode($url->path))) {
-            throw new \InvalidArgumentException("Malformed URL path");
+        if (str_contains($url->path, "%")) {
+            throw new \InvalidArgumentException("Percent-encoding not allowed in path");
         }
+
+        $normalized = preg_replace("/\/+/", "/", "/" . trim($url->path, "/"));
+        if ($normalized !== rtrim($url->path, "/")) {
+            return $normalized; // Redirect suggested
+        }
+
+        // Only ASCII chars (with ._-) are allowed, Dot segments are not allowed
+        if (!preg_match("/^(\/[A-Za-z0-9.\-_]*[A-Za-z0-9\-_])*\/?$/", $url->path)) {
+            throw new \InvalidArgumentException("URL contains invalid characters");
+        }
+
+        return null;
     }
 }
