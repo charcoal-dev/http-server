@@ -15,6 +15,7 @@ use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Config\HttpServer;
 use Charcoal\Http\Router\Config\RouterConfig;
 use Charcoal\Http\Router\Config\TrustedProxy;
+use Charcoal\Http\Router\Exceptions\RequestContextException;
 use Charcoal\Http\Router\Request\GatewayEnv;
 use Charcoal\Http\Router\Request\ServerRequest;
 use Charcoal\Http\Router\Request\TrustGateway;
@@ -24,8 +25,50 @@ use PHPUnit\Framework\TestCase;
  * Class GatewayTest
  * @package Charcoal\Http\Tests\Router
  */
-class GatewayTest extends TestCase
+final class GatewayTest extends TestCase
 {
+    /**
+     * @throws RequestContextException
+     */
+    public function testGateway_Xff_LongChain_Index7_UsesNearestTrustedAndCustomPort(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 6001)],
+            [new TrustedProxy(true, ["10.0.0.0/8"], 10)],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "10.0.0.99"; // nearest trusted proxy (must match allowed CIDR)
+        $headers = new Headers();
+
+        // XFF: left→right = client→...→nearest; we walk right→left.
+        // We want the first non-trusted at reversed index 7.
+        $headers->set("X-Forwarded-For", "garbage, unknown, 203.0.113.77, 10.0.0.93, 10.0.0.94, 10.0.0.95, 10.0.0.96, 10.0.0.97, 10.0.0.98, 10.0.0.99");
+        // Align host/port/proto lists with XFF (same count). Entry used will be at reversed index 6 (original index 3).
+        $headers->set("X-Forwarded-Host", "h0, h1, h2, hostname.tld, h4, h5, h6, h7, h8, h9");
+        $headers->set("X-Forwarded-Port", "5000, 5001, 5002, 6001, 5004, 5005, 5006, 5007, 5008, 5009");
+        $headers->set("X-Forwarded-Proto", "http, http, http, https, http, http, http, http, http, http");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://placeholder/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp));
+
+        // First non-trusted from right is at index 7 → client IP
+        $this->assertSame("203.0.113.77", $gw->clientIp);
+        // Authority promoted from nearest trusted hop (index 6)
+        $this->assertSame("hostname.tld", $gw->server?->hostname);
+        $this->assertSame(6001, $gw->port);
+        $this->assertSame("https", $gw->scheme);
+        $this->assertSame(7, $gw->proxyHop);
+    }
+
     /**
      * @return void
      * @throws \Charcoal\Http\Router\Exceptions\RequestContextException
