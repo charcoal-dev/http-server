@@ -51,7 +51,7 @@ final class UrlEncodingEnforcer implements UrlEncodingEnforcerInterface
 
         $normalized = preg_replace("/\/+/", "/", "/" . trim($url->path, "/"));
         if ($normalized !== rtrim($url->path, "/")) {
-            return new RedirectUrl($url, 308, $normalized, false, true);
+            return new RedirectUrl($url, 308, $normalized, absolute: false, queryStr: true);
         }
 
         // Only ASCII chars (with ._-) are allowed, Dot segments are not allowed

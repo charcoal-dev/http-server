@@ -24,7 +24,6 @@ interface Constants
      * Path validations RegExp literals
      * @var non-empty-string
      */
-
     // language=RegExp
     public const string PATH_VALIDATION_REGEXP = "~^(?:[A-Za-z0-9_.-]*[A-Za-z0-9]|" . self::PARAM_FORMAT_REGEXP . ")" .
     "(?:/(?:[A-Za-z0-9_.-]*[A-Za-z0-9]|" . self::PARAM_FORMAT_REGEXP . "))*$~";
@@ -35,4 +34,9 @@ interface Constants
     // language=RegExp
     public const string PARAM_NAME_PLACEHOLDER = "([^/]+)";
 
+    /**
+     * Cache duration for permanent redirects
+     * @var int
+     */
+    public const int PERMANENT_REDIRECT_CACHE = 604800;
 }

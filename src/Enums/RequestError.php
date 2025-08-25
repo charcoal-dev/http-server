@@ -16,10 +16,14 @@ namespace Charcoal\Http\Router\Enums;
 enum RequestError
 {
     case KernelError;
+    case BadPeerIp;
+    case BadHostname;
+    case IncorrectHost;
+    case TlsEnforcedRedirect;
     case RequestIdError;
     case BadUrlEncoding;
     case BadUrlLength;
-    case ClientIpError;
+    case UrlNormalizedRedirect;
 
     /**
      * Determines and returns the appropriate HTTP status code
@@ -30,7 +34,6 @@ enum RequestError
         return match ($this) {
             self::RequestIdError,
             self::BadUrlEncoding,
-            self::ClientIpError => 400,
             self::BadUrlLength => 414,
             default => 500
         };

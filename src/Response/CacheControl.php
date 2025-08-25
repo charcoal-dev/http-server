@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Response;
 
-use Charcoal\Http\Router\Enums\CacheStoreDirective;
+use Authorization\CacheStoreDirective;
 
 /**
  * Class CacheControl

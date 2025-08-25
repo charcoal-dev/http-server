@@ -12,7 +12,6 @@ use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareResolverInterface;
 use Charcoal\Http\Router\Enums\Middleware\KernelPipelines;
-use Charcoal\Http\Router\Middleware\Kernel\ClientIpResolver;
 use Charcoal\Http\Router\Middleware\Kernel\RequestIdResolver;
 use Charcoal\Http\Router\Middleware\Kernel\UrlEncodingEnforcer;
 
@@ -46,7 +45,6 @@ final readonly class FallbackResolver implements MiddlewareResolverInterface
         return match ($pipeline) {
             KernelPipelines::RequestID_Resolver => new RequestIdResolver(),
             KernelPipelines::URL_EncodingEnforcer => new UrlEncodingEnforcer(),
-            KernelPipelines::ClientIP_Resolver => new ClientIpResolver(),
         };
     }
 }

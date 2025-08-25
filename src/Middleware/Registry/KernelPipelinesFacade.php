@@ -51,14 +51,4 @@ final readonly class KernelPipelinesFacade
     {
         return $this->resolve(KernelPipelines::URL_EncodingEnforcer);
     }
-
-    /**
-     * Resolves and returns the UrlEncodingEnforcer instance from the registry
-     * using the specified scope and interface class.
-     * @return callable(HeadersImmutable $headers): ?string
-     */
-    public function clientIpResolver(): callable
-    {
-        return $this->resolve(KernelPipelines::ClientIP_Resolver);
-    }
 }

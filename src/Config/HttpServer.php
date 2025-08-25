@@ -21,7 +21,7 @@ final readonly class HttpServer
     public bool $isIpAddress;
     public ?array $ports;
 
-    public function __construct(string $hostname, int ...$ports)
+    public function __construct(string $hostname, public bool $enforceTls, int ...$ports)
     {
         $hostname = str_ends_with($hostname, ".") ? substr($hostname, 0, -1) : $hostname;
         $this->wildcard = str_starts_with($hostname, "*.");

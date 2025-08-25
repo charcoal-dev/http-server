@@ -8,28 +8,43 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Request;
 
+use Charcoal\Buffers\Buffer;
+use Charcoal\Http\Commons\Body\Payload;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Router\Config\Config;
 use Charcoal\Http\Router\Enums\RequestError;
 use Charcoal\Http\Router\Exceptions\RequestContextException;
 use Charcoal\Http\Router\Middleware\Registry\ResolverFacade;
 
-final class RequestContext
+/**
+ * Represents the context of an HTTP request, encompassing details such as
+ * request headers, payload, trust gateway information, and internal buffer states.
+ * This class is designed to facilitate HTTP request handling, processing pipelines,
+ * and error management during runtime.
+ */
+final readonly class RequestContext
 {
     /** @var string<non-empty-string> 16 bytes, Binary UUID */
-    public readonly string $requestId;
-    public readonly TrustGateway $gateway;
-    public readonly Headers $headers;
+    public string $requestId;
+    public TrustGateway $gateway;
+    public Headers $headers;
+    public Payload $payload;
+    public Buffer $buffer;
 
     public function __construct(
-        private readonly ServerRequest  $request,
-        private readonly ResolverFacade $middleware,
+        private ServerRequest  $request,
+        private ResolverFacade $middleware,
     )
     {
         $this->headers = new Headers();
 
     }
 
+    /**
+     * @param Config $config
+     * @return void
+     * @throws RequestContextException
+     */
     public function gatewayPipelines(Config $config): void
     {
         // 1. Resolve TrustGateway via trusted proxy CIDR

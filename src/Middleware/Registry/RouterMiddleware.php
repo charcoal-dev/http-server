@@ -147,10 +147,10 @@ final class RouterMiddleware
      * @param Scope $scope
      * @param non-empty-string $contract
      * @param array $context
-     * @return MiddlewareInterface
+     * @return MiddlewareInterface|callable
      * @internal
      */
-    public function resolve(Scope $scope, string $contract, array $context = []): MiddlewareInterface
+    public function resolve(Scope $scope, string $contract, array $context = []): MiddlewareInterface|callable
     {
         $resolved = $this->resolved[$scope->name][$contract] ??
             $this->factories[$scope->name][$contract] ?? null;
