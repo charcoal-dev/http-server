@@ -39,6 +39,7 @@ final readonly class RequestContext
     public string $requestId;
     public TrustGateway $gateway;
     public Headers $headers;
+    public ?array $pathParams;
     public ?CorsPolicy $corsPolicy;
     public ?ContentType $contentType;
     public UnsafePayload $input;
@@ -87,12 +88,16 @@ final readonly class RequestContext
     }
 
     /**
+     * @param array|null $pathParams
      * @return void
      * @throws HttpOptionsException
      * @throws RequestContextException
      */
-    public function preFlightControl(): void
+    public function preFlightControl(?array $pathParams): void
     {
+        $this->pathParams = $pathParams;
+        var_dump($this->pathParams);
+
         // 4. Pre-Flight Control
         $origin = $this->request->headers->get("Origin");
         if ($origin) {

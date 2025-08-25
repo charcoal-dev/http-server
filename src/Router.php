@@ -12,7 +12,6 @@ use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Router\Config\RouterConfig;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareResolverInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareTrustPolicyInterface;
-use Charcoal\Http\Router\Controllers\ValidatedController;
 use Charcoal\Http\Router\Enums\RequestError;
 use Charcoal\Http\Router\Exceptions\HttpOptionsException;
 use Charcoal\Http\Router\Exceptions\RequestContextException;
@@ -94,9 +93,15 @@ final class Router
 
         // Match with available routes
         $matched = false;
+        $urlPath = "/" . trim($request->url->path, "/");
         foreach ($this->routes as $route) {
-            if (preg_match($route->matchRegExp, $request->url->path) === 1) {
+            $tokens = [];
+            if (preg_match_all($route->matchRegExp, $urlPath, $tokens) === 1) {
                 $matched = true;
+                if ($tokens) {
+                    unset($tokens[0]);
+                }
+
                 break;
             }
         }
@@ -113,7 +118,17 @@ final class Router
 
         // Pre-Flight Control
         try {
-            $context->preFlightControl();
+            if ($route->params) {
+                if (!isset($tokens)) {
+                    $tokens = [];
+                }
+
+                $params = array_combine($route->params,
+                    array_pad(array_map(fn($v) => $v[0] ?? null, $tokens),
+                        count($route->params), null));
+            }
+
+            $context->preFlightControl($params ?? null);
         } catch (HttpOptionsException $e) {
             return new OptionsResult(204, $e->allowedOrigin, $e->corsPolicy, $context->headers);
         } catch (RequestContextException $e) {
@@ -138,7 +153,7 @@ final class Router
                 continue;
             }
 
-            if (is_array($controller->methods) && in_array($method->value, $controller->methods)) {
+            if (is_array($controller->methods) && in_array(strtolower($method->value), $controller->methods)) {
                 $matchedController = $controller;
                 break;
             }
