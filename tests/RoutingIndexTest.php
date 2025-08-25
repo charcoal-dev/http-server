@@ -275,7 +275,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $b = $snap->controllers[0];
         self::assertSame(rtrim(RoutingFixtures::FAKE_NAMESPACE, "\\") . "\\HomeController", $b->controller->classname);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
     }
 
@@ -289,7 +288,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(["GET", "HEAD"], array_map(fn($m) => $m->name, $b->methods));
         self::assertSame(["get", "head"], $b->controller->entryPoints);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertNull($snap->params);
     }
@@ -304,7 +302,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertTrue($b->methods);
         self::assertIsArray($b->controller->entryPoints);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertIsArray($snap->params);
         self::assertCount(1, $snap->params);
@@ -332,7 +329,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(["GET", "HEAD"], array_map(fn($m) => $m->name, $b->methods));
         self::assertSame(["get", "head"], $b->controller->entryPoints);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertNull($snap->params);
     }
@@ -345,7 +341,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $b = $snap->controllers[0];
         self::assertSame(rtrim(RoutingFixtures::FAKE_NAMESPACE, "\\") . "\\BlogController", $b->controller->classname);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertIsArray($snap->params);
         self::assertCount(2, $snap->params);
@@ -364,7 +359,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $b = $snap->controllers[0];
         self::assertSame(rtrim(RoutingFixtures::FAKE_NAMESPACE, "\\") . "\\BlogController", $b->controller->classname);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertIsArray($snap->params);
         self::assertCount(1, $snap->params);
@@ -384,7 +378,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(["GET", "HEAD", "POST", "PUT"], array_map(fn($m) => $m->name, $b->methods));
         self::assertSame(["get", "head", "post", "put"], $b->controller->entryPoints);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertIsArray($snap->params);
         self::assertCount(1, $snap->params);
@@ -412,7 +405,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(["GET", "HEAD"], array_map(fn($m) => $m->name, $b->methods));
         self::assertSame(["get", "head"], $b->controller->entryPoints);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertNull($snap->params);
     }
@@ -425,7 +417,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $b = $snap->controllers[0];
         self::assertSame(rtrim(RoutingFixtures::FAKE_NAMESPACE, "\\") . "\\ProductsController", $b->controller->classname);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertIsArray($snap->params);
         self::assertCount(1, $snap->params);
@@ -443,7 +434,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $b = $snap->controllers[0];
         self::assertSame(rtrim(RoutingFixtures::FAKE_NAMESPACE, "\\") . "\\CartController", $b->controller->classname);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertNull($snap->params);
     }
@@ -458,7 +448,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(["POST", "DELETE"], array_map(fn($m) => $m->name, $b->methods));
         self::assertSame(["post", "delete"], $b->controller->entryPoints);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertIsArray($snap->params);
         self::assertCount(1, $snap->params);
@@ -484,7 +473,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         $b = $snap->controllers[0];
         self::assertSame(rtrim(RoutingFixtures::FAKE_NAMESPACE, "\\") . "\\AccountController", $b->controller->classname);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertNull($snap->params);
     }
@@ -499,7 +487,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(["GET", "HEAD"], array_map(fn($m) => $m->name, $b->methods));
         self::assertSame(["get", "head"], $b->controller->entryPoints);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertIsArray($snap->params);
         self::assertCount(1, $snap->params);
@@ -536,7 +523,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         foreach ($snap->controllers as $b) {
             self::assertSame($expectedClass, $b->controller->classname);
             self::assertNull($b->controller->defaultEntrypoint);
-            self::assertNull($b->controller->appContext);
             self::assertNull($b->middleware);
         }
 
@@ -556,7 +542,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         foreach ($snap->controllers as $b) {
             self::assertSame($expectedClass, $b->controller->classname);
             self::assertNull($b->controller->defaultEntrypoint);
-            self::assertNull($b->controller->appContext);
             self::assertNull($b->middleware);
         }
         $verbsSet = [];
@@ -585,7 +570,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         foreach ($snap->controllers as $b) {
             self::assertSame($expectedClass, $b->controller->classname);
             self::assertNull($b->controller->defaultEntrypoint);
-            self::assertNull($b->controller->appContext);
             self::assertNull($b->middleware);
         }
         $verbsSet = [];
@@ -609,7 +593,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         foreach ($snap->controllers as $b) {
             self::assertSame($expectedClass, $b->controller->classname);
             self::assertNull($b->controller->defaultEntrypoint);
-            self::assertNull($b->controller->appContext);
             self::assertNull($b->middleware);
         }
         $verbsSet = [];
@@ -638,7 +621,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         foreach ($snap->controllers as $b) {
             self::assertSame($expectedClass, $b->controller->classname);
             self::assertNull($b->controller->defaultEntrypoint);
-            self::assertNull($b->controller->appContext);
             self::assertNull($b->middleware);
         }
         $verbsSet = [];
@@ -667,7 +649,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         foreach ($snap->controllers as $b) {
             self::assertSame($expectedClass, $b->controller->classname);
             self::assertNull($b->controller->defaultEntrypoint);
-            self::assertNull($b->controller->appContext);
             self::assertNull($b->middleware);
         }
         $verbsSet = [];
@@ -697,7 +678,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         foreach ($snap->controllers as $b) {
             self::assertSame($expectedClass, $b->controller->classname);
             self::assertNull($b->controller->defaultEntrypoint);
-            self::assertNull($b->controller->appContext);
             self::assertNull($b->middleware);
         }
 
@@ -735,7 +715,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(["GET", "HEAD"], array_map(fn($m) => $m->name, $b->methods));
         self::assertSame(["get", "head"], $b->controller->entryPoints);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertNull($snap->params);
     }
@@ -755,7 +734,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertContains("get", $b->controller->entryPoints);
         self::assertContains("head", $b->controller->entryPoints);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertIsArray($snap->params);
         self::assertCount(2, $snap->params);
@@ -775,7 +753,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(rtrim(RoutingFixtures::FAKE_NAMESPACE, "\\") . "\\AdminDashboardController", $b->controller->classname);
         self::assertTrue($b->methods);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertNull($snap->params);
     }
@@ -789,7 +766,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(rtrim(RoutingFixtures::FAKE_NAMESPACE, "\\") . "\\AdminUsersController", $b->controller->classname);
         self::assertTrue($b->methods);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertNull($snap->params);
     }
@@ -803,7 +779,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(rtrim(RoutingFixtures::FAKE_NAMESPACE, "\\") . "\\AdminUsersController", $b->controller->classname);
         self::assertTrue($b->methods);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertIsArray($snap->params);
         self::assertCount(1, $snap->params);
@@ -823,7 +798,6 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         self::assertSame(["GET", "HEAD", "POST", "PATCH"], array_map(fn($m) => $m->name, $b->methods));
         self::assertSame(["get", "head", "post", "patch"], $b->controller->entryPoints);
         self::assertNull($b->controller->defaultEntrypoint);
-        self::assertNull($b->controller->appContext);
         self::assertNull($b->middleware);
         self::assertIsArray($snap->params);
         self::assertCount(1, $snap->params);
