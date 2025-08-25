@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router;
 
-use Charcoal\Http\Router\Config\Config;
+use Charcoal\Http\Router\Config\RouterConfig;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareResolverInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareTrustPolicyInterface;
 use Charcoal\Http\Router\Exceptions\RequestContextException;
@@ -34,14 +34,14 @@ final class Router
     private readonly RouterMiddleware $middleware;
 
     /**
-     * @param Config $config
+     * @param RouterConfig $config
      * @param AppRoutes $routes
      * @param MiddlewareResolverInterface $resolver
      * @param MiddlewareTrustPolicyInterface|null $trustPolicy
      * @param null|\Closure(Router, AppRoutes, RouterMiddleware): void $closure
      */
     public function __construct(
-        private readonly Config                          $config,
+        private readonly RouterConfig                    $config,
         AppRoutes                                        $routes,
         MiddlewareResolverInterface                      $resolver = new FallbackResolver(),
         private readonly ?MiddlewareTrustPolicyInterface $trustPolicy = null,

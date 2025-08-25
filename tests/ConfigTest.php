@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Tests\Router;
 
-use Charcoal\Http\Router\Config\Config;
+use Charcoal\Http\Router\Config\RouterConfig;
 use Charcoal\Http\Router\Config\HttpServer;
 use Charcoal\Http\Router\Config\TrustedProxy;
 use PHPUnit\Framework\TestCase;
@@ -38,7 +38,7 @@ final class ConfigTest extends TestCase
             public function checksum(): string { return $this->chk; }
         };
 
-        $cfg = new Config([$s1, $s2], [$p1, $p2]);
+        $cfg = new RouterConfig([$s1, $s2], [$p1, $p2]);
 
         $this->assertSame([$s1, $s2], $cfg->hostnames);
         $this->assertSame([$p1, $p2], $cfg->proxies);
@@ -47,7 +47,7 @@ final class ConfigTest extends TestCase
 
     public function testAllowsEmptyHostnamesAndProxies(): void
     {
-        $cfg = new Config([], []);
+        $cfg = new RouterConfig([], []);
 
         $this->assertSame([], $cfg->hostnames);
         $this->assertSame([], $cfg->proxies);
@@ -57,7 +57,7 @@ final class ConfigTest extends TestCase
     public function testAllowsEmptyProxiesWithHostnames(): void
     {
         $s1 = new HttpServer("example.com");
-        $cfg = new Config([$s1], []);
+        $cfg = new RouterConfig([$s1], []);
 
         $this->assertSame([$s1], $cfg->hostnames);
         $this->assertSame([], $cfg->proxies);
@@ -70,7 +70,7 @@ final class ConfigTest extends TestCase
 
         $notServer = (object)[];
         /** @noinspection PhpParamsInspection */
-        new Config([$notServer], []);
+        new RouterConfig([$notServer], []);
     }
 
     public function testRejectsDuplicateNonWildcardHostname(): void
@@ -81,7 +81,7 @@ final class ConfigTest extends TestCase
         $s1 = new HttpServer("example.com");
         $s2 = new HttpServer("example.com");
 
-        new Config([$s1, $s2], []);
+        new RouterConfig([$s1, $s2], []);
     }
 
     public function testRejectsDuplicateWildcardHostname(): void
@@ -92,7 +92,7 @@ final class ConfigTest extends TestCase
         $s1 = new HttpServer("*.example.com");
         $s2 = new HttpServer("*.example.com");
 
-        new Config([$s1, $s2], []);
+        new RouterConfig([$s1, $s2], []);
     }
 
     public function testRejectsDuplicateHostnameCaseInsensitive(): void
@@ -103,7 +103,7 @@ final class ConfigTest extends TestCase
         $s1 = new HttpServer("Example.COM");
         $s2 = new HttpServer("example.com");
 
-        new Config([$s1, $s2], []);
+        new RouterConfig([$s1, $s2], []);
     }
 
     public function testRejectsDuplicateHostnameIgnoringTrailingDot(): void
@@ -114,7 +114,7 @@ final class ConfigTest extends TestCase
         $s1 = new HttpServer("example.com.");
         $s2 = new HttpServer("example.com");
 
-        new Config([$s1, $s2], []);
+        new RouterConfig([$s1, $s2], []);
     }
 
     public function testRejectsDuplicateHostnameEvenIfPortsDiffer(): void
@@ -125,7 +125,7 @@ final class ConfigTest extends TestCase
         $s1 = new HttpServer("example.com", 80);
         $s2 = new HttpServer("example.com", 443);
 
-        new Config([$s1, $s2], []);
+        new RouterConfig([$s1, $s2], []);
     }
 
     public function testAllowsSameBaseWithWildcardAndExact(): void
@@ -133,7 +133,7 @@ final class ConfigTest extends TestCase
         $sExact = new HttpServer("example.com");
         $sWildcard = new HttpServer("*.example.com");
 
-        $cfg = new Config([$sExact, $sWildcard], []);
+        $cfg = new RouterConfig([$sExact, $sWildcard], []);
         $this->assertSame([$sExact, $sWildcard], $cfg->hostnames);
     }
 
@@ -142,7 +142,7 @@ final class ConfigTest extends TestCase
         $sWildcard = new HttpServer("*.example.com");
         $sSub = new HttpServer("api.example.com");
 
-        $cfg = new Config([$sWildcard, $sSub], []);
+        $cfg = new RouterConfig([$sWildcard, $sSub], []);
         $this->assertSame([$sWildcard, $sSub], $cfg->hostnames);
     }
 
@@ -151,7 +151,7 @@ final class ConfigTest extends TestCase
         $s1 = new HttpServer("www.example.com");
         $s2 = new HttpServer("example.com");
 
-        $cfg = new Config([$s1, $s2], []);
+        $cfg = new RouterConfig([$s1, $s2], []);
         $this->assertSame([$s1, $s2], $cfg->hostnames);
     }
 
@@ -162,7 +162,7 @@ final class ConfigTest extends TestCase
 
         $notProxy = (object)[];
         /** @noinspection PhpParamsInspection */
-        new Config([], [$notProxy]);
+        new RouterConfig([], [$notProxy]);
     }
 
     public function testRejectsDuplicateProxiesByChecksumWithSubclass(): void
@@ -183,7 +183,7 @@ final class ConfigTest extends TestCase
             public function checksum(): string { return $this->chk; }
         };
 
-        new Config([], [$p1, $p2]);
+        new RouterConfig([], [$p1, $p2]);
     }
 
     public function testRejectsDuplicateProxiesByChecksumWithBaseTrustedProxy(): void
@@ -194,7 +194,7 @@ final class ConfigTest extends TestCase
         $p1 = new TrustedProxy(true, ["10.0.0.0/8", "192.168.0.0/16"]);
         $p2 = new TrustedProxy(false, ["10.0.0.0/8", "192.168.0.0/16"]); // same CIDRs -> same checksum
 
-        new Config([], [$p1, $p2]);
+        new RouterConfig([], [$p1, $p2]);
     }
 
     public function testAcceptsMultipleDistinctProxies(): void
@@ -203,7 +203,7 @@ final class ConfigTest extends TestCase
         $p2 = new TrustedProxy(true, ["192.168.0.0/16"]);
         $p3 = new TrustedProxy(true, ["172.16.0.0/12"]);
 
-        $cfg = new Config([], [$p1, $p2, $p3]);
+        $cfg = new RouterConfig([], [$p1, $p2, $p3]);
         $this->assertSame([$p1, $p2, $p3], $cfg->proxies);
     }
 
@@ -212,7 +212,7 @@ final class ConfigTest extends TestCase
         $s = new HttpServer("example.com");
         $p = new TrustedProxy(true, ["10.0.0.0/8"]);
 
-        $cfg = new Config([$s], [$p], false);
+        $cfg = new RouterConfig([$s], [$p], true, false);
         $this->assertFalse($cfg->wwwAlias);
     }
 
@@ -229,7 +229,7 @@ final class ConfigTest extends TestCase
         $hostnames = [$s1, $s2, $s3];
         $proxies = [$p1, $p2, $p3];
 
-        $cfg = new Config($hostnames, $proxies);
+        $cfg = new RouterConfig($hostnames, $proxies);
 
         $this->assertSame($hostnames, $cfg->hostnames);
         $this->assertSame($proxies, $cfg->proxies);

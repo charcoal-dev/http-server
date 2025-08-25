@@ -11,7 +11,7 @@ namespace Charcoal\Http\Router\Request;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Body\Payload;
 use Charcoal\Http\Commons\Headers\Headers;
-use Charcoal\Http\Router\Config\Config;
+use Charcoal\Http\Router\Config\RouterConfig;
 use Charcoal\Http\Router\Enums\RequestError;
 use Charcoal\Http\Router\Exceptions\RequestContextException;
 use Charcoal\Http\Router\Middleware\Registry\ResolverFacade;
@@ -41,11 +41,11 @@ final readonly class RequestContext
     }
 
     /**
-     * @param Config $config
+     * @param RouterConfig $config
      * @return void
      * @throws RequestContextException
      */
-    public function gatewayPipelines(Config $config): void
+    public function gatewayPipelines(RouterConfig $config): void
     {
         // 1. Resolve TrustGateway via trusted proxy CIDR
         $this->gateway = new TrustGateway($config, $this->request);

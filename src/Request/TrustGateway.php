@@ -10,7 +10,7 @@ namespace Charcoal\Http\Router\Request;
 
 use Charcoal\Http\Commons\Contracts\HeadersInterface;
 use Charcoal\Http\Commons\Support\HttpHelper;
-use Charcoal\Http\Router\Config\Config;
+use Charcoal\Http\Router\Config\RouterConfig;
 use Charcoal\Http\Router\Config\HttpServer;
 use Charcoal\Http\Router\Config\TrustedProxy;
 use Charcoal\Http\Router\Enums\RequestError;
@@ -36,7 +36,7 @@ final readonly class TrustGateway
     /**
      * @throws RequestContextException
      */
-    public function __construct(Config $config, ServerRequest $request)
+    public function __construct(RouterConfig $config, ServerRequest $request)
     {
         $peerIp = $_SERVER["REMOTE_ADDR"];
         $peerIpBinary = @inet_pton($peerIp);
@@ -96,7 +96,7 @@ final readonly class TrustGateway
                 new \RuntimeException("Hostname not configured: " . $hostname));
         }
 
-        if ($this->server->enforceTls && $this->scheme !== "https") {
+        if ($config->enforceTls && $this->scheme !== "https") {
             throw RequestContextException::forRedirect(RequestError::TlsEnforcedRedirect,
                 new RedirectUrl($request->url, 308, null, toggleScheme: true, absolute: false, queryStr: true));
         }
@@ -104,11 +104,11 @@ final readonly class TrustGateway
 
     /**
      * @param string $peerIpBinary
-     * @param Config $config
+     * @param RouterConfig $config
      * @param HeadersInterface $headers
      * @return array<string,string|null,int|null,string|null,int,TrustedProxy>|false
      */
-    private function checkProxies(string $peerIpBinary, Config $config, HeadersInterface $headers): array|false
+    private function checkProxies(string $peerIpBinary, RouterConfig $config, HeadersInterface $headers): array|false
     {
         if (!$config->proxies) {
             return false;

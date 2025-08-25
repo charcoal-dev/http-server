@@ -13,7 +13,7 @@ namespace Charcoal\Http\Router\Config;
  * This class enforces that all hostnames are instances of HttpServer,
  * and all proxies are instances of TrustedProxy. Duplicates are not allowed.
  */
-final readonly class Config
+final readonly class RouterConfig
 {
     /** @var HttpServer[] */
     public array $hostnames;
@@ -27,6 +27,7 @@ final readonly class Config
     public function __construct(
         array       $hostnames,
         array       $proxies,
+        public bool $enforceTls = true,
         public bool $wwwAlias = true
     )
     {
