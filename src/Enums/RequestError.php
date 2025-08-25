@@ -24,6 +24,11 @@ enum RequestError
     case BadUrlEncoding;
     case BadUrlLength;
     case UrlNormalizedRedirect;
+    case EndpointNotFound;
+    case MethodNotDeclared;
+    case MethodNotAllowed;
+    case BadOriginHeader;
+    case CorsOriginNotAllowed;
 
     /**
      * Determines and returns the appropriate HTTP status code
@@ -33,8 +38,11 @@ enum RequestError
     {
         return match ($this) {
             self::RequestIdError,
-            self::BadUrlEncoding,
+            self::BadUrlEncoding => 400,
             self::BadUrlLength => 414,
+            self::EndpointNotFound => 404,
+            self::MethodNotDeclared, self::MethodNotAllowed => 405,
+            self::BadOriginHeader, self::CorsOriginNotAllowed => 403,
             default => 500
         };
     }
