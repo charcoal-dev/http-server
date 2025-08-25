@@ -50,9 +50,9 @@ final readonly class TrustGateway
         $checkTrustedProxies = $this->checkProxies($peerIpBinary, $config, $request->headers);
         if ($checkTrustedProxies) {
             $this->clientIp = $checkTrustedProxies[0];
-            $hostname = $checkTrustedProxies[1] ?? $hostname;
-            $port = $checkTrustedProxies[2] ?? $port;
-            $scheme = $checkTrustedProxies[3] ?? $scheme;
+            $hostname = $checkTrustedProxies[1] ?: $hostname;
+            $port = $checkTrustedProxies[2] ?: $port;
+            $scheme = $checkTrustedProxies[3] ?: $scheme;
             $this->proxyHop = $checkTrustedProxies[4];
             $this->proxy = $checkTrustedProxies[5];
         } else {
@@ -253,17 +253,22 @@ final readonly class TrustGateway
                 continue;
             }
 
-            $channelIp = @inet_pton($channel["for"]);
-            if ($channelIp === false) {
+            $channelIp = (HttpHelper::normalizeHostnamePort($channel["for"]) ?: [null])[0];
+            if(!$channelIp) {
                 continue;
             }
 
-            if (!$proxy->match($channelIp)) {
+            $channelIpBinary = @inet_pton($channelIp);
+            if ($channelIpBinary === false) {
+                continue;
+            }
+
+            if (!$proxy->match($channelIpBinary)) {
                 if ($index === 0) {
-                    return [$channel["for"], null, null, null, 0];
+                    return [$channelIp, null, null, null, 0];
                 }
 
-                return [$channel["for"], $hostname ?? null, $port ?? null, $scheme ?? null, $index];
+                return [$channelIp, $hostname ?? null, $port ?? null, $scheme ?? null, $index];
             }
 
             if (isset($channel["host"])) {

@@ -61,7 +61,7 @@ abstract readonly class HttpForwarded
                 $hostname = HttpHelper::normalizeHostnamePort($match[$key]) ?: [null, null, false];
                 $match[$key] = $hostname && $hostname[1] ? HttpHelper::rejoinValidatedParts($hostname) : $hostname[0];
                 if (!$match[$key]) {
-                    unset($match[$key]);
+                    $match[$key] = null;
                 }
             }
 

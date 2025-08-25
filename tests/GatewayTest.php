@@ -28,6 +28,362 @@ use PHPUnit\Framework\TestCase;
 final class GatewayTest extends TestCase
 {
     /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Forwarded_TrustedThenClient_UsesLastTrustedAuthority(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"])],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "10.1.2.3"; // trusted
+        $headers = new Headers();
+        // nearest (trusted) carries proto/host; next is client
+        $headers->set("Forwarded", "for=10.9.8.7;proto=https;host=hostname.tld, for=203.0.113.7");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld", https: false));
+        $this->assertSame("203.0.113.7", $gw->clientIp);
+        $this->assertSame("hostname.tld", $gw->server?->hostname);
+        $this->assertNull($gw->port);
+        $this->assertSame("https", $gw->scheme);
+        $this->assertSame(1, $gw->proxyHop);
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Forwarded_AllTrusted_NoPromotion(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"])],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "10.1.2.3"; // trusted
+        $headers = new Headers();
+        $headers->set("Forwarded", "for=10.2.3.4, for=10.3.4.5");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $this->assertSame($peerIp, $gw->clientIp);    // no promotion
+        $this->assertSame("hostname.tld", $gw->server?->hostname);
+        $this->assertNull($gw->port);
+        $this->assertSame("http", $gw->scheme);
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Forwarded_PeerUntrusted_IgnoresHeader(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"])],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "192.0.2.10"; // untrusted
+        $headers = new Headers();
+        $headers->set("Forwarded", "for=203.0.113.7;proto=https;host=hostname.tld");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $this->assertSame($peerIp, $gw->clientIp);
+        $this->assertSame("http", $gw->scheme); // unchanged
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Forwarded_InvalidAndObfuscated_SkipsUntilValid(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"])],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "10.1.2.3"; // trusted
+        $headers = new Headers();
+        $headers->set("Forwarded", "for=_hidden, for=garbage, for=203.0.113.7");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $this->assertSame("203.0.113.7", $gw->clientIp);
+        $this->assertSame(2, $gw->proxyHop);
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Forwarded_Ipv6Index0_PromotesIpOnly(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"])],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "10.1.2.3"; // trusted
+        $headers = new Headers();
+        // Index 0 client (IPv6 with port in header) → IP only promoted
+        $headers->set("Forwarded", 'for="[2001:db8::2]:51234";proto=https;host=malicious.tld');
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $this->assertSame("2001:db8::2", $gw->clientIp);
+        $this->assertSame("hostname.tld", $gw->server?->hostname);
+        $this->assertNull($gw->port);
+        $this->assertSame("http", $gw->scheme);
+        $this->assertSame(0, $gw->proxyHop);
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Xff_BasicTwoHops_PromotesClientKeepsBaselineAuthority(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"])],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "10.1.2.3"; // trusted
+        $headers = new Headers();
+        $headers->set("X-Forwarded-For", "203.0.113.7, 10.1.2.3");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $this->assertSame("203.0.113.7", $gw->clientIp);
+        $this->assertSame("hostname.tld", $gw->server?->hostname); // baseline
+        $this->assertNull($gw->port);
+        $this->assertSame("http", $gw->scheme);
+        $this->assertSame(1, $gw->proxyHop);
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Xff_RightAligned_UsesNearestTrustedAuthority_Short(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"])],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "10.1.2.3"; // trusted
+        $headers = new Headers();
+        $headers->set("X-Forwarded-For", "203.0.113.7, 10.9.8.7, 10.1.2.3");
+        $headers->set("X-Forwarded-Host", "client.tld, hostname.tld, proxyA");
+        $headers->set("X-Forwarded-Port", "1234, 443, 80");
+        $headers->set("X-Forwarded-Proto", "http, https, http");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://placeholder/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp));
+        $this->assertSame("203.0.113.7", $gw->clientIp);
+        $this->assertSame("hostname.tld", $gw->server?->hostname); // from trustedIdx=1
+        $this->assertSame(443, $gw->port);
+        $this->assertSame("https", $gw->scheme);
+        $this->assertSame(2, $gw->proxyHop);
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Xff_MaxHopsCap_NoPromotionBeyondCap(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"], maxHops: 1)],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "10.1.2.3"; // trusted
+        $headers = new Headers();
+        // client would be 2 hops to the left; cap prevents reaching it
+        $headers->set("X-Forwarded-For", "203.0.113.7, 10.9.8.7, 10.1.2.3");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $this->assertSame($peerIp, $gw->clientIp); // no promotion due to cap
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_BothHeaders_ForwardedWinsOverXff(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"])],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "10.1.2.3"; // trusted
+        $headers = new Headers();
+        // Forwarded says client=203.0.113.7, proto=https, host=hostname.tld
+        $headers->set("Forwarded", "for=10.9.8.7;proto=https;host=hostname.tld, for=203.0.113.7");
+        // XFF chain would also resolve, but we expect Forwarded to take precedence
+        $headers->set("X-Forwarded-For", "203.0.113.88, 10.9.8.7, 10.1.2.3");
+        $headers->set("X-Forwarded-Host", "client.tld, proxyB, proxyA");
+        $headers->set("X-Forwarded-Port", "1234, 80, 80");
+        $headers->set("X-Forwarded-Proto", "http, http, http");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://placeholder/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp));
+        $this->assertSame("203.0.113.7", $gw->clientIp);   // from Forwarded
+        $this->assertSame("hostname.tld", $gw->server?->hostname);
+        $this->assertNull($gw->port);                      // no explicit port in Forwarded host
+        $this->assertSame("https", $gw->scheme);           // Forwarded proto wins
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Xff_AllTrusted_NoPromotion(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"])],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "10.1.2.3"; // trusted
+        $headers = new Headers();
+        $headers->set("X-Forwarded-For", "10.2.3.4, 10.1.2.3");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $this->assertSame($peerIp, $gw->clientIp);
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Xff_UntrustedPeer_IgnoresXff(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["10.0.0.0/8"])],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "192.0.2.10"; // untrusted
+        $headers = new Headers();
+        $headers->set("X-Forwarded-For", "203.0.113.7, 10.1.2.3");
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $this->assertSame($peerIp, $gw->clientIp);
+        $this->assertSame("http", $gw->scheme);
+    }
+
+    /**
      * @throws RequestContextException
      */
     public function testGateway_Xff_LongChain_Index7_UsesNearestTrustedAndCustomPort(): void
