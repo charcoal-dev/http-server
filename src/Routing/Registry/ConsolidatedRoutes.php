@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Routing\Registry;
 
 use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
-use Charcoal\Http\Router\Controllers\ControllerValidated;
+use Charcoal\Http\Router\Controllers\ValidatedController;
 use Charcoal\Http\Router\Internal\Constants;
 use Charcoal\Http\Router\Router;
 use Charcoal\Http\Router\Routing\AppRoutes;
@@ -27,7 +27,7 @@ final readonly class ConsolidatedRoutes
 {
     /** @var array<string, list<Route|AbstractRouteGroup>> */
     public array $declared;
-    /** @var array<class-string<ControllerInterface>,ControllerValidated> */
+    /** @var array<class-string<ControllerInterface>,ValidatedController> */
     public array $controllers;
     /** @var array<string,<array<string,class-string<ControllerInterface>>> */
     public array $entryPoints;
@@ -96,7 +96,7 @@ final readonly class ConsolidatedRoutes
                 continue;
             }
 
-            $validatedControllers[$classname] = new ControllerValidated(
+            $validatedControllers[$classname] = new ValidatedController(
                 $classname,
                 $methods,
                 !Router::$validateControllerClasses

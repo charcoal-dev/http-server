@@ -19,7 +19,7 @@ use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
  * This class ensures the controller adheres to specific requirements such as implementing mandatory interfaces, being final,
  * and validating its declared entry points.
  */
-final readonly class ControllerValidated
+final readonly class ValidatedController
 {
     public array $entryPoints;
     public ?string $defaultEntrypoint;

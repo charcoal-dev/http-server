@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Routing\Snapshot;
 
-use Charcoal\Http\Router\Controllers\ControllerValidated;
+use Charcoal\Http\Router\Controllers\ValidatedController;
 use Charcoal\Http\Router\Middleware\Bag\SealedBag;
 
 /**
@@ -20,7 +20,7 @@ final readonly class ControllerBinding
     public ?SealedBag $middleware;
 
     public function __construct(
-        public ControllerValidated $controller,
+        public ValidatedController $controller,
         public array|true          $methods,
         ?SealedBag                 $middleware,
     )
