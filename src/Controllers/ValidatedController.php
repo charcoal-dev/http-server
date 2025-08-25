@@ -24,6 +24,7 @@ final readonly class ValidatedController
     public array $entryPoints;
     public ?string $defaultEntrypoint;
     public ?AppContextEnumInterface $appContext;
+    public ControllerAttributes $attributes;
     public bool $validated;
 
     public function __construct(
@@ -38,6 +39,7 @@ final readonly class ValidatedController
             $this->entryPoints = $entryPoints;
             $this->defaultEntrypoint = null;
             $this->appContext = null;
+            $this->attributes = new ControllerAttributes(null);
             $this->validated = false;
             return;
         }
@@ -88,6 +90,7 @@ final readonly class ValidatedController
             throw new \InvalidArgumentException("Controller class must implement: " . ControllerContextInterface::class);
         }
 
+        $this->attributes = new ControllerAttributes($reflect);
         $this->entryPoints = $entryPoints;
         $this->validated = true;
     }
