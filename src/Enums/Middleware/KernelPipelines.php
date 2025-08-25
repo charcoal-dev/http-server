@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Enums\Middleware;
 
+use Charcoal\Http\Router\Contracts\Middleware\Kernel\CorsPolicyResolverInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\RequestIdResolverInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\UrlEncodingEnforcerInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareEnumInterface;
@@ -21,6 +22,7 @@ enum KernelPipelines: string implements MiddlewareEnumInterface
 {
     case RequestID_Resolver = RequestIdResolverInterface::class;
     case URL_EncodingEnforcer = UrlEncodingEnforcerInterface::class;
+    case CORS_PolicyResolver = CorsPolicyResolverInterface::class;
 
     /**
      * @return array<class-string>

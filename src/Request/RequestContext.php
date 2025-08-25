@@ -8,11 +8,14 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Request;
 
-use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Body\Payload;
+use Charcoal\Http\Commons\Body\WritablePayload;
+use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\Headers;
+use Charcoal\Http\Commons\Support\HttpHelper;
 use Charcoal\Http\Router\Config\RouterConfig;
 use Charcoal\Http\Router\Enums\RequestError;
+use Charcoal\Http\Router\Exceptions\HttpOptionsException;
 use Charcoal\Http\Router\Exceptions\RequestContextException;
 use Charcoal\Http\Router\Middleware\Registry\ResolverFacade;
 
@@ -28,8 +31,8 @@ final readonly class RequestContext
     public string $requestId;
     public TrustGateway $gateway;
     public Headers $headers;
+    public ?CorsPolicy $corsPolicy;
     public Payload $payload;
-    public Buffer $buffer;
 
     public function __construct(
         private ServerRequest  $request,
@@ -37,7 +40,6 @@ final readonly class RequestContext
     )
     {
         $this->headers = new Headers();
-
     }
 
     /**
@@ -72,5 +74,49 @@ final readonly class RequestContext
                 default => RequestError::BadUrlEncoding
             }, $e);
         }
+    }
+
+    public function preFlightControl(): void
+    {
+        // 4. Pre-Flight Control
+        $origin = $this->request->headers->get("Origin");
+        if ($origin) {
+            try {
+                $this->corsPolicy = $this->middleware->kernel->corsPolicyResolver()();
+            } catch (\Throwable $e) {
+                throw new RequestContextException(RequestError::KernelError, $e);
+            }
+        }
+
+        if (!isset($this->corsPolicy)) {
+            $this->corsPolicy = null;
+        }
+
+        if ($this->request->method === HttpMethod::OPTIONS) {
+            if ($this->corsPolicy) {
+                if (!HttpHelper::isValidOrigin($origin)) {
+                    throw new RequestContextException(RequestError::BadOriginHeader, null);
+                }
+
+                if ($this->corsPolicy->origins) {
+                    if (!in_array(strtolower($origin), $this->corsPolicy->origins, true)) {
+                        throw new RequestContextException(RequestError::CorsOriginNotAllowed, null);
+                    }
+                }
+
+                throw new HttpOptionsException($origin, $this->corsPolicy);
+            }
+
+            throw new HttpOptionsException(null, $this->corsPolicy);
+        }
+
+        // Echo the received origin
+        if ($this->corsPolicy) {
+            $this->headers->set("Access-Control-Allow-Origin", $origin);
+            $this->headers->set("Access-Control-Expose-Headers", $this->corsPolicy->expose);
+            $this->headers->set("Vary", "Origin");
+        }
+
+        $this->payload = new WritablePayload();
     }
 }

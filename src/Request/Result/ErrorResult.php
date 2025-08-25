@@ -20,7 +20,7 @@ final readonly class ErrorResult extends AbstractResult
     public function __construct(
         Headers             $headers,
         public RequestError $error,
-        public \Throwable   $exception,
+        public ?\Throwable  $exception,
     )
     {
         parent::__construct($this->error->getStatusCode(), $headers);

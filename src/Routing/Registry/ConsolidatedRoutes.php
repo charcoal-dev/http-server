@@ -67,7 +67,7 @@ final readonly class ConsolidatedRoutes
                     $controllers[$route->classname] = [];
                 }
 
-                $methods = array_map(fn($m) => $m->name ?? [], $route->methods?->getArray() ?? []);
+                $methods = array_map(fn($m) => strtolower($m->name) ?? [], $route->methods?->getArray() ?? []);
 
                 // Append to be validated controller entryPoints
                 $controllers[$route->classname] = [...$controllers[$route->classname], ...$methods];

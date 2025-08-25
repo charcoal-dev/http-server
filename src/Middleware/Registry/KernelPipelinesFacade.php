@@ -13,6 +13,7 @@ use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\KernelPipelines;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
+use Charcoal\Http\Router\Request\CorsPolicy;
 
 /**
  * Provides a facade for kernel-level pipelines, enabling the resolution and access to key parts.
@@ -30,6 +31,16 @@ final readonly class KernelPipelinesFacade
     public function resolve(KernelPipelines $pipeline, array $context = []): KernelMiddlewareInterface|callable
     {
         return $this->registry->resolve(Scope::Kernel, $pipeline->value, $context);
+    }
+
+    /**
+     * Resolves and returns the CorsPolicyResolverInterface instance from the registry
+     * using the specified scope and interface class.
+     * @return callable(string $origin): CorsPolicy
+     */
+    public function corsPolicyResolver(): callable
+    {
+        return $this->resolve(KernelPipelines::CORS_PolicyResolver);
     }
 
     /**
