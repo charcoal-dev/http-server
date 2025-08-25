@@ -37,20 +37,20 @@ final readonly class FallbackResolver implements MiddlewareResolverInterface
         ?array              $context = null
     ): MiddlewareInterface|callable
     {
-        $kernel = KernelPipelines::tryFrom($contract);
-        if ($kernel) {
-            return $this->resolveForKernel($kernel);
+        if ($scope === Scope::Kernel) {
+            return $this->resolveForKernel($contract);
         }
 
         throw new \RuntimeException("No middleware resolver found for contract: " . $contract);
     }
 
     /**
-     * @param KernelPipelines $pipeline
+     * @param string $contract
      * @return KernelMiddlewareInterface
      */
-    public function resolveForKernel(KernelPipelines $pipeline): MiddlewareInterface
+    public function resolveForKernel(string $contract): MiddlewareInterface
     {
+        $pipeline = KernelPipelines::tryFrom($contract);
         return match ($pipeline) {
             KernelPipelines::RequestID_Resolver => new RequestIdResolver(),
             KernelPipelines::URL_EncodingEnforcer => new UrlEncodingEnforcer(),

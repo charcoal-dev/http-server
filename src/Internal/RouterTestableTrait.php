@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Internal;
 
+use Charcoal\Http\Router\Request\GatewayEnv;
+
 /**
  * Provides functionality to toggle test mode for an application, allowing
  * validation of controller and middleware classes to be enabled or disabled.
@@ -30,5 +32,32 @@ trait RouterTestableTrait
     {
         self::$validateControllerClasses = !$testing;
         self::$validateMiddlewareClasses = !$testing;
+    }
+
+    /**
+     * @var GatewayEnv|null The injected environment.
+     * @internal
+     */
+    public static ?GatewayEnv $injectedEnvironment = null;
+
+    /**
+     * @param GatewayEnv $env
+     * @return void
+     */
+    public static function injectEnv(GatewayEnv $env): void
+    {
+        if (self::$validateControllerClasses || self::$validateMiddlewareClasses) {
+            throw new \LogicException("Cannot inject environment while NOT in test mode");
+        }
+
+        self::$injectedEnvironment = $env;
+    }
+
+    /**
+     * Resets the environment by clearing the current injected environment.
+     */
+    public static function resetEnv(): void
+    {
+        self::$injectedEnvironment = null;
     }
 }

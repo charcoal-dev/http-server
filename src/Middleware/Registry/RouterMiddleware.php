@@ -240,10 +240,11 @@ final class RouterMiddleware
             return $middleware;
         }
 
-        $resolved = $this->resolver->resolveFor($contract, $controller, $scope);
         if ($scope === Scope::Kernel) {
+            $resolved = $this->resolver->resolveForKernel($contract);
             $this->kernelResolved[$scope->name][$contract] = $resolved;
         } else {
+            $resolved = $this->resolver->resolveFor($contract, $controller, $scope);
             $this->resolved[$scope->name][$controller::class][$contract] = $resolved;
         }
 

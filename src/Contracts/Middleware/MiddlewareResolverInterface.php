@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Contracts\Middleware;
 
 use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
-use Charcoal\Http\Router\Enums\Middleware\KernelPipelines;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 
 /**
@@ -31,5 +30,5 @@ interface MiddlewareResolverInterface
     /**
      * Resolves a middleware instance or a callable for the given kernel pipeline.
      */
-    public function resolveForKernel(KernelPipelines $pipeline): MiddlewareInterface|callable;
+    public function resolveForKernel(string $contract): MiddlewareInterface|callable;
 }

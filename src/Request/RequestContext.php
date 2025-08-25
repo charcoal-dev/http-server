@@ -8,6 +8,9 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Request;
 
+use Charcoal\Base\Traits\NoDumpTrait;
+use Charcoal\Base\Traits\NotCloneableTrait;
+use Charcoal\Base\Traits\NotSerializableTrait;
 use Charcoal\Http\Commons\Body\Payload;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
@@ -28,6 +31,10 @@ use Charcoal\Http\Router\Middleware\Registry\ResolverFacade;
  */
 final readonly class RequestContext
 {
+    use NoDumpTrait;
+    use NotSerializableTrait;
+    use NotCloneableTrait;
+
     /** @var string<non-empty-string> 16 bytes, Binary UUID */
     public string $requestId;
     public TrustGateway $gateway;
