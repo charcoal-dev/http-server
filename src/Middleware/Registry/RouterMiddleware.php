@@ -28,15 +28,18 @@ use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
 final class RouterMiddleware
 {
     /** @var array<non-empty-string,MiddlewareInterface> */
+    private array $kernelResolved = [];
+    /** @var array<non-empty-string,MiddlewareConstructor> */
+    private array $kernelFactories = [];
+
+    /** @var array<non-empty-string,array<class-string<ControllerInterface>,MiddlewareInterface> */
     private array $resolved = [
-        Scope::Kernel->name => [],
         Scope::Group->name => [],
         Scope::Route->name => [],
     ];
 
-    /** @var array<non-empty-string,MiddlewareInterface> */
+    /** @var array<non-empty-string,array<class-string<ControllerInterface>,MiddlewareConstructor> */
     private array $factories = [
-        Scope::Kernel->name => [],
         Scope::Group->name => [],
         Scope::Route->name => [],
     ];
@@ -190,8 +193,17 @@ final class RouterMiddleware
         ?array               $context = null
     ): MiddlewareInterface|callable
     {
-        $resolved = $this->resolved[$scope->name][$contract] ??
-            $this->factories[$scope->name][$contract] ?? null;
+        if ($scope === Scope::Kernel) {
+            $resolved = $this->kernelResolver[$scope->name][$contract] ??
+                $this->kernelFactories[$scope->name][$contract] ?? null;
+        } else {
+            if (!$controller) {
+                throw new \BadMethodCallException("Controller is required for non-kernel scope: " . $scope->name);
+            }
+
+            $resolved = $this->resolved[$scope->name][$controller::class][$contract] ??
+                $this->factories[$scope->name][$controller::class][$contract] ?? null;
+        }
 
         if ($resolved instanceof MiddlewareInterface) {
             return $resolved;
@@ -215,14 +227,23 @@ final class RouterMiddleware
             }
 
             foreach ($resolved->binds as $bind) {
-                $this->resolved[$scope->name][$bind] = $middleware;
+                if ($scope === Scope::Kernel) {
+                    $this->kernelResolved[$scope->name][$bind] = $middleware;
+                } else {
+                    $this->resolved[$scope->name][$controller::class][$bind] = $middleware;
+                }
             }
 
             return $middleware;
         }
 
         $resolved = $this->resolver->resolveFor($contract, $controller, $scope);
-        $this->resolved[$scope->name][$contract] = $resolved;
+        if ($scope === Scope::Kernel) {
+            $this->kernelResolved[$scope->name][$contract] = $resolved;
+        } else {
+            $this->resolved[$scope->name][$controller::class][$contract] = $resolved;
+        }
+
         return $resolved;
     }
 
