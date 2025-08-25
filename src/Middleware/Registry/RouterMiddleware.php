@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Middleware\Registry;
 
+use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Group\GroupMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
@@ -144,13 +145,50 @@ final class RouterMiddleware
     }
 
     /**
+     * @param string $contract
+     * @return KernelMiddlewareInterface|callable
+     */
+    public function resolveGlobal(string $contract): KernelMiddlewareInterface|callable
+    {
+        return $this->resolveInternal(Scope::Kernel, $contract);
+    }
+
+    /**
+     * @param string $contract
+     * @param ControllerInterface $controller
      * @param Scope $scope
-     * @param non-empty-string $contract
-     * @param array $context
-     * @return MiddlewareInterface|callable
+     * @param array|null $context
+     * @return GroupMiddlewareInterface|RouteMiddlewareInterface|callable
      * @internal
      */
-    public function resolve(Scope $scope, string $contract, array $context = []): MiddlewareInterface|callable
+    public function resolveFor(
+        string              $contract,
+        ControllerInterface $controller,
+        Scope               $scope = Scope::Group,
+        ?array              $context = null
+    ): GroupMiddlewareInterface|RouteMiddlewareInterface|callable
+    {
+        if ($scope === Scope::Kernel) {
+            throw new \BadMethodCallException("Cannot resolve middleware for kernel scope: " . $scope->name);
+        }
+
+        return $this->resolveInternal($scope, $contract, $controller, $context);
+    }
+
+    /**
+     * @param Scope $scope
+     * @param string $contract
+     * @param ControllerInterface|null $controller
+     * @param array|null $context
+     * @return MiddlewareInterface|callable
+     * @noinspection PhpUnusedParameterInspection
+     */
+    private function resolveInternal(
+        Scope                $scope,
+        string               $contract,
+        ?ControllerInterface $controller = null,
+        ?array               $context = null
+    ): MiddlewareInterface|callable
     {
         $resolved = $this->resolved[$scope->name][$contract] ??
             $this->factories[$scope->name][$contract] ?? null;
@@ -183,7 +221,7 @@ final class RouterMiddleware
             return $middleware;
         }
 
-        $resolved = $this->resolver->resolve($contract, $context);
+        $resolved = $this->resolver->resolveFor($contract, $controller, $scope);
         $this->resolved[$scope->name][$contract] = $resolved;
         return $resolved;
     }

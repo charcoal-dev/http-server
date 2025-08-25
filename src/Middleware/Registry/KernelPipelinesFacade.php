@@ -15,7 +15,6 @@ use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\KernelPipelines;
-use Charcoal\Http\Router\Enums\Middleware\Scope;
 use Charcoal\Http\Router\Request\CorsPolicy;
 
 /**
@@ -31,9 +30,9 @@ final readonly class KernelPipelinesFacade
      * Resolves and returns the KernelMiddlewareInterface instance from the registry
      * based on the provided pipeline and optional context.
      */
-    public function resolve(KernelPipelines $pipeline, array $context = []): KernelMiddlewareInterface|callable
+    public function resolve(KernelPipelines $pipeline): KernelMiddlewareInterface|callable
     {
-        return $this->registry->resolve(Scope::Kernel, $pipeline->value, $context);
+        return $this->registry->resolveGlobal($pipeline->value);
     }
 
     /**

@@ -8,10 +8,12 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Middleware;
 
+use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareResolverInterface;
 use Charcoal\Http\Router\Enums\Middleware\KernelPipelines;
+use Charcoal\Http\Router\Enums\Middleware\Scope;
 use Charcoal\Http\Router\Middleware\Kernel\RequestIdResolver;
 use Charcoal\Http\Router\Middleware\Kernel\UrlEncodingEnforcer;
 
@@ -23,10 +25,17 @@ final readonly class FallbackResolver implements MiddlewareResolverInterface
 {
     /**
      * @param string $contract
-     * @param array $context
-     * @return MiddlewareInterface
+     * @param ControllerInterface $controller
+     * @param Scope $scope
+     * @param array|null $context
+     * @return MiddlewareInterface|callable
      */
-    public function resolve(string $contract, array $context = []): MiddlewareInterface
+    public function resolveFor(
+        string              $contract,
+        ControllerInterface $controller,
+        Scope               $scope = Scope::Group,
+        ?array              $context = null
+    ): MiddlewareInterface|callable
     {
         $kernel = KernelPipelines::tryFrom($contract);
         if ($kernel) {
@@ -40,11 +49,12 @@ final readonly class FallbackResolver implements MiddlewareResolverInterface
      * @param KernelPipelines $pipeline
      * @return KernelMiddlewareInterface
      */
-    private function resolveForKernel(KernelPipelines $pipeline): KernelMiddlewareInterface
+    public function resolveForKernel(KernelPipelines $pipeline): MiddlewareInterface
     {
         return match ($pipeline) {
             KernelPipelines::RequestID_Resolver => new RequestIdResolver(),
             KernelPipelines::URL_EncodingEnforcer => new UrlEncodingEnforcer(),
+            default => throw new \RuntimeException($pipeline->name . " is not available in FallbackResolver"),
         };
     }
 }
