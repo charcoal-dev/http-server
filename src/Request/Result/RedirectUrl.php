@@ -19,8 +19,9 @@ final readonly class RedirectUrl
     public function __construct(
         public UrlInfo $previous,
         public int     $statusCode,
-        public string  $path,
-        public bool    $absolute,
+        public ?string $changePath = null,
+        public bool    $toggleScheme = false,
+        public bool    $absolute = false,
         public bool    $queryStr = false,
     )
     {
@@ -31,7 +32,7 @@ final readonly class RedirectUrl
      * @api
      */
     public function getUrl(
-        ?UrlInfo $previous,
+        ?UrlInfo $previous = null,
         ?bool    $absolute = null,
         ?bool    $queryStr = null
     ): string
@@ -39,14 +40,16 @@ final readonly class RedirectUrl
         $previous ??= $this->previous;
         $absolute ??= $this->absolute;
         $queryStr ??= $this->queryStr;
-        $redirectTo = "/" . ltrim($this->path, "/");
+
+        $redirectTo = $this->changePath ? "/" . ltrim($this->changePath, "/") : $this->previous->path;
         if ($queryStr) {
             $redirectTo .= $previous->query ? ("?" . $previous->query) : "";
             $redirectTo .= $previous->fragment ? ("#" . $previous->fragment) : "";
         }
 
+        $scheme = $this->toggleScheme ? ($previous->scheme === "https" ? "http" : "https") : $previous->scheme;
         return $absolute && ($previous->scheme && $previous->host) ?
-            (($previous->scheme . "://") .
+            (($scheme . "://") .
                 ((str_contains($previous->host, ":") && $previous->host[0] !== "[") ?
                     ("[" . $previous->host . "]") : $previous->host) .
                 ($previous->port ? (":" . $previous->port) : "") .

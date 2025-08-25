@@ -6,17 +6,16 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Request\Headers;
+namespace Charcoal\Http\Router\Support;
 
 use Charcoal\Base\Charsets\Ascii;
-use Charcoal\Base\Enums\ValidationState;
-use Charcoal\Http\Commons\Header\Headers;
+use Charcoal\Http\Commons\Contracts\HeadersInterface;
 
 /**
- * Class Authorization
- * @package Charcoal\Http\Router\Request\Headers
+ * Class HttpAuthorization
+ * @package Charcoal\Http\Router\Support
  */
-readonly class Authorization
+readonly class HttpAuthorization
 {
     /** @var array<string,string|array<string,string>> */
     public array $schemes;
@@ -25,16 +24,11 @@ readonly class Authorization
     public string $unchecked;
 
     /**
-     * @param Headers $headers
+     * @param HeadersInterface $headers
      */
-    public function __construct(Headers $headers)
+    public function __construct(HeadersInterface $headers)
     {
-        $authorization = (string)$headers->get("authorization");
-        if (!$headers->policy->valueTrust->meets(ValidationState::VALIDATED)) {
-            $authorization = Ascii::sanitizeUseFilter($authorization);
-        }
-
-        $authorization = trim($authorization);
+        $authorization = trim(Ascii::sanitizeUseFilter($headers->get("Authorization") ?? ""));
         if (!$authorization) {
             $this->schemes = [];
             $this->invalid = [];

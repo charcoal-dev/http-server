@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Request\Result;
 
+use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Router\Enums\RequestError;
 
 /**
@@ -17,9 +18,11 @@ use Charcoal\Http\Router\Enums\RequestError;
 final readonly class ErrorResult extends AbstractResult
 {
     public function __construct(
+        Headers             $headers,
         public RequestError $error,
         public \Throwable   $exception,
     )
     {
+        parent::__construct($this->error->getStatusCode(), $headers);
     }
 }
