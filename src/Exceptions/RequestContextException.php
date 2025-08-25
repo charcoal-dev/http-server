@@ -24,7 +24,7 @@ final class RequestContextException extends \Exception
         public readonly ?RedirectUrl $redirectTo = null,
     )
     {
-        parent::__construct($previous->getMessage(), 0, $previous);
+        parent::__construct($previous?->getMessage() ?? $this->error->name, 0, $previous);
     }
 
     /**

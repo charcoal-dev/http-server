@@ -70,6 +70,10 @@ final readonly class HttpServer
             return false;
         }
 
+        if (!$port) {
+            return true;
+        }
+
         return !$this->ports || in_array($port, $this->ports);
     }
 }

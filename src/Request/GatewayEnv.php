@@ -23,7 +23,7 @@ final readonly class GatewayEnv
     {
         $this->peerIp = $peerIp ?? $_SERVER["REMOTE_ADDR"] ?? null;
         $this->hostname = $host ?? $_SERVER["HTTP_HOST"] ?? null;
-        $this->port = $port ?? isset($_SERVER["SERVER_PORT"]) ? (int)$_SERVER["SERVER_PORT"] : null;
+        $this->port = $port ?? (isset($_SERVER["SERVER_PORT"]) ? intval($_SERVER["SERVER_PORT"]) : null);
         $this->https = $https ?: isset($_SERVER["HTTPS"]) && strtolower($_SERVER["HTTPS"]) === "on";
     }
 }

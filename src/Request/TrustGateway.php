@@ -82,7 +82,7 @@ final readonly class TrustGateway
         }
 
         foreach ($config->hostnames as $profile) {
-            $configServer = $profile->matches($validateAs, $port);
+            $configServer = $profile->matches($validateAs, $this->port);
             if ($configServer) {
                 $this->server = $profile;
                 break;
@@ -142,6 +142,10 @@ final readonly class TrustGateway
         [$clientIp, $hostname, $port, $scheme, $proxyHop] = $xff;
         $scheme = $scheme && in_array(strtolower($scheme), ["http", "https"]) ?
             $scheme : null;
+
+        if (is_string($port) && ctype_digit($port)) {
+            $port = (int)$port;
+        }
 
         if ($port && ($port < 1 || $port > 65535)) {
             $port = null;
