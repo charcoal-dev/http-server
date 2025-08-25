@@ -20,6 +20,7 @@ abstract readonly class HttpForwarded
     /**
      * Extracts and processes proxy information from the provided header
      * string up to the specified maximum number of hops.
+     * @return array<array{for?: string, host?: string, proto?: string, by?: string}>|false
      */
     public static function getProxies(string $header, int $maxHop): array|false
     {
@@ -57,13 +58,8 @@ abstract readonly class HttpForwarded
                     continue;
                 }
 
-                $hostname = HttpHelper::normalizeHostname($match[$key]);
-                $match[$key] = match (true) {
-                    is_string($hostname) => $hostname,
-                    is_array($hostname) => $hostname[1] ? implode(":", $hostname) : $hostname[0],
-                    default => null,
-                };
-
+                $hostname = HttpHelper::normalizeHostnamePort($match[$key]);
+                $match[$key] = $hostname && $hostname[1] ? implode(":", $hostname) : $hostname[0];
                 if (!$match[$key]) {
                     unset($match[$key]);
                 }
