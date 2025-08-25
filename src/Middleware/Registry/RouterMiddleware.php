@@ -113,8 +113,10 @@ final class RouterMiddleware
     {
         return [
             "resolved" => null,
+            "kernelResolved" => null,
             "resolver" => $this->resolver,
             "factories" => $this->factories,
+            "kernelFactories" => $this->kernelFactories,
             "trustPolicy" => $this->trustPolicy,
             "isLocked" => $this->isLocked,
         ];
@@ -128,10 +130,11 @@ final class RouterMiddleware
     {
         $this->resolver = $data["resolver"];
         $this->factories = $data["factories"];
+        $this->kernelFactories = $data["kernelFactories"];
         $this->trustPolicy = $data["trustPolicy"];
         $this->isLocked = $data["isLocked"];
+        $this->kernelResolved = [];
         $this->resolved = [
-            Scope::Kernel->name => [],
             Scope::Group->name => [],
             Scope::Route->name => [],
         ];
@@ -278,7 +281,7 @@ final class RouterMiddleware
             throw new \BadMethodCallException("Middleware does not implement the contract: " . $contract);
         }
 
-        if (!in_array($contract, $scope->getRegisteredPipelines())) {
+        if (!in_array($contract, $scope->getRegisteredPipelines(), true)) {
             if ($this->trustPolicy?->isTrusted($middleware, $scope) !== true) {
                 throw new \DomainException("Middleware is not registered nor whitelisted: " . $middleware::class);
             }
