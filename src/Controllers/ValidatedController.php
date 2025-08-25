@@ -8,11 +8,9 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Controllers;
 
-use Charcoal\Http\Router\Attributes\Controllers\AppContextRequired;
 use Charcoal\Http\Router\Attributes\Controllers\DefaultEntrypoint;
-use Charcoal\Http\Router\Contracts\Controllers\AppContextEnumInterface;
-use Charcoal\Http\Router\Contracts\Controllers\ControllerContextInterface;
 use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
+use Charcoal\Http\Router\Contracts\Controllers\InvokableControllerInterface;
 
 /**
  * Represents a validated controller class designed to hold the configuration, entry points, and app context.
@@ -23,7 +21,6 @@ final readonly class ValidatedController
 {
     public array $entryPoints;
     public ?string $defaultEntrypoint;
-    public ?AppContextEnumInterface $appContext;
     public ControllerAttributes $attributes;
     public bool $validated;
 
@@ -38,7 +35,6 @@ final readonly class ValidatedController
         if ($isTesting) {
             $this->entryPoints = $entryPoints;
             $this->defaultEntrypoint = null;
-            $this->appContext = null;
             $this->attributes = new ControllerAttributes(null);
             $this->validated = false;
             return;
@@ -64,9 +60,18 @@ final readonly class ValidatedController
 
         // Default entrypoint declaration (if any)
         $defaultEp = $reflect->getAttributes(DefaultEntrypoint::class);
-        $this->defaultEntrypoint = $defaultEp ? $defaultEp[0]->newInstance()->method : null;
-        if ($this->defaultEntrypoint) {
-            $entryPoints[] = $this->defaultEntrypoint;
+        $defaultEp = $defaultEp ? $defaultEp[0]->newInstance()->method : null;
+        if ($reflect->implementsInterface(InvokableControllerInterface::class)) {
+            if ($defaultEp) {
+                throw new \InvalidArgumentException("Controller class cannot declare a default entrypoint when implementing " .
+                    InvokableControllerInterface::class);
+            }
+
+            $defaultEp = "__invoke";
+        }
+
+        if ($defaultEp) {
+            $entryPoints[] = $defaultEp;
         }
 
         // Check all mentioned entry-points exist and accessible
@@ -79,15 +84,6 @@ final readonly class ValidatedController
             if (!$epMethod->isPublic() || $epMethod->isStatic()) {
                 throw new \InvalidArgumentException("Controller entrypoint must be public: " . $classname . "::" . $entrypoint);
             }
-        }
-
-        // AppContext requirement?
-        $requiredAppContext = $reflect->getAttributes(AppContextRequired::class);
-        $this->appContext = $requiredAppContext ? $requiredAppContext[0]->newInstance()->appContext : null;
-
-        // Make sure controller implements the required interfaces
-        if ($this->appContext && !$reflect->implementsInterface(ControllerContextInterface::class)) {
-            throw new \InvalidArgumentException("Controller class must implement: " . ControllerContextInterface::class);
         }
 
         $this->attributes = new ControllerAttributes($reflect);

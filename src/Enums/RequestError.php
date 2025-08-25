@@ -32,6 +32,7 @@ enum RequestError
     case CorsOriginNotAllowed;
     case RequestBodyDecodeError;
     case BadContentType;
+    case ControllerContextResolveError;
 
     /**
      * Determines and returns the appropriate HTTP status code

@@ -11,17 +11,19 @@ namespace Charcoal\Http\Router\Request;
 use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
-use Charcoal\Http\Commons\Body\Payload;
 use Charcoal\Http\Commons\Body\UnsafePayload;
+use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\Headers;
+use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Commons\Support\HttpHelper;
 use Charcoal\Http\Router\Config\RouterConfig;
 use Charcoal\Http\Router\Enums\RequestError;
 use Charcoal\Http\Router\Exceptions\HttpOptionsException;
 use Charcoal\Http\Router\Exceptions\RequestContextException;
 use Charcoal\Http\Router\Middleware\Registry\ResolverFacade;
+use Charcoal\Http\Router\Routing\Snapshot\ControllerBinding;
 
 /**
  * Represents the context of an HTTP request, encompassing details such as
@@ -42,8 +44,12 @@ final readonly class RequestContext
     public ?array $pathParams;
     public ?CorsPolicy $corsPolicy;
     public ?ContentType $contentType;
+    public ControllerBinding $controllerMeta;
+    public ControllerContext $controllerContext;
+    public string $controllerEp;
     public UnsafePayload $input;
-    public Payload $response;
+    public WritablePayload $response;
+    public ?CacheControlDirectives $cacheControl;
 
     public function __construct(
         private ServerRequest  $request,
@@ -135,8 +141,21 @@ final readonly class RequestContext
             $this->headers->set("Access-Control-Expose-Headers", $this->corsPolicy->expose);
             $this->headers->set("Vary", "Origin");
         }
+    }
 
-        // 5. Require Request Body?
+    public function routingResolved(ControllerBinding $controller, string $entryPoint): void
+    {
+        $this->controllerMeta = $controller;
+        $this->controllerEp = $entryPoint;
+
+        // 5. Create Controller Context
+        try {
+            $this->controllerContext = $this->middleware->kernel->controllerContextResolver()($this);
+        } catch (\Throwable $e) {
+            throw new RequestContextException(RequestError::ControllerContextResolveError, $e);
+        }
+
+        // 6. Require Request Body?
         $this->contentType = ContentType::find($this->headers->get("Content-Type") ?? "");
         if ($this->contentType) {
             $contentLength = (int)$this->headers->get("Content-Length");
@@ -152,7 +171,18 @@ final readonly class RequestContext
                 throw new RequestContextException(RequestError::RequestBodyDecodeError, $e);
             }
         }
+    }
 
+    /**
+     * @param CacheControlDirectives $cacheControl
+     * @return void
+     */
+    public function setCacheControl(CacheControlDirectives $cacheControl): void
+    {
+        if (isset($this->cacheControl)) {
+            throw new \BadMethodCallException("Duplicate cache control directives");
+        }
 
+        $this->cacheControl = $cacheControl;
     }
 }

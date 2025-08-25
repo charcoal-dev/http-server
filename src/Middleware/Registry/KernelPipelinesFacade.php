@@ -15,7 +15,9 @@ use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\KernelPipelines;
+use Charcoal\Http\Router\Request\ControllerContext;
 use Charcoal\Http\Router\Request\CorsPolicy;
+use Charcoal\Http\Router\Request\RequestContext;
 
 /**
  * Provides a facade for kernel-level pipelines, enabling the resolution and access to key parts.
@@ -73,6 +75,15 @@ final readonly class KernelPipelinesFacade
     public function requestBodyDecoder(): callable
     {
         return $this->resolve(KernelPipelines::RequestBodyDecoder);
+    }
+
+    /**
+     * Resolves and returns the ControllerContextResolverInterface instance from the registry.
+     * @return callable(RequestContext $request): ?ControllerContext
+     */
+    public function controllerContextResolver(): callable
+    {
+        return $this->resolve(KernelPipelines::ControllerContextResolver);
     }
 
     /**

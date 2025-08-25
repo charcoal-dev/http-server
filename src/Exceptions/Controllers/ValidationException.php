@@ -1,0 +1,25 @@
+<?php
+/**
+ * Part of the "charcoal-dev/http-router" package.
+ * @link https://github.com/charcoal-dev/http-router
+ */
+
+declare(strict_types=1);
+
+namespace Charcoal\Http\Router\Exceptions\Controllers;
+
+/**
+ * This exception includes an optional parameter name associated with the validation failure,
+ * along with a message describing the error and an optional error code.
+ */
+class ValidationException extends \Exception
+{
+    public function __construct(
+        string                  $message,
+        int                     $code = 0,
+        public readonly ?string $param = null
+    )
+    {
+        parent::__construct($message, $code);
+    }
+}

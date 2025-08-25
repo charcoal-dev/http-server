@@ -128,12 +128,21 @@ final class Router
                         count($route->params), null));
             }
 
+            // Pre-Flight Controls
             $context->preFlightControl($params ?? null);
+
+            // Update RequestContext with routing success
+            $context->routingResolved($entryPoint[0], $entryPoint[1]);
         } catch (HttpOptionsException $e) {
             return new OptionsResult(204, $e->allowedOrigin, $e->corsPolicy, $context->headers);
         } catch (RequestContextException $e) {
             return new ErrorResult($context->headers, $e->error, $e);
         }
+
+        // Todo: Init Logging
+        // Todo: Concurrency Handling
+        // Todo: Rate limiting
+        // Todo: Authentication
 
         throw new \RuntimeException("Not implemented");
         //return new SuccessResult(200, $context->headers, $context->payload);
