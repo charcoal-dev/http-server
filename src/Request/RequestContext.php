@@ -96,7 +96,6 @@ final readonly class RequestContext
     public function preFlightControl(?array $pathParams): void
     {
         $this->pathParams = $pathParams;
-        var_dump($this->pathParams);
 
         // 4. Pre-Flight Control
         $origin = $this->request->headers->get("Origin");
