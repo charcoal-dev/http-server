@@ -66,6 +66,7 @@ abstract readonly class HttpForwarded
             }
 
             if (isset($match["proto"])) {
+                $match["proto"] =   strtolower($match["proto"]);
                 if (!in_array($match["proto"], ["http", "https", "ws", "wss"])) {
                     unset($match["proto"]);
                 }
