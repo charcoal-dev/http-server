@@ -58,8 +58,8 @@ abstract readonly class HttpForwarded
                     continue;
                 }
 
-                $hostname = HttpHelper::normalizeHostnamePort($match[$key]) ?: [null, null];
-                $match[$key] = $hostname && $hostname[1] ? implode(":", $hostname) : $hostname[0];
+                $hostname = HttpHelper::normalizeHostnamePort($match[$key]) ?: [null, null, false];
+                $match[$key] = $hostname && $hostname[1] ? HttpHelper::rejoinValidatedParts($hostname) : $hostname[0];
                 if (!$match[$key]) {
                     unset($match[$key]);
                 }
