@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Request;
 
 use Charcoal\Http\Commons\Body\Payload;
+use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\Headers;
@@ -32,7 +33,8 @@ final readonly class RequestContext
     public TrustGateway $gateway;
     public Headers $headers;
     public ?CorsPolicy $corsPolicy;
-    public Payload $payload;
+    public UnsafePayload $input;
+    public Payload $response;
 
     public function __construct(
         private ServerRequest  $request,
@@ -76,6 +78,11 @@ final readonly class RequestContext
         }
     }
 
+    /**
+     * @return void
+     * @throws HttpOptionsException
+     * @throws RequestContextException
+     */
     public function preFlightControl(): void
     {
         // 4. Pre-Flight Control
@@ -117,6 +124,6 @@ final readonly class RequestContext
             $this->headers->set("Vary", "Origin");
         }
 
-        $this->payload = new WritablePayload();
+        $this->response = new WritablePayload();
     }
 }
