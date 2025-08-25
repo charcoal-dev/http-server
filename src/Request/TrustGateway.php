@@ -36,19 +36,17 @@ final readonly class TrustGateway
     /**
      * @throws RequestContextException
      */
-    public function __construct(RouterConfig $config, ServerRequest $request)
+    public function __construct(RouterConfig $config, ServerRequest $request, GatewayEnv $env = new GatewayEnv())
     {
-        $peerIp = $_SERVER["REMOTE_ADDR"];
-        $peerIpBinary = @inet_pton($peerIp);
+        $peerIpBinary = @inet_pton($env->peerIp ?? "");
         if ($peerIpBinary === false) {
             throw new RequestContextException(RequestError::BadPeerIp,
-                new \RuntimeException("Invalid peer IP: " . $peerIp));
+                new \RuntimeException("Invalid peer IP: " . $env->peerIp));
         }
 
-        $port = isset($_SERVER["SERVER_PORT"]) ? (int)$_SERVER["SERVER_PORT"] : null;
-        $hostname = $_SERVER["HTTP_HOST"] ?? null;
-        $scheme = isset($_SERVER["HTTPS"]) && strtolower($_SERVER["HTTPS"]) === "on" ? "https" : "http";
-
+        $port = $env->port;
+        $hostname = $env->hostname;
+        $scheme = $env->https ? "https" : "http";
         $checkTrustedProxies = $this->checkProxies($peerIpBinary, $config, $request->headers);
         if ($checkTrustedProxies) {
             $this->clientIp = $checkTrustedProxies[0];
@@ -58,7 +56,7 @@ final readonly class TrustGateway
             $this->proxyHop = $checkTrustedProxies[4];
             $this->proxy = $checkTrustedProxies[5];
         } else {
-            $this->clientIp = $peerIp;
+            $this->clientIp = $env->peerIp;
             $this->proxyHop = null;
             $this->proxy = null;
         }
