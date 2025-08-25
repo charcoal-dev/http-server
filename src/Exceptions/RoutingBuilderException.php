@@ -12,6 +12,6 @@ namespace Charcoal\Http\Router\Exceptions;
  * Class RouteBuilderException
  * @package Charcoal\Http\Router\Exceptions
  */
-class RoutingBuilderException extends \Exception
+final class RoutingBuilderException extends \Exception
 {
 }
