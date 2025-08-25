@@ -40,7 +40,7 @@ final class GatewayTest extends TestCase
             wwwAlias: true,
         );
 
-        $peerIp  = "10.1.2.3"; // trusted
+        $peerIp = "10.1.2.3"; // trusted
         $headers = new Headers();
         // Nearest trusted provides quoted/mixed-case proto + quoted host; next is client
         $headers->set("Forwarded", 'for=10.9.8.7;proto="HTTPS";host="hostname.tld", for=203.0.113.7');
@@ -74,7 +74,7 @@ final class GatewayTest extends TestCase
             wwwAlias: true,
         );
 
-        $peerIp  = "10.1.2.3"; // trusted
+        $peerIp = "10.1.2.3"; // trusted
         $headers = new Headers();
         // Client token includes :port → should be stripped
         $headers->set("X-Forwarded-For", "203.0.113.7:51111, 10.1.2.3");
@@ -609,5 +609,77 @@ final class GatewayTest extends TestCase
         $this->assertNull($gw->port, "Port should not be inferred from proto");
         $this->assertSame("https", $gw->scheme);
         $this->assertSame(1, $gw->proxyHop); // client at index 1 (after one trusted hop)
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Cloudflare_SingleHop_PromotesIp_ProtoFromXfp_Https(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["173.245.48.0/20", "103.21.244.0/22"], protoFromTrustedEdge: true)], // sample CF CIDRs
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "173.245.48.5"; // Cloudflare edge (trusted)
+        $headers = new Headers();
+        $headers->set("X-Forwarded-For", "203.0.113.7");   // single-hop → clientIdx=0
+        $headers->set("X-Forwarded-Proto", "https");       // proto override
+        // no X-Forwarded-Host/Port → keep baseline authority
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld", https: false));
+
+        $this->assertSame("203.0.113.7", $gw->clientIp);
+        $this->assertSame("hostname.tld", $gw->server?->hostname); // baseline host
+        $this->assertNull($gw->port);                               // no explicit port
+        $this->assertSame("https", $gw->scheme);                    // from X-Forwarded-Proto
+        $this->assertSame(0, $gw->proxyHop);                        // index 0
+    }
+
+    /**
+     * @return void
+     * @throws RequestContextException
+     */
+    public function testGateway_Cloudflare_SingleHop_PromotesIp_ProtoFromXfp_Http(): void
+    {
+        $config = new RouterConfig(
+            [new HttpServer("hostname.tld", 80, 443)],
+            [new TrustedProxy(true, ["173.245.48.0/20", "103.21.244.0/22"], protoFromTrustedEdge: true)],
+            enforceTls: false,
+            wwwAlias: true,
+        );
+
+        $peerIp = "173.245.48.5"; // Cloudflare edge (trusted)
+        $headers = new Headers();
+        $headers->set("X-Forwarded-For", "203.0.113.7");
+        $headers->set("X-Forwarded-Proto", "http");        // stays http
+        // no X-Forwarded-Host/Port → keep baseline authority
+
+        $request = new ServerRequest(
+            HttpMethod::GET,
+            HttpProtocol::Version2,
+            $headers->toImmutable(),
+            new UrlInfo("http://hostname.tld/"),
+            isSecure: false
+        );
+
+        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld", https: false));
+
+        $this->assertSame("203.0.113.7", $gw->clientIp);
+        $this->assertSame("hostname.tld", $gw->server?->hostname);
+        $this->assertNull($gw->port);
+        $this->assertSame("http", $gw->scheme);            // from X-Forwarded-Proto
+        $this->assertSame(0, $gw->proxyHop);
     }
 }

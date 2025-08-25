@@ -213,13 +213,18 @@ final readonly class TrustGateway
             return false;
         }
 
+        $xfp2 = array_reverse(array_map("trim", explode(",", $headers->get("X-Forwarded-Proto") ?? "")));
         if ($index === 0) {
-            return [$clientIp, null, null, null, 0];
+            $scheme = match($proxy->protoFromTrustedEdge) {
+                true => $xfp2[0] ?? null,
+                false => null,
+            };
+
+            return [$clientIp, null, null, $scheme, 0];
         }
 
         $xfh = array_reverse(array_map("trim", explode(",", $headers->get("X-Forwarded-Host") ?? "")));
         $xfp1 = array_reverse(array_map("trim", explode(",", $headers->get("X-Forwarded-Port") ?? "")));
-        $xfp2 = array_reverse(array_map("trim", explode(",", $headers->get("X-Forwarded-Proto") ?? "")));
 
         return [
             $clientIp,
@@ -254,7 +259,7 @@ final readonly class TrustGateway
             }
 
             $channelIp = (HttpHelper::normalizeHostnamePort($channel["for"]) ?: [null])[0];
-            if(!$channelIp) {
+            if (!$channelIp) {
                 continue;
             }
 

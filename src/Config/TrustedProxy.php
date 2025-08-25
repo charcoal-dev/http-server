@@ -26,6 +26,7 @@ readonly class TrustedProxy
         public bool $useForwarded,
         array       $cidrList,
         public int  $maxHops = 6,
+        public bool $protoFromTrustedEdge = false
     )
     {
         $cidrCount = count($cidrList);
