@@ -24,7 +24,8 @@ readonly class TrustedProxy
 
     public function __construct(
         public bool $useForwarded,
-        array       $cidrList
+        array       $cidrList,
+        public int  $maxHops = 6,
     )
     {
         $cidrCount = count($cidrList);
