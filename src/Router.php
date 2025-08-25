@@ -119,10 +119,7 @@ final class Router
         // Pre-Flight Control
         try {
             if ($route->params) {
-                if (!isset($tokens)) {
-                    $tokens = [];
-                }
-
+                if (!isset($tokens)) $tokens = [];
                 $params = array_combine($route->params,
                     array_pad(array_map(fn($v) => $v[0] ?? null, $tokens),
                         count($route->params), null));
@@ -143,6 +140,9 @@ final class Router
         // Todo: Concurrency Handling
         // Todo: Rate limiting
         // Todo: Authentication
+
+        // Todo: Instantiate and Execute Controller (before Hooks)
+        // Todo: Final Cleanups
 
         throw new \RuntimeException("Not implemented");
         //return new SuccessResult(200, $context->headers, $context->payload);
