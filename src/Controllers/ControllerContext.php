@@ -6,12 +6,13 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Request;
+namespace Charcoal\Http\Router\Controllers;
 
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Router\Contracts\Request\ControllerContextInterface;
+use Charcoal\Http\Router\Request\RequestContext;
 
 /**
  * Defines the controller context, which provides access to request and response handling,

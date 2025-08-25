@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Contracts\Controllers;
 
-use Charcoal\Http\Router\Request\ControllerContext;
+use Charcoal\Http\Router\Controllers\ControllerContext;
 
 /**
  * Represents a controller interface that ensures the implementation of an invokable method.

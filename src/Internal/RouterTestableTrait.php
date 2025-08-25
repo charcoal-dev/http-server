@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Internal;
 
-use Charcoal\Http\Router\Request\GatewayEnv;
+use Charcoal\Http\Router\Config\GatewayEnv;
 
 /**
  * Provides functionality to toggle test mode for an application, allowing

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Request;
+namespace Charcoal\Http\Router\Config;
 
 /**
  * Represents environment details for a gateway connection, including information about the

@@ -19,6 +19,7 @@ use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Commons\Support\HttpHelper;
 use Charcoal\Http\Router\Config\RouterConfig;
+use Charcoal\Http\Router\Controllers\ControllerContext;
 use Charcoal\Http\Router\Enums\RequestError;
 use Charcoal\Http\Router\Exceptions\HttpOptionsException;
 use Charcoal\Http\Router\Exceptions\RequestContextException;

@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Contracts\Middleware\Kernel;
 
-use Charcoal\Http\Router\Request\ControllerContext;
+use Charcoal\Http\Router\Controllers\ControllerContext;
 use Charcoal\Http\Router\Request\RequestContext;
 
 /**

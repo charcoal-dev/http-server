@@ -10,8 +10,9 @@ namespace Charcoal\Http\Router\Request;
 
 use Charcoal\Http\Commons\Contracts\HeadersInterface;
 use Charcoal\Http\Commons\Support\HttpHelper;
-use Charcoal\Http\Router\Config\RouterConfig;
+use Charcoal\Http\Router\Config\GatewayEnv;
 use Charcoal\Http\Router\Config\HttpServer;
+use Charcoal\Http\Router\Config\RouterConfig;
 use Charcoal\Http\Router\Config\TrustedProxy;
 use Charcoal\Http\Router\Enums\RequestError;
 use Charcoal\Http\Router\Exceptions\RequestContextException;

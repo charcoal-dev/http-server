@@ -14,8 +14,8 @@ use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
+use Charcoal\Http\Router\Controllers\ControllerContext;
 use Charcoal\Http\Router\Enums\Middleware\KernelPipelines;
-use Charcoal\Http\Router\Request\ControllerContext;
 use Charcoal\Http\Router\Request\CorsPolicy;
 use Charcoal\Http\Router\Request\RequestContext;
 
