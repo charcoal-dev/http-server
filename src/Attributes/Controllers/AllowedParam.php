@@ -13,7 +13,7 @@ namespace Charcoal\Http\Router\Attributes\Controllers;
  * This attribute can be applied to methods and is repeatable.
  */
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-final readonly class RequiredParams
+final readonly class AllowedParam
 {
     /** @var string[] */
     public array $params;
