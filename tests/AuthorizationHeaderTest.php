@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Tests\Router;
 
-use Charcoal\Http\Router\Request\Headers\Authorization;
+use Charcoal\Http\Router\Support\HttpAuthorization;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,7 +19,7 @@ final class AuthorizationHeaderTest extends TestCase
 {
     public function testEmptyHeaderReturnsEmptyResults(): void
     {
-        [$valid, $invalid, $unchecked] = Authorization::from('');
+        [$valid, $invalid, $unchecked] = HttpAuthorization::from('');
 
         $this->assertSame([], $valid);
         $this->assertSame([], $invalid);
@@ -33,7 +33,7 @@ final class AuthorizationHeaderTest extends TestCase
             . 'Digest username="Aladdin", realm="test", nonce=abc, uri="/", response=deadbeef, qop=auth, algorithm=MD5, opaque="xyz\"123", '
             . 'Custom Zm9vYmFy';
 
-        [$valid, $invalid, $unchecked] = Authorization::from($header);
+        [$valid, $invalid, $unchecked] = HttpAuthorization::from($header);
 
         $this->assertSame(
             [
@@ -65,7 +65,7 @@ final class AuthorizationHeaderTest extends TestCase
     {
         $header = 'Basic, Bearer';
 
-        [$valid, $invalid, $unchecked] = Authorization::from($header);
+        [$valid, $invalid, $unchecked] = HttpAuthorization::from($header);
 
         $this->assertSame([], $valid);
         $this->assertSame(['Basic ', 'Bearer '], $invalid);
@@ -76,7 +76,7 @@ final class AuthorizationHeaderTest extends TestCase
     {
         $header = 'Bearer a.b.c, Custom dGVzdA==';
 
-        [$valid, $invalid, $unchecked] = Authorization::from($header);
+        [$valid, $invalid, $unchecked] = HttpAuthorization::from($header);
 
         // Align expectations with current behavior
         $this->assertSame(
