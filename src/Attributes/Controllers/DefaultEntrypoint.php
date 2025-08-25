@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Attributes;
+namespace Charcoal\Http\Router\Attributes\Controllers;
 
 /**
  * An attribute that specifies the default entry point method for a class.

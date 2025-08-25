@@ -6,7 +6,9 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts\Middleware;
+namespace Charcoal\Http\Router\Contracts\Middleware\Route;
+
+use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 
 /**
  * Represents a middleware specifically tailored to be used on a per-route basis.

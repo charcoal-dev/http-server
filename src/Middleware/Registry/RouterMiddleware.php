@@ -13,7 +13,7 @@ use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareResolverInterface;
 use Charcoal\Http\Router\Contracts\Middleware\MiddlewareTrustPolicyInterface;
-use Charcoal\Http\Router\Contracts\Middleware\RouteMiddlewareInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Route\RouteMiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 use Charcoal\Http\Router\Middleware\MiddlewareConstructor;
 use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;

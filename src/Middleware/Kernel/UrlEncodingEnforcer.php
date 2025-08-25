@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Middleware\Kernel;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
-use Charcoal\Http\Router\Attributes\BindsTo;
+use Charcoal\Http\Router\Attributes\Middleware\BindsTo;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\UrlEncodingEnforcerInterface;
 use Charcoal\Http\Router\Request\Result\RedirectUrl;
 

@@ -18,5 +18,5 @@ use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInt
  */
 interface RequestBodyDecoderInterface extends KernelMiddlewareInterface, MiddlewareConstructableInterface
 {
-    public function __invoke(ContentType $contentType): ?UnsafePayload;
+    public function __invoke(ContentType $contentType, int $length): ?UnsafePayload;
 }

@@ -69,7 +69,7 @@ final readonly class KernelPipelinesFacade
     /**
      * Resolves and returns the RequestBodyDecoder callable instance from the registry
      * using the specified scope and interface class.
-     * @return callable(ContentType $contentType): ?UnsafePayload
+     * @return callable(ContentType $contentType, int $length): ?UnsafePayload
      */
     public function requestBodyDecoder(): callable
     {

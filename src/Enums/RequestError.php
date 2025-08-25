@@ -28,7 +28,10 @@ enum RequestError
     case MethodNotDeclared;
     case MethodNotAllowed;
     case BadOriginHeader;
+    case CorsPolicyResolveError;
     case CorsOriginNotAllowed;
+    case RequestBodyDecodeError;
+    case BadContentType;
 
     /**
      * Determines and returns the appropriate HTTP status code
@@ -37,12 +40,17 @@ enum RequestError
     public function getStatusCode(): int
     {
         return match ($this) {
+            self::BadPeerIp,
+            self::BadHostname,
+            self::IncorrectHost,
+            self::CorsPolicyResolveError,
             self::RequestIdError,
             self::BadUrlEncoding => 400,
             self::BadUrlLength => 414,
             self::EndpointNotFound => 404,
             self::MethodNotDeclared, self::MethodNotAllowed => 405,
             self::BadOriginHeader, self::CorsOriginNotAllowed => 403,
+            self::BadContentType => 415,
             default => 500
         };
     }

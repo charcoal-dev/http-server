@@ -8,8 +8,9 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Contracts\Middleware;
 
-use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Group\GroupMiddlewareInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Route\RouteMiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 
 /**

@@ -10,7 +10,7 @@ namespace Charcoal\Http\Router\Middleware\Kernel;
 
 use Charcoal\Buffers\Frames\Bytes16;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
-use Charcoal\Http\Router\Attributes\BindsTo;
+use Charcoal\Http\Router\Attributes\Middleware\BindsTo;
 use Charcoal\Http\Router\Contracts\Middleware\Kernel\RequestIdResolverInterface;
 
 /**

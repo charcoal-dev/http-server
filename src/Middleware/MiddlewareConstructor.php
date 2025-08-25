@@ -9,12 +9,12 @@ declare(strict_types=1);
 namespace Charcoal\Http\Router\Middleware;
 
 use Charcoal\Base\Support\Helpers\DtoHelper;
-use Charcoal\Http\Router\Attributes\BindsTo;
+use Charcoal\Http\Router\Attributes\Middleware\BindsTo;
 use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareConstructableInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareFactoryInterface;
-use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
 use Charcoal\Http\Router\Contracts\Middleware\Group\GroupMiddlewareInterface;
-use Charcoal\Http\Router\Contracts\Middleware\RouteMiddlewareInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Kernel\KernelMiddlewareInterface;
+use Charcoal\Http\Router\Contracts\Middleware\Route\RouteMiddlewareInterface;
 use Charcoal\Http\Router\Enums\Middleware\Scope;
 
 /**

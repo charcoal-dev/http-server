@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Router\Controllers;
 
-use Charcoal\Http\Router\Attributes\AppContextRequired;
-use Charcoal\Http\Router\Attributes\DefaultEntrypoint;
+use Charcoal\Http\Router\Attributes\Controllers\AppContextRequired;
+use Charcoal\Http\Router\Attributes\Controllers\DefaultEntrypoint;
 use Charcoal\Http\Router\Contracts\Controllers\AppContextEnumInterface;
 use Charcoal\Http\Router\Contracts\Controllers\ControllerContextInterface;
 use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;

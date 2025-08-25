@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Attributes;
+namespace Charcoal\Http\Router\Attributes\Middleware;
 
 /**
  * An attribute class that binds a class to a specified contract.

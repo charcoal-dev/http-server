@@ -10,7 +10,7 @@ namespace Charcoal\Http\Router\Request;
 
 use Charcoal\Http\Commons\Body\Payload;
 use Charcoal\Http\Commons\Body\UnsafePayload;
-use Charcoal\Http\Commons\Body\WritablePayload;
+use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Support\HttpHelper;
@@ -33,6 +33,7 @@ final readonly class RequestContext
     public TrustGateway $gateway;
     public Headers $headers;
     public ?CorsPolicy $corsPolicy;
+    public ?ContentType $contentType;
     public UnsafePayload $input;
     public Payload $response;
 
@@ -91,7 +92,7 @@ final readonly class RequestContext
             try {
                 $this->corsPolicy = $this->middleware->kernel->corsPolicyResolver()();
             } catch (\Throwable $e) {
-                throw new RequestContextException(RequestError::KernelError, $e);
+                throw new RequestContextException(RequestError::CorsPolicyResolveError, $e);
             }
         }
 
@@ -124,6 +125,23 @@ final readonly class RequestContext
             $this->headers->set("Vary", "Origin");
         }
 
-        $this->response = new WritablePayload();
+        // 5. Require Request Body?
+        $this->contentType = ContentType::find($this->headers->get("Content-Type") ?? "");
+        if ($this->contentType) {
+            $contentLength = (int)$this->headers->get("Content-Length");
+            if ($contentLength <= 0) {
+                $this->input = new UnsafePayload();
+            }
+        }
+
+        if (!isset($this->input) && isset($contentLength) && $contentLength > 0) {
+            try {
+                $this->input = $this->middleware->kernel->requestBodyDecoder()($this->contentType, $contentLength);
+            } catch (\Throwable $e) {
+                throw new RequestContextException(RequestError::RequestBodyDecodeError, $e);
+            }
+        }
+
+
     }
 }
