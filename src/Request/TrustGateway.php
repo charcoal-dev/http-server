@@ -24,7 +24,7 @@ use Charcoal\Http\Router\Support\HttpForwarded;
  * headers, and configuration to validate the client and potentially traverse through
  * trusted proxies specified via configuration.
  */
-readonly class TrustGateway
+final readonly class TrustGateway
 {
     public ?TrustedProxy $proxy;
     public ?int $proxyHop;
@@ -78,12 +78,13 @@ readonly class TrustGateway
                 new \RuntimeException("Invalid hostname: " . ($hostname ?? "!null")));
         }
 
+        $validateAs = $hostname;
         if ($config->wwwAlias && str_starts_with($hostname, "www.")) {
-            $hostname = substr($hostname, 4);
+            $validateAs = substr($hostname, 4);
         }
 
         foreach ($config->hostnames as $profile) {
-            $configServer = $profile->matches($hostname, $port);
+            $configServer = $profile->matches($validateAs, $port);
             if ($configServer) {
                 $this->server = $profile;
                 break;
