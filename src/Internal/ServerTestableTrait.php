@@ -1,28 +1,26 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Internal;
+namespace Charcoal\Http\Server\Internal;
 
-use Charcoal\Http\Router\Config\GatewayEnv;
+use Charcoal\Http\Server\TrustProxy\ServerEnv;
 
 /**
- * Provides functionality to toggle test mode for an application, allowing
- * validation of controller and middleware classes to be enabled or disabled.
- * @internal
+ * Provides functionality for toggling test mode in the application and managing
+ * an injected server environment.
  */
-trait RouterTestableTrait
+trait ServerTestableTrait
 {
     /**
      * @var bool Toggles controller existence check
      * @internal
      */
     public static bool $validateControllerClasses = true;
-    public static bool $validateMiddlewareClasses = true;
 
     /**
      * Toggles the test mode for the application by enabling or disabling
@@ -31,22 +29,21 @@ trait RouterTestableTrait
     public static function toggleTestMode(bool $testing): void
     {
         self::$validateControllerClasses = !$testing;
-        self::$validateMiddlewareClasses = !$testing;
     }
 
     /**
-     * @var GatewayEnv|null The injected environment.
+     * @var ServerEnv|null The injected environment.
      * @internal
      */
-    public static ?GatewayEnv $injectedEnvironment = null;
+    public static ?ServerEnv $injectedEnvironment = null;
 
     /**
-     * @param GatewayEnv $env
+     * @param ServerEnv $env
      * @return void
      */
-    public static function injectEnv(GatewayEnv $env): void
+    public static function injectEnv(ServerEnv $env): void
     {
-        if (self::$validateControllerClasses || self::$validateMiddlewareClasses) {
+        if (self::$validateControllerClasses) {
             throw new \LogicException("Cannot inject environment while NOT in test mode");
         }
 
