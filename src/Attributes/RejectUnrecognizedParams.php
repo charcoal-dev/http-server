@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Attributes;
 
 /**
- * An attribute that denotes whether to reject unrecognized parameters for a method.
- * @property-read bool $enforce Indicates whether the enforcement is enabled or disabled. Defaults to true.
+ * An attribute that can be applied to a method to enforce the rejection
+ * of unrecognized parameters during its invocation or processing.
  */
 #[\Attribute(\Attribute::TARGET_METHOD)]
 final readonly class RejectUnrecognizedParams
