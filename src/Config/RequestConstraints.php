@@ -51,7 +51,7 @@ final class RequestConstraints
     public function change(RequestConstraint $override, mixed $value): void
     {
         if (!is_int($value) || $value < 0 || $value > 0xFFFFFFFE) {
-            throw new \InvalidArgumentException("Invalid HTTP constant override value: " . $override->name);
+            throw new \InvalidArgumentException("Invalid HTTP constraint override value: " . $override->name);
         }
 
         $this->{$override->name} = $value;

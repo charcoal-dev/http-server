@@ -27,10 +27,11 @@ final readonly class ServerConfig
      * @param TrustedProxy[] $proxies
      */
     public function __construct(
-        array       $hostnames,
-        array       $proxies,
-        public bool $enforceTls = true,
-        public bool $wwwAlias = true
+        array                     $hostnames,
+        array                     $proxies,
+        public RequestConstraints $requests,
+        public bool               $enforceTls = true,
+        public bool               $wwwAlias = true
     )
     {
         // Hostnames Setup
