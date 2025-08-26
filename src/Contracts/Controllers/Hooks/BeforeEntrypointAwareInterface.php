@@ -1,14 +1,14 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts\Controllers\Hooks;
+namespace Charcoal\Http\Server\Contracts\Controllers\Hooks;
 
-use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
+use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 
 /**
  * Interface for classes that are aware of a "before entry point" callable.

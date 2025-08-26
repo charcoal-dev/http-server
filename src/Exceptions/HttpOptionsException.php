@@ -1,18 +1,18 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Exceptions;
+namespace Charcoal\Http\Server\Exceptions;
 
-use Charcoal\Http\Router\Request\CorsPolicy;
+use Authorization\CorsPolicy;
 
 /**
  * Class HttpOptionsException
- * @package Charcoal\Http\Router\Exceptions
+ * @package Charcoal\Http\Server\Exceptions
  */
 final class HttpOptionsException extends \Exception
 {

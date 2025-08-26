@@ -1,15 +1,15 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Exceptions;
+namespace Charcoal\Http\Server\Exceptions;
 
-use Charcoal\Http\Router\Enums\RequestError;
-use Charcoal\Http\Router\Request\Result\RedirectUrl;
+use Charcoal\Http\Server\Enums\RequestError;
+use Charcoal\Http\Server\Request\Result\RedirectUrl;
 
 /**
  * An exception specifically designed to handle errors related to the request context.

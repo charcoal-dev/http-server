@@ -1,14 +1,14 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts\Controllers;
+namespace Charcoal\Http\Server\Contracts\Controllers;
 
-use Charcoal\Http\Router\Controllers\ControllerContext;
+use Charcoal\Http\Server\Request\Controller\ControllerApi;
 
 /**
  * Represents an interface for validation error enumerations.
@@ -16,5 +16,5 @@ use Charcoal\Http\Router\Controllers\ControllerContext;
  */
 interface ValidationErrorEnumInterface extends \UnitEnum
 {
-    public function getTranslatedMessage(ControllerContext $context): string;
+    public function getTranslatedMessage(ControllerApi $context): string;
 }

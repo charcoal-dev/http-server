@@ -11,13 +11,13 @@ namespace Charcoal\Http\Server\Request\Controller;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
-use Charcoal\Http\Server\Contracts\Request\ControllerContextInterface;
+use Charcoal\Http\Server\Contracts\Request\ControllerApiInterface;
 use Charcoal\Http\Server\Request\RequestLifecycle;
 
 /**
  * Represents a controller API that interacts with request and response contexts.
  */
-readonly class ControllerApi implements ControllerContextInterface
+readonly class ControllerApi implements ControllerApiInterface
 {
     public function __construct(private RequestLifecycle $request)
     {

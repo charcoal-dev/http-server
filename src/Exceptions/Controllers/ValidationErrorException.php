@@ -1,14 +1,14 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Exceptions\Controllers;
+namespace Charcoal\Http\Server\Exceptions\Controllers;
 
-use Charcoal\Http\Router\Contracts\Controllers\ValidationErrorEnumInterface;
+use Charcoal\Http\Server\Contracts\Controllers\ValidationErrorEnumInterface;
 
 /**
  * Represents a translated validation exception that includes a specific error type,

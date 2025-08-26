@@ -1,25 +1,24 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Contracts\Request;
+namespace Charcoal\Http\Server\Contracts\Request;
 
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
-use Charcoal\Http\Router\Request\RequestContext;
+use Charcoal\Http\Server\Request\RequestLifecycle;
 
 /**
- * Defines the contract for a controller context, which provides access to
- * request and response handling, path parameters, and cache control directives.
+ * Interface representing a controller API that manages the lifecycle of HTTP requests and responses.
  */
-interface ControllerContextInterface
+interface ControllerApiInterface
 {
-    public function __construct(RequestContext $context);
+    public function __construct(RequestLifecycle $context);
 
     public function request(): UnsafePayload;
 

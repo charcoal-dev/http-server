@@ -1,19 +1,19 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Support;
+namespace Charcoal\Http\Server\Support;
 
 use Charcoal\Base\Charsets\Ascii;
 use Charcoal\Http\Commons\Contracts\HeadersInterface;
 
 /**
  * Class HttpAuthorization
- * @package Charcoal\Http\Router\Support
+ * @package Charcoal\Http\Server\Support
  */
 readonly class HttpAuthorization
 {
