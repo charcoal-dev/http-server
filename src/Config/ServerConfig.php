@@ -1,27 +1,29 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Config;
+namespace Charcoal\Http\Server\Config;
+
+use Charcoal\Http\Server\TrustProxy\TrustedProxy;
 
 /**
- * Represents the configuration containing hostnames and trusted proxies.
- * This class enforces that all hostnames are instances of HttpServer,
- * and all proxies are instances of TrustedProxy. Duplicates are not allowed.
+ * Represents a server configuration that includes a list of HTTP servers
+ * and trusted proxies, along with settings for TLS enforcement and
+ * www alias handling.
  */
-final readonly class RouterConfig
+final readonly class ServerConfig
 {
-    /** @var HttpServer[] */
+    /** @var VirtualHost[] */
     public array $hostnames;
     /** @var TrustedProxy[] */
     public array $proxies;
 
     /**
-     * @param HttpServer[] $hostnames
+     * @param VirtualHost[] $hostnames
      * @param TrustedProxy[] $proxies
      */
     public function __construct(
@@ -34,8 +36,8 @@ final readonly class RouterConfig
         // Hostnames Setup
         $checked = [];
         foreach ($hostnames as $hostname) {
-            if (!$hostname instanceof HttpServer) {
-                throw new \InvalidArgumentException("Required instance of: " . HttpServer::class);
+            if (!$hostname instanceof VirtualHost) {
+                throw new \InvalidArgumentException("Required instance of: " . VirtualHost::class);
             }
 
             $hostname = $hostname->wildcard ? "*." . $hostname->hostname : $hostname->hostname;
