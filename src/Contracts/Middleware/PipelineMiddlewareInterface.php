@@ -15,5 +15,5 @@ namespace Charcoal\Http\Server\Contracts\Middleware;
  */
 interface PipelineMiddlewareInterface
 {
-    public function invoke(array $params): mixed;
+    public function execute(array $params): mixed;
 }
