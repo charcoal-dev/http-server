@@ -29,6 +29,7 @@ final readonly class Router
     /**
      * Matches a given path against the route patterns in the snapshot
      * and returns the matching route and extracted tokens if a match is found.
+     * @return array{RouteSnapshot, array<string>}|false
      */
     public function match(string $path): array|false
     {

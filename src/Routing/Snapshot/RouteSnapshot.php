@@ -24,7 +24,7 @@ final readonly class RouteSnapshot
     public ?array $params;
 
     public function __construct(
-        public string       $path,
+        public string          $path,
         RouteControllerBinding ...$controllers
     )
     {
@@ -42,5 +42,18 @@ final readonly class RouteSnapshot
         $this->matchRegExp = "~^" . $matchRegExp . "$~";
         $this->params = $params ?: null;
         $this->controllers = $controllers;
+    }
+
+    /**
+     * Aggregates methods from all controllers associated with the instance.
+     */
+    public function getAggregatedMethods(): array
+    {
+        $methods = [];
+        foreach ($this->controllers as $controller) {
+            $methods = [...$methods, ...$controller->methods];
+        }
+
+        return array_unique($methods);
     }
 }
