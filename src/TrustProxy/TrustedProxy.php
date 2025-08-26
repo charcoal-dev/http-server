@@ -1,19 +1,19 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Config;
+namespace Charcoal\Http\Server\TrustProxy;
 
 use Charcoal\Base\Support\Helpers\NetworkHelper;
 
 /**
- * Immutable class representing a trusted proxy configuration.
- * This class is used to validate and manage a list of allowed CIDR blocks for trusted
- * proxies and determine whether the "Forwarded" header should be used.
+ * Represents a trusted proxy configuration that validates if a given binary IP
+ * address matches specific allowed CIDR ranges. This class is designed to
+ * handle proxy-related operations and validation logic.
  * @property-read bool $useForwarded Indicates whether the "Forwarded" header should be used.
  * @property-read array<string,array{string,string}> $allowedCidr Contains the validated list of allowed CIDR blocks.
  */

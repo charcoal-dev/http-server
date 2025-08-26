@@ -1,35 +1,32 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Request;
+namespace Charcoal\Http\Server\TrustProxy;
 
 use Charcoal\Http\Commons\Contracts\HeadersInterface;
 use Charcoal\Http\Commons\Support\HttpHelper;
-use Charcoal\Http\Router\Config\GatewayEnv;
-use Charcoal\Http\Router\Config\HttpServer;
-use Charcoal\Http\Router\Config\RouterConfig;
-use Charcoal\Http\Router\Config\TrustedProxy;
-use Charcoal\Http\Router\Enums\RequestError;
-use Charcoal\Http\Router\Exceptions\RequestContextException;
-use Charcoal\Http\Router\Request\Result\RedirectUrl;
-use Charcoal\Http\Router\Support\HttpForwarded;
+use Charcoal\Http\Server\Config\ServerConfig;
+use Charcoal\Http\Server\Config\VirtualHost;
+use Charcoal\Http\Server\Enums\RequestError;
+use Charcoal\Http\Server\Exceptions\RequestContextException;
+use Charcoal\Http\Server\Request\Result\RedirectUrl;
+use Charcoal\Http\Server\Request\ServerRequest;
 
 /**
- * The TrustGateway class is responsible for determining the client's IP address and scheme
- * while optionally processing trusted proxy information. It examines environmental variables,
- * headers, and configuration to validate the client and potentially traverse through
- * trusted proxies specified via configuration.
+ * TrustGateway is a final readonly class responsible for handling trusted
+ * proxy configurations, validating incoming server requests, and extracting
+ * client-related information such as IP address, hostname, port, and scheme.
  */
 final readonly class TrustGateway
 {
     public ?TrustedProxy $proxy;
     public ?int $proxyHop;
-    public ?HttpServer $server;
+    public ?VirtualHost $server;
     public string $clientIp;
     public ?int $port;
     public ?string $scheme;
@@ -37,7 +34,7 @@ final readonly class TrustGateway
     /**
      * @throws RequestContextException
      */
-    public function __construct(RouterConfig $config, ServerRequest $request, GatewayEnv $env = new GatewayEnv())
+    public function __construct(ServerConfig $config, ServerRequest $request, ServerEnv $env = new ServerEnv())
     {
         $peerIpBinary = @inet_pton($env->peerIp ?? "");
         if ($peerIpBinary === false) {
@@ -103,11 +100,11 @@ final readonly class TrustGateway
 
     /**
      * @param string $peerIpBinary
-     * @param RouterConfig $config
+     * @param ServerConfig $config
      * @param HeadersInterface $headers
      * @return array<string,string|null,int|null,string|null,int,TrustedProxy>|false
      */
-    private function checkProxies(string $peerIpBinary, RouterConfig $config, HeadersInterface $headers): array|false
+    private function checkProxies(string $peerIpBinary, ServerConfig $config, HeadersInterface $headers): array|false
     {
         if (!$config->proxies) {
             return false;
@@ -251,7 +248,7 @@ final readonly class TrustGateway
         $hostname = null;
         $port = null;
         $scheme = null;
-        $entries = HttpForwarded::getProxies($header, $maxHops) ?: [];
+        $entries = ForwardedHeaderParser::getProxies($header, $maxHops) ?: [];
         $index = -1;
         foreach ($entries as $channel) {
             $index++;

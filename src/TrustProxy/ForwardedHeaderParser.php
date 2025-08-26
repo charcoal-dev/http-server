@@ -1,12 +1,12 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Support;
+namespace Charcoal\Http\Server\TrustProxy;
 
 use Charcoal\Http\Commons\Support\HttpHelper;
 
@@ -15,7 +15,7 @@ use Charcoal\Http\Commons\Support\HttpHelper;
  * proxy-related information from HTTP headers, specifically from the
  * Forwarded header.
  */
-abstract readonly class HttpForwarded
+abstract readonly class ForwardedHeaderParser
 {
     /**
      * Extracts and processes proxy information from the provided header

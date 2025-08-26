@@ -1,18 +1,18 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Config;
+namespace Charcoal\Http\Server\TrustProxy;
 
 /**
- * Represents environment details for a gateway connection, including information about the
- * remote peer, host, port, and scheme of the current request.
+ * Represents the HTTP request header information,
+ * including peer IP address, hostname, port, and HTTPS status.
  */
-final readonly class GatewayEnv
+final readonly class ServerEnv
 {
     public ?string $peerIp;
     public ?string $hostname;
