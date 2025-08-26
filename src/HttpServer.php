@@ -105,7 +105,7 @@ final class HttpServer
             strtolower(trim($trustProxy->hostname)), $trustProxy->port);
         if (!$virtualHost) {
             return new ErrorResult($response, RequestError::IncorrectHost,
-                new \RuntimeException("Incorrect hostname or post"));
+                new \RuntimeException("Incorrect hostname or port"));
         }
 
         if ($this->config->enforceTls && $trustProxy->scheme !== "https") {
