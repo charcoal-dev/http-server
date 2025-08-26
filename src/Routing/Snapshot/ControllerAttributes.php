@@ -1,18 +1,21 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Controllers;
+namespace Charcoal\Http\Server\Routing\Snapshot;
 
-use Charcoal\Http\Router\Attributes\Controllers\RejectUnrecognizedParams;
-use Charcoal\Http\Router\Attributes\Controllers\AllowedParam;
+use Charcoal\Http\Server\Attributes\AllowedParam;
+use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
 
 /**
- * Represents a controller's attributes.
+ * Represents metadata and configuration attributes for a controller.
+ * This class provides functionality for handling allowed parameters
+ * and rejecting unrecognized parameters based on reflection data
+ * retrieved from controller attributes.
  */
 final readonly class ControllerAttributes
 {

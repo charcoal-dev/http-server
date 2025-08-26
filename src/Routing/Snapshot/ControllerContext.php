@@ -11,12 +11,11 @@ namespace Charcoal\Http\Server\Routing\Snapshot;
 use Charcoal\Http\Server\Attributes\DefaultEntrypoint;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
-use Charcoal\Http\Server\Controllers\ControllerAttributes;
 
 /**
- * Represents a validated controller class designed to hold the configuration, entry points, and app context.
- * This class ensures the controller adheres to specific requirements such as implementing mandatory interfaces, being final,
- * and validating its declared entry points.
+ * Represents the execution and validation context for a controller class.
+ * This class is responsible for managing controller entry points, validating
+ * the controller class, and storing associated attributes.
  */
 final readonly class ControllerContext
 {
