@@ -1,12 +1,12 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Request\Result;
+namespace Charcoal\Http\Server\Request\Result;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
 

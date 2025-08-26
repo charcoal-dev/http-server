@@ -1,15 +1,15 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Request\Result;
+namespace Charcoal\Http\Server\Request\Result;
 
 use Charcoal\Http\Commons\Headers\Headers;
-use Charcoal\Http\Router\Internal\Constants;
+use Charcoal\Http\Server\Internal\Constants;
 
 /**
  * Represents the result of a redirection, containing the redirect URL and associated headers.

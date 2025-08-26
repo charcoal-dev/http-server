@@ -1,12 +1,12 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Request;
+namespace Charcoal\Http\Server\Request;
 
 use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
@@ -17,14 +17,16 @@ use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
+use Charcoal\Http\Commons\Support\CorsPolicy;
 use Charcoal\Http\Commons\Support\HttpHelper;
-use Charcoal\Http\Router\Config\RouterConfig;
-use Charcoal\Http\Router\Controllers\ControllerContext;
-use Charcoal\Http\Router\Enums\RequestError;
-use Charcoal\Http\Router\Exceptions\HttpOptionsException;
-use Charcoal\Http\Router\Exceptions\RequestContextException;
-use Charcoal\Http\Router\Middleware\Registry\ResolverFacade;
-use Charcoal\Http\Router\Routing\Snapshot\ControllerBinding;
+use Charcoal\Http\Server\Config\ServerConfig;
+use Charcoal\Http\Server\Enums\RequestError;
+use Charcoal\Http\Server\Exceptions\HttpOptionsException;
+use Charcoal\Http\Server\Exceptions\RequestContextException;
+use Charcoal\Http\Server\Middleware\Registry\ResolverFacade;
+use Charcoal\Http\Server\Request\Controller\ControllerApi;
+use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
+use Charcoal\Http\Server\TrustProxy\TrustGateway;
 
 /**
  * Represents the context of an HTTP request, encompassing details such as
@@ -32,7 +34,7 @@ use Charcoal\Http\Router\Routing\Snapshot\ControllerBinding;
  * This class is designed to facilitate HTTP request handling, processing pipelines,
  * and error management during runtime.
  */
-final readonly class RequestContext
+final readonly class RequestLifecycle
 {
     use NoDumpTrait;
     use NotSerializableTrait;
@@ -45,8 +47,8 @@ final readonly class RequestContext
     public ?array $pathParams;
     public ?CorsPolicy $corsPolicy;
     public ?ContentType $contentType;
-    public ControllerBinding $controllerMeta;
-    public ControllerContext $controllerContext;
+    public RouteControllerBinding $controllerMeta;
+    public ControllerApi $controllerContext;
     public string $controllerEp;
     public UnsafePayload $input;
     public WritablePayload $response;
@@ -61,11 +63,11 @@ final readonly class RequestContext
     }
 
     /**
-     * @param RouterConfig $config
+     * @param ServerConfig $config
      * @return void
      * @throws RequestContextException
      */
-    public function gatewayPipelines(RouterConfig $config): void
+    public function gatewayPipelines(ServerConfig $config): void
     {
         // 1. Resolve TrustGateway via trusted proxy CIDR
         $this->gateway = new TrustGateway($config, $this->request);
@@ -144,7 +146,7 @@ final readonly class RequestContext
         }
     }
 
-    public function routingResolved(ControllerBinding $controller, string $entryPoint): void
+    public function routingResolved(RouteControllerBinding $controller, string $entryPoint): void
     {
         $this->controllerMeta = $controller;
         $this->controllerEp = $entryPoint;
