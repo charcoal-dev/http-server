@@ -12,14 +12,14 @@ use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Contracts\Request\ControllerApiInterface;
-use Charcoal\Http\Server\Request\RequestLifecycle;
+use Charcoal\Http\Server\Request\RequestGateway;
 
 /**
  * Represents a controller API that interacts with request and response contexts.
  */
-readonly class ControllerApi implements ControllerApiInterface
+readonly class RequestFacade implements ControllerApiInterface
 {
-    public function __construct(private RequestLifecycle $request)
+    public function __construct(private RequestGateway $request)
     {
     }
 
@@ -36,7 +36,7 @@ readonly class ControllerApi implements ControllerApiInterface
      */
     public function response(): WritablePayload
     {
-        return $this->request->response;
+        return $this->request->output;
     }
 
     /**
@@ -58,6 +58,5 @@ readonly class ControllerApi implements ControllerApiInterface
 
     public function enforceRequiredParams(): void
     {
-        // Todo: pending
     }
 }

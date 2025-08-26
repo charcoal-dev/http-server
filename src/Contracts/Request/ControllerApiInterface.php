@@ -11,14 +11,14 @@ namespace Charcoal\Http\Server\Contracts\Request;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
-use Charcoal\Http\Server\Request\RequestLifecycle;
+use Charcoal\Http\Server\Request\RequestGateway;
 
 /**
  * Interface representing a controller API that manages the lifecycle of HTTP requests and responses.
  */
 interface ControllerApiInterface
 {
-    public function __construct(RequestLifecycle $context);
+    public function __construct(RequestGateway $context);
 
     public function request(): UnsafePayload;
 

@@ -15,24 +15,36 @@ namespace Charcoal\Http\Server\Enums;
  */
 enum RequestError
 {
-    case KernelError;
+    case InternalError;
+
+    /** @for=Peer */
     case BadPeerIp;
-    case BadHostname;
     case IncorrectHost;
     case TlsEnforcedRedirect;
-    case RequestIdError;
-    case BadUrlEncoding;
+
+    /** @for=Url */
     case BadUrlLength;
-    case UrlNormalizedRedirect;
+    case BadUrlEncoding;
+
+    /** @for=Headers */
+    case BadHeaders;
+    case HeadersCountCap;
+    case BadHeaderName;
+    case HeaderLength;
+    case BadHeaderValue;
+
+    /** @for=Routing */
     case EndpointNotFound;
     case MethodNotDeclared;
-    case MethodNotAllowed;
+
+    /** @for=Cors */
     case BadOriginHeader;
-    case CorsPolicyResolveError;
     case CorsOriginNotAllowed;
-    case RequestBodyDecodeError;
+    case MethodNotAllowed;
+    case CorsNotImplemented;
+
     case BadContentType;
-    case ControllerContextResolveError;
+    case RequestBodyDecodeError;
 
     /**
      * Determines and returns the appropriate HTTP status code
@@ -41,17 +53,20 @@ enum RequestError
     public function getStatusCode(): int
     {
         return match ($this) {
-            self::BadPeerIp,
-            self::BadHostname,
-            self::IncorrectHost,
-            self::CorsPolicyResolveError,
-            self::RequestIdError,
-            self::BadUrlEncoding => 400,
-            self::BadUrlLength => 414,
+            self::BadUrlEncoding,
+            self::BadHeaderName,
+            self::BadHeaderValue,
+            self::BadHeaders,
+            self::BadOriginHeader,
+            self::BadPeerIp => 400,
+            self::CorsOriginNotAllowed => 403,
             self::EndpointNotFound => 404,
-            self::MethodNotDeclared, self::MethodNotAllowed => 405,
-            self::BadOriginHeader, self::CorsOriginNotAllowed => 403,
+            self::MethodNotDeclared => 405,
+            self::BadUrlLength => 414,
             self::BadContentType => 415,
+            self::IncorrectHost => 421,
+            self::HeadersCountCap,
+            self::HeaderLength => 431,
             default => 500
         };
     }

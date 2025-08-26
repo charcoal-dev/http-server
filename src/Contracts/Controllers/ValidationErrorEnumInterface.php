@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Contracts\Controllers;
 
-use Charcoal\Http\Server\Request\Controller\ControllerApi;
+use Charcoal\Http\Server\Request\Controller\RequestFacade;
 
 /**
  * Represents an interface for validation error enumerations.
@@ -16,5 +16,5 @@ use Charcoal\Http\Server\Request\Controller\ControllerApi;
  */
 interface ValidationErrorEnumInterface extends \UnitEnum
 {
-    public function getTranslatedMessage(ControllerApi $context): string;
+    public function getTranslatedMessage(RequestFacade $context): string;
 }

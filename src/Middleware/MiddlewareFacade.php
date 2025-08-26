@@ -9,9 +9,13 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Middleware;
 
 use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
+use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
+use Charcoal\Http\Commons\Support\CorsPolicy;
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Server\Enums\Pipeline;
+use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
+use Charcoal\Http\Server\Pipelines\OptionsMethodHandler;
 use Charcoal\Http\Server\Pipelines\RequestHeadersValidator;
 use Charcoal\Http\Server\Pipelines\UrlValidator;
 use Charcoal\Http\Server\Request\Result\RedirectUrl;
@@ -51,6 +55,19 @@ final readonly class MiddlewareFacade
         return $this->registry->execute(Pipeline::RequestHeaders_Validator,
             RequestHeadersValidator::class,
             [$headers, $maxHeaders, $maxHeaderLength, $keyValidation]
+        );
+    }
+
+    /**
+     * Handles the HTTP OPTIONS method by resolving CORS policies and
+     * setting the appropriate response headers.
+     * @see PreFlightTerminateException
+     */
+    public function optionsMethodHandler(string $origin, CorsPolicy $corsPolicy, Headers $response): void
+    {
+        $this->registry->execute(Pipeline::Options_MethodResolver,
+            OptionsMethodHandler::class,
+            [$origin, $corsPolicy, $response]
         );
     }
 }
