@@ -6,11 +6,11 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Tests\Router;
+namespace Charcoal\Http\Tests\Server;
 
-use Charcoal\Http\Router\Config\RouterConfig;
-use Charcoal\Http\Router\Config\HttpServer;
-use Charcoal\Http\Router\Config\TrustedProxy;
+use Charcoal\Http\Server\Config\VirtualHost;
+use Charcoal\Http\Server\Config\ServerConfig;
+use Charcoal\Http\Server\TrustProxy\TrustedProxy;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -22,8 +22,8 @@ final class ConfigTest extends TestCase
 {
     public function testBuildsWithValidHostnamesAndProxiesAndDefaults(): void
     {
-        $s1 = new HttpServer("example.com");
-        $s2 = new HttpServer("*.example.com");
+        $s1 = new VirtualHost("example.com");
+        $s2 = new VirtualHost("*.example.com");
 
         $p1 = new readonly class(true, ["10.0.0.0/8"], "\x01\x02") extends TrustedProxy {
             public function __construct(bool $useForwarded, array $cidrList, private string $chk) {
@@ -38,7 +38,7 @@ final class ConfigTest extends TestCase
             public function checksum(): string { return $this->chk; }
         };
 
-        $cfg = new RouterConfig([$s1, $s2], [$p1, $p2]);
+        $cfg = new ServerConfig([$s1, $s2], [$p1, $p2]);
 
         $this->assertSame([$s1, $s2], $cfg->hostnames);
         $this->assertSame([$p1, $p2], $cfg->proxies);
@@ -47,7 +47,7 @@ final class ConfigTest extends TestCase
 
     public function testAllowsEmptyHostnamesAndProxies(): void
     {
-        $cfg = new RouterConfig([], []);
+        $cfg = new ServerConfig([], []);
 
         $this->assertSame([], $cfg->hostnames);
         $this->assertSame([], $cfg->proxies);
@@ -56,8 +56,8 @@ final class ConfigTest extends TestCase
 
     public function testAllowsEmptyProxiesWithHostnames(): void
     {
-        $s1 = new HttpServer("example.com");
-        $cfg = new RouterConfig([$s1], []);
+        $s1 = new VirtualHost("example.com");
+        $cfg = new ServerConfig([$s1], []);
 
         $this->assertSame([$s1], $cfg->hostnames);
         $this->assertSame([], $cfg->proxies);
@@ -70,7 +70,7 @@ final class ConfigTest extends TestCase
 
         $notServer = (object)[];
         /** @noinspection PhpParamsInspection */
-        new RouterConfig([$notServer], []);
+        new ServerConfig([$notServer], []);
     }
 
     public function testRejectsDuplicateNonWildcardHostname(): void
@@ -78,10 +78,10 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new HttpServer("example.com");
-        $s2 = new HttpServer("example.com");
+        $s1 = new VirtualHost("example.com");
+        $s2 = new VirtualHost("example.com");
 
-        new RouterConfig([$s1, $s2], []);
+        new ServerConfig([$s1, $s2], []);
     }
 
     public function testRejectsDuplicateWildcardHostname(): void
@@ -89,10 +89,10 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new HttpServer("*.example.com");
-        $s2 = new HttpServer("*.example.com");
+        $s1 = new VirtualHost("*.example.com");
+        $s2 = new VirtualHost("*.example.com");
 
-        new RouterConfig([$s1, $s2], []);
+        new ServerConfig([$s1, $s2], []);
     }
 
     public function testRejectsDuplicateHostnameCaseInsensitive(): void
@@ -100,10 +100,10 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new HttpServer("Example.COM");
-        $s2 = new HttpServer("example.com");
+        $s1 = new VirtualHost("Example.COM");
+        $s2 = new VirtualHost("example.com");
 
-        new RouterConfig([$s1, $s2], []);
+        new ServerConfig([$s1, $s2], []);
     }
 
     public function testRejectsDuplicateHostnameIgnoringTrailingDot(): void
@@ -111,10 +111,10 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new HttpServer("example.com.");
-        $s2 = new HttpServer("example.com");
+        $s1 = new VirtualHost("example.com.");
+        $s2 = new VirtualHost("example.com");
 
-        new RouterConfig([$s1, $s2], []);
+        new ServerConfig([$s1, $s2], []);
     }
 
     public function testRejectsDuplicateHostnameEvenIfPortsDiffer(): void
@@ -122,36 +122,36 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new HttpServer("example.com", 80);
-        $s2 = new HttpServer("example.com", 443);
+        $s1 = new VirtualHost("example.com", 80);
+        $s2 = new VirtualHost("example.com", 443);
 
-        new RouterConfig([$s1, $s2], []);
+        new ServerConfig([$s1, $s2], []);
     }
 
     public function testAllowsSameBaseWithWildcardAndExact(): void
     {
-        $sExact = new HttpServer("example.com");
-        $sWildcard = new HttpServer("*.example.com");
+        $sExact = new VirtualHost("example.com");
+        $sWildcard = new VirtualHost("*.example.com");
 
-        $cfg = new RouterConfig([$sExact, $sWildcard], []);
+        $cfg = new ServerConfig([$sExact, $sWildcard], []);
         $this->assertSame([$sExact, $sWildcard], $cfg->hostnames);
     }
 
     public function testAllowsWildcardAndSpecificSubdomainTogether(): void
     {
-        $sWildcard = new HttpServer("*.example.com");
-        $sSub = new HttpServer("api.example.com");
+        $sWildcard = new VirtualHost("*.example.com");
+        $sSub = new VirtualHost("api.example.com");
 
-        $cfg = new RouterConfig([$sWildcard, $sSub], []);
+        $cfg = new ServerConfig([$sWildcard, $sSub], []);
         $this->assertSame([$sWildcard, $sSub], $cfg->hostnames);
     }
 
     public function testAllowsWwwAndNonWwwTogether(): void
     {
-        $s1 = new HttpServer("www.example.com");
-        $s2 = new HttpServer("example.com");
+        $s1 = new VirtualHost("www.example.com");
+        $s2 = new VirtualHost("example.com");
 
-        $cfg = new RouterConfig([$s1, $s2], []);
+        $cfg = new ServerConfig([$s1, $s2], []);
         $this->assertSame([$s1, $s2], $cfg->hostnames);
     }
 
@@ -162,7 +162,7 @@ final class ConfigTest extends TestCase
 
         $notProxy = (object)[];
         /** @noinspection PhpParamsInspection */
-        new RouterConfig([], [$notProxy]);
+        new ServerConfig([], [$notProxy]);
     }
 
     public function testRejectsDuplicateProxiesByChecksumWithSubclass(): void
@@ -183,7 +183,7 @@ final class ConfigTest extends TestCase
             public function checksum(): string { return $this->chk; }
         };
 
-        new RouterConfig([], [$p1, $p2]);
+        new ServerConfig([], [$p1, $p2]);
     }
 
     public function testRejectsDuplicateProxiesByChecksumWithBaseTrustedProxy(): void
@@ -194,7 +194,7 @@ final class ConfigTest extends TestCase
         $p1 = new TrustedProxy(true, ["10.0.0.0/8", "192.168.0.0/16"]);
         $p2 = new TrustedProxy(false, ["10.0.0.0/8", "192.168.0.0/16"]); // same CIDRs -> same checksum
 
-        new RouterConfig([], [$p1, $p2]);
+        new ServerConfig([], [$p1, $p2]);
     }
 
     public function testAcceptsMultipleDistinctProxies(): void
@@ -203,24 +203,24 @@ final class ConfigTest extends TestCase
         $p2 = new TrustedProxy(true, ["192.168.0.0/16"]);
         $p3 = new TrustedProxy(true, ["172.16.0.0/12"]);
 
-        $cfg = new RouterConfig([], [$p1, $p2, $p3]);
+        $cfg = new ServerConfig([], [$p1, $p2, $p3]);
         $this->assertSame([$p1, $p2, $p3], $cfg->proxies);
     }
 
     public function testWwwAliasFlagExplicitFalse(): void
     {
-        $s = new HttpServer("example.com");
+        $s = new VirtualHost("example.com");
         $p = new TrustedProxy(true, ["10.0.0.0/8"]);
 
-        $cfg = new RouterConfig([$s], [$p], true, false);
+        $cfg = new ServerConfig([$s], [$p], true, false);
         $this->assertFalse($cfg->wwwAlias);
     }
 
     public function testPreservesOrderOfHostnamesAndProxies(): void
     {
-        $s1 = new HttpServer("a.test");
-        $s2 = new HttpServer("*.b.test");
-        $s3 = new HttpServer("c.test");
+        $s1 = new VirtualHost("a.test");
+        $s2 = new VirtualHost("*.b.test");
+        $s3 = new VirtualHost("c.test");
 
         $p1 = new TrustedProxy(true, ["10.0.0.0/8"]);
         $p2 = new TrustedProxy(true, ["192.168.0.0/16"]);
@@ -229,7 +229,7 @@ final class ConfigTest extends TestCase
         $hostnames = [$s1, $s2, $s3];
         $proxies = [$p1, $p2, $p3];
 
-        $cfg = new RouterConfig($hostnames, $proxies);
+        $cfg = new ServerConfig($hostnames, $proxies);
 
         $this->assertSame($hostnames, $cfg->hostnames);
         $this->assertSame($proxies, $cfg->proxies);

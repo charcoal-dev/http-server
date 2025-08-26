@@ -6,24 +6,24 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Tests\Router;
+namespace Charcoal\Http\Tests\Server;
 
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Enums\HttpProtocol;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Url\UrlInfo;
-use Charcoal\Http\Router\Config\GatewayEnv;
-use Charcoal\Http\Router\Config\HttpServer;
-use Charcoal\Http\Router\Config\RouterConfig;
-use Charcoal\Http\Router\Config\TrustedProxy;
-use Charcoal\Http\Router\Exceptions\RequestContextException;
-use Charcoal\Http\Router\Request\ServerRequest;
-use Charcoal\Http\Router\Request\TrustGateway;
+use Charcoal\Http\Server\Config\ServerConfig;
+use Charcoal\Http\Server\Config\VirtualHost;
+use Charcoal\Http\Server\Exceptions\RequestContextException;
+use Charcoal\Http\Server\Request\ServerRequest;
+use Charcoal\Http\Server\TrustProxy\ServerEnv;
+use Charcoal\Http\Server\TrustProxy\TrustedProxy;
+use Charcoal\Http\Server\TrustProxy\TrustGateway;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Class GatewayTest
- * @package Charcoal\Http\Tests\Router
+ * @package Charcoal\Http\Tests\Server
  */
 final class GatewayTest extends TestCase
 {
@@ -33,8 +33,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Forwarded_QuotedTokens_MixedCaseProto_PromotesAndLowercases(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -53,7 +53,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld", https: false));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld", https: false));
         $this->assertSame("203.0.113.7", $gw->clientIp);
         $this->assertSame("hostname.tld", $gw->server?->hostname);
         $this->assertNull($gw->port);
@@ -67,8 +67,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Xff_Ipv4WithPort_StripsPortAndKeepsBaselineAuthority(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -87,7 +87,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld"));
         $this->assertSame("203.0.113.7", $gw->clientIp);
         $this->assertSame("hostname.tld", $gw->server?->hostname); // baseline retained
         $this->assertNull($gw->port);
@@ -101,8 +101,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Forwarded_TrustedThenClient_UsesLastTrustedAuthority(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -121,7 +121,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld", https: false));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld", https: false));
         $this->assertSame("203.0.113.7", $gw->clientIp);
         $this->assertSame("hostname.tld", $gw->server?->hostname);
         $this->assertNull($gw->port);
@@ -135,8 +135,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Forwarded_AllTrusted_NoPromotion(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -154,7 +154,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld"));
         $this->assertSame($peerIp, $gw->clientIp);    // no promotion
         $this->assertSame("hostname.tld", $gw->server?->hostname);
         $this->assertNull($gw->port);
@@ -167,8 +167,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Forwarded_PeerUntrusted_IgnoresHeader(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -186,7 +186,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld"));
         $this->assertSame($peerIp, $gw->clientIp);
         $this->assertSame("http", $gw->scheme); // unchanged
     }
@@ -197,8 +197,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Forwarded_InvalidAndObfuscated_SkipsUntilValid(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -216,7 +216,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld"));
         $this->assertSame("203.0.113.7", $gw->clientIp);
         $this->assertSame(2, $gw->proxyHop);
     }
@@ -227,8 +227,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Forwarded_Ipv6Index0_PromotesIpOnly(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -247,7 +247,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld"));
         $this->assertSame("2001:db8::2", $gw->clientIp);
         $this->assertSame("hostname.tld", $gw->server?->hostname);
         $this->assertNull($gw->port);
@@ -261,8 +261,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Xff_BasicTwoHops_PromotesClientKeepsBaselineAuthority(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -280,7 +280,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld"));
         $this->assertSame("203.0.113.7", $gw->clientIp);
         $this->assertSame("hostname.tld", $gw->server?->hostname); // baseline
         $this->assertNull($gw->port);
@@ -294,8 +294,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Xff_RightAligned_UsesNearestTrustedAuthority_Short(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -316,7 +316,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp));
         $this->assertSame("203.0.113.7", $gw->clientIp);
         $this->assertSame("hostname.tld", $gw->server?->hostname); // from trustedIdx=1
         $this->assertSame(443, $gw->port);
@@ -330,8 +330,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Xff_MaxHopsCap_NoPromotionBeyondCap(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"], maxHops: 1)],
             enforceTls: false,
             wwwAlias: true,
@@ -350,7 +350,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld"));
         $this->assertSame($peerIp, $gw->clientIp); // no promotion due to cap
     }
 
@@ -360,8 +360,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_BothHeaders_ForwardedWinsOverXff(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -385,7 +385,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp));
         $this->assertSame("203.0.113.7", $gw->clientIp);   // from Forwarded
         $this->assertSame("hostname.tld", $gw->server?->hostname);
         $this->assertNull($gw->port);                      // no explicit port in Forwarded host
@@ -398,8 +398,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Xff_AllTrusted_NoPromotion(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -417,7 +417,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld"));
         $this->assertSame($peerIp, $gw->clientIp);
     }
 
@@ -427,8 +427,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Xff_UntrustedPeer_IgnoresXff(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -446,7 +446,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld"));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld"));
         $this->assertSame($peerIp, $gw->clientIp);
         $this->assertSame("http", $gw->scheme);
     }
@@ -456,8 +456,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Xff_LongChain_Index7_UsesNearestTrustedAndCustomPort(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 6001)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 6001)],
             [new TrustedProxy(true, ["10.0.0.0/8"], 10)],
             enforceTls: false,
             wwwAlias: true,
@@ -482,7 +482,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp));
 
         // First non-trusted from right is at index 7 → client IP
         $this->assertSame("203.0.113.77", $gw->clientIp);
@@ -495,14 +495,14 @@ final class GatewayTest extends TestCase
 
     /**
      * @return void
-     * @throws \Charcoal\Http\Router\Exceptions\RequestContextException
+     * @throws \Charcoal\Http\Server\Exceptions\RequestContextException
      */
     public function testGateway_Xff_RightAligned_UsesNearestTrustedAuthority(): void
     {
-        $config = new RouterConfig(
+        $config = new ServerConfig(
             [
-                new HttpServer("hostname.tld", 80, 443),
-                new HttpServer("localhost", 80, 443)
+                new VirtualHost("hostname.tld", 80, 443),
+                new VirtualHost("localhost", 80, 443)
             ],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: true,
@@ -525,7 +525,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp));
         // First non-trusted from right is 203.0.113.7 (index 2)
         $this->assertSame("203.0.113.7", $gw->clientIp);
         // Nearest trusted (index 1) supplies authority
@@ -537,12 +537,12 @@ final class GatewayTest extends TestCase
 
     /**
      * @return void
-     * @throws \Charcoal\Http\Router\Exceptions\RequestContextException
+     * @throws \Charcoal\Http\Server\Exceptions\RequestContextException
      */
     public function testGateway_Forwarded_Index0Client_PromotesIpOnly(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: false,
             wwwAlias: true,
@@ -562,7 +562,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $env = new GatewayEnv($peerIp, "hostname.tld", https: false);
+        $env = new ServerEnv($peerIp, "hostname.tld", https: false);
         $gw = new TrustGateway($config, $request, $env);
         $this->assertSame("203.0.113.7", $gw->clientIp);
         $this->assertSame("hostname.tld", $gw->server?->hostname);
@@ -573,13 +573,13 @@ final class GatewayTest extends TestCase
 
     /**
      * @return void
-     * @throws \Charcoal\Http\Router\Exceptions\RequestContextException
+     * @throws \Charcoal\Http\Server\Exceptions\RequestContextException
      */
     public function testGateway_ForwardedTwoHops_PromotesClient_UsesLastTrustedAuthority(): void
     {
         // Config: one HTTPS server; proxies trust 10.0.0.0/8 and allow Forwarded
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["10.0.0.0/8"])],
             enforceTls: true,
             wwwAlias: true,
@@ -603,7 +603,7 @@ final class GatewayTest extends TestCase
         );
 
         // Invoke TrustGateway::establish(...) via reflection
-        $gw = new TrustGateway($config, $request, new GatewayEnv("10.1.2.3"));
+        $gw = new TrustGateway($config, $request, new ServerEnv("10.1.2.3"));
         $this->assertSame("203.0.113.7", $gw->clientIp);
         $this->assertSame("hostname.tld", $gw->server->hostname);
         $this->assertNull($gw->port, "Port should not be inferred from proto");
@@ -617,8 +617,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Cloudflare_SingleHop_PromotesIp_ProtoFromXfp_Https(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["173.245.48.0/20", "103.21.244.0/22"], protoFromTrustedEdge: true)], // sample CF CIDRs
             enforceTls: false,
             wwwAlias: true,
@@ -638,7 +638,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld", https: false));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld", https: false));
 
         $this->assertSame("203.0.113.7", $gw->clientIp);
         $this->assertSame("hostname.tld", $gw->server?->hostname); // baseline host
@@ -653,8 +653,8 @@ final class GatewayTest extends TestCase
      */
     public function testGateway_Cloudflare_SingleHop_PromotesIp_ProtoFromXfp_Http(): void
     {
-        $config = new RouterConfig(
-            [new HttpServer("hostname.tld", 80, 443)],
+        $config = new ServerConfig(
+            [new VirtualHost("hostname.tld", 80, 443)],
             [new TrustedProxy(true, ["173.245.48.0/20", "103.21.244.0/22"], protoFromTrustedEdge: true)],
             enforceTls: false,
             wwwAlias: true,
@@ -674,7 +674,7 @@ final class GatewayTest extends TestCase
             isSecure: false
         );
 
-        $gw = new TrustGateway($config, $request, new GatewayEnv($peerIp, "hostname.tld", https: false));
+        $gw = new TrustGateway($config, $request, new ServerEnv($peerIp, "hostname.tld", https: false));
 
         $this->assertSame("203.0.113.7", $gw->clientIp);
         $this->assertSame("hostname.tld", $gw->server?->hostname);

@@ -6,20 +6,20 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Tests\Router\Fixture;
+namespace Charcoal\Http\Tests\Server\Fixture;
 
 use Charcoal\Http\Commons\Enums\HttpMethod;
-use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
-use Charcoal\Http\Router\Routing\AppRoutes;
-use Charcoal\Http\Router\Routing\Group\RouteGroupBuilder;
+use Charcoal\Http\Server\Exceptions\RoutingBuilderException;
+use Charcoal\Http\Server\Routing\AppRoutes;
+use Charcoal\Http\Server\Routing\Group\RouteGroupBuilder;
 
 /**
  * Class RoutingFixtures
- * @package Charcoal\Http\Tests\Router\Fixture
+ * @package Charcoal\Http\Tests\Server\Fixture
  */
 final class RoutingFixtures
 {
-    public const string FAKE_NAMESPACE = "Charcoal\Http\Tests\Router\Fixture\\";
+    public const string FAKE_NAMESPACE = "Charcoal\Http\Tests\Server\Fixture\\";
 
     /**
      * @throws RoutingBuilderException

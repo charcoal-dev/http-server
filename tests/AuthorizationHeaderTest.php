@@ -6,14 +6,14 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Tests\Router;
+namespace Charcoal\Http\Tests\Server;
 
-use Charcoal\Http\Router\Support\HttpAuthorization;
+use Charcoal\Http\Server\Support\HttpAuthorization;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Class AuthorizationHeaderTest
- * @package Charcoal\Http\Tests\Router
+ * @package Charcoal\Http\Tests\Server
  */
 final class AuthorizationHeaderTest extends TestCase
 {
