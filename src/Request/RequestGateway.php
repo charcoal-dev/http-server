@@ -132,6 +132,8 @@ final readonly class RequestGateway
 
     /**
      * @throws RequestContextException
+     * @throws PreFlightTerminateException
+     * @noinspection PhpDocRedundantThrowsInspection
      */
     public function preFlightCorsControl(
         CorsPolicy             $corsPolicy,
@@ -155,10 +157,10 @@ final readonly class RequestGateway
             /** @see PreFlightTerminateException */
             $this->middleware->optionsMethodHandler($origin, $corsPolicy, $this->responseHeaders);
 
-            if (!$this->responseHeaders->has("Access-Control-Allow-Origin")) {
-                $this->responseHeaders->set("Access-Control-Allow-Origin", $origin);
-                $this->responseHeaders->set("Access-Control-Expose-Headers", $corsPolicy->expose);
-                $this->responseHeaders->set("Vary", "Origin");
+            // Continuing?
+            if (!$this->responseHeaders->has("Access-Control-Allow-Origin") ||
+                $this->responseHeaders->get("Vary") !== "Origin") {
+                throw new RequestContextException(RequestError::BadOriginHeader, null);
             }
         }
 
