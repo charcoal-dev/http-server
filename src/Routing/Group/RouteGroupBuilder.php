@@ -1,39 +1,29 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing\Group;
+namespace Charcoal\Http\Server\Routing\Group;
 
-use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
-use Charcoal\Http\Router\Contracts\Middleware\Factory\MiddlewareFactoryInterface;
-use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
-use Charcoal\Http\Router\Routing\RouteBuilder;
+use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
+use Charcoal\Http\Server\Exceptions\RoutingBuilderException;
+use Charcoal\Http\Server\Routing\RouteBuilder;
 
 /**
- * Class RouteGroupBuilder
- * @package Charcoal\Http\Router\Routing\Group
+ * This class facilitates the building of route groups and allows for defining pipelines, individual routes,
+ * and nested route groups within a structured routing system. It provides methods to configure middleware pipelines,
+ * create routes, and define nested route groups.
  */
 final class RouteGroupBuilder
 {
+    /** @var array{1: list<RouteBuilder|RouteGroup>} */
     protected array $children = [];
 
     public function __construct(protected readonly AbstractRouteGroup $group)
     {
-    }
-
-    /**
-     * @param class-string<MiddlewareFactoryInterface> ...$pipelines
-     * @return $this
-     * @api
-     */
-    public function pipelines(string ...$pipelines): self
-    {
-        $this->group->pipelines(...$pipelines);
-        return $this;
     }
 
     /**
@@ -61,8 +51,8 @@ final class RouteGroupBuilder
      * @return array{1: list<RouteBuilder|RouteGroup>}
      * @internal
      */
-    public function attributes(): array
+    public function getChildren(): array
     {
-        return [$this->children];
+        return $this->children;
     }
 }

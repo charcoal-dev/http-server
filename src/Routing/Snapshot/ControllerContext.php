@@ -1,23 +1,24 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Controllers;
+namespace Charcoal\Http\Server\Routing\Snapshot;
 
-use Charcoal\Http\Router\Attributes\Controllers\DefaultEntrypoint;
-use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
-use Charcoal\Http\Router\Contracts\Controllers\InvokableControllerInterface;
+use Charcoal\Http\Server\Attributes\DefaultEntrypoint;
+use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
+use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
+use Charcoal\Http\Server\Controllers\ControllerAttributes;
 
 /**
  * Represents a validated controller class designed to hold the configuration, entry points, and app context.
  * This class ensures the controller adheres to specific requirements such as implementing mandatory interfaces, being final,
  * and validating its declared entry points.
  */
-final readonly class ValidatedController
+final readonly class ControllerContext
 {
     public array $entryPoints;
     public ?string $defaultEntrypoint;

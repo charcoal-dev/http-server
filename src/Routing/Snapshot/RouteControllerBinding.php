@@ -1,32 +1,28 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing\Snapshot;
+namespace Charcoal\Http\Server\Routing\Snapshot;
 
 use Charcoal\Http\Commons\Enums\HttpMethod;
-use Charcoal\Http\Router\Controllers\ValidatedController;
-use Charcoal\Http\Router\Middleware\Bag\SealedBag;
 
 /**
- * Represents a binding between a validated controller, entrypoint and matching path.
- * @property array<string>|true $methods If default entrypoint, true, else array of methods.
+ * Represents a binding between a validated controller and the associated HTTP methods.
+ * This class ensures that a controller is properly associated with HTTP methods, and provides
+ * functionality to determine the appropriate entry point based on the provided HTTP method.
+ * @property array<string>|true $methods If default entrypoint: bool(true)
  */
-final readonly class ControllerBinding
+final readonly class RouteControllerBinding
 {
-    public ?SealedBag $middleware;
-
     public function __construct(
-        public ValidatedController $controller,
-        public array|true          $methods,
-        ?SealedBag                 $middleware,
+        public ControllerContext $controller,
+        public array|true        $methods,
     )
     {
-        $this->middleware = $middleware->count() ? $middleware : null;
     }
 
     /**

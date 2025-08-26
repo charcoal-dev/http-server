@@ -1,20 +1,17 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing\Group;
+namespace Charcoal\Http\Server\Routing\Group;
 
-use Charcoal\Http\Router\Enums\Middleware\Scope;
-use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
-use Charcoal\Http\Router\Internal\Constants;
-use Charcoal\Http\Router\Middleware\Bag\Bag;
-use Charcoal\Http\Router\Middleware\Bag\SealedBag;
-use Charcoal\Http\Router\Routing\Route;
-use Charcoal\Http\Router\Routing\RouteBuilder;
+use Charcoal\Http\Server\Exceptions\RoutingBuilderException;
+use Charcoal\Http\Server\Internal\Constants;
+use Charcoal\Http\Server\Routing\Registry\Route;
+use Charcoal\Http\Server\Routing\RouteBuilder;
 
 /**
  * Abstract class that represents a group of routes.
@@ -25,8 +22,6 @@ abstract readonly class AbstractRouteGroup
 {
     public string $path;
     public array $children;
-    protected Bag $middlewareOwn;
-    protected SealedBag $middleware;
 
     /**
      * @param RouteGroup|null $parent
@@ -49,10 +44,8 @@ abstract readonly class AbstractRouteGroup
         };
 
         try {
-            $this->middlewareOwn = Bag::create(Scope::Group);
             $groupPolicy = new RouteGroupBuilder($this);
             $declaration($groupPolicy);
-            $this->middlewareOwn->lock();
             $this->build($groupPolicy);
         } catch (RoutingBuilderException $e) {
             throw $e;
@@ -67,14 +60,11 @@ abstract readonly class AbstractRouteGroup
     protected function build(RouteGroupBuilder $group): void
     {
         $children = [];
-        $groupPolicies = $group->attributes();
-        $middleware = $this->getAggregatedMiddleware();
-        $middlewareAgr = Bag::merge(Scope::Group, ...$middleware)->lock();
-        $this->middleware = new SealedBag($this->middlewareOwn, $middlewareAgr);
+        $groupChildren = $group->getChildren();
 
         // Children
         $num = 0;
-        foreach ($groupPolicies[0] as $child) {
+        foreach ($groupChildren as $child) {
             $num++;
             try {
                 if (!$child instanceof RouteBuilder && !$child instanceof RouteGroup) {
@@ -82,11 +72,7 @@ abstract readonly class AbstractRouteGroup
                 }
 
                 if ($child instanceof RouteBuilder) {
-                    $routePolicies = $child->attributes();
-                    $routePipelines = $routePolicies[1];
-                    $routePipelines->lock();
-                    $route = new Route($child->path, $child->classname, $routePolicies[0]);
-                    $route->finalize(new SealedBag($routePipelines, $middlewareAgr));
+                    $route = new Route($child->path, $child->classname, $child->getMethods());
                     $this->appendChild($children, $route);
                 }
 
@@ -100,28 +86,6 @@ abstract readonly class AbstractRouteGroup
         }
 
         $this->children = $children;
-    }
-
-    /**
-     * @param string ...$pipelines
-     * @return $this
-     */
-    public function pipelines(string ...$pipelines): self
-    {
-        $this->middlewareOwn->set(...$pipelines);
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getAggregatedMiddleware(): array
-    {
-        if (!$this->parent) {
-            return [Bag::create(Scope::Group)->lock()];
-        }
-
-        return [...$this->parent->getAggregatedMiddleware(), $this->middlewareOwn->lock()];
     }
 
     /**

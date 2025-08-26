@@ -1,33 +1,28 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing;
+namespace Charcoal\Http\Server\Routing;
 
 use Charcoal\Http\Commons\Enums\HttpMethod;
-use Charcoal\Http\Router\Enums\Middleware\Scope;
-use Charcoal\Http\Router\Middleware\Bag\Bag;
-use Charcoal\Http\Router\Support\HttpMethods;
+use Charcoal\Http\Commons\Support\HttpMethods;
 
 /**
  * Represents a route builder for creating route configurations.
  */
 final class RouteBuilder
 {
-    /** @var HttpMethods|null */
     protected ?HttpMethods $methods = null;
-    private Bag $middleware;
 
     public function __construct(
         public readonly string $path,
         public readonly string $classname
     )
     {
-        $this->middleware = Bag::create(Scope::Route);
     }
 
     /**
@@ -40,20 +35,11 @@ final class RouteBuilder
     }
 
     /**
-     * @api
-     */
-    public function pipelines(string ...$pipelines): self
-    {
-        $this->middleware->set(...$pipelines);
-        return $this;
-    }
-
-    /**
-     * @return array{0: ?HttpMethods, 1: Bag}
+     * @return HttpMethods|null
      * @internal
      */
-    public function attributes(): array
+    public function getMethods(): ?HttpMethods
     {
-        return [$this->methods, $this->middleware->lock()];
+        return $this->methods;
     }
 }

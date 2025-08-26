@@ -1,18 +1,18 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing;
+namespace Charcoal\Http\Server\Routing;
 
-use Charcoal\Http\Router\Exceptions\RoutingBuilderException;
-use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
-use Charcoal\Http\Router\Routing\Group\RouteGroupBuilder;
-use Charcoal\Http\Router\Routing\Registry\ConsolidatedRoutes;
-use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
+use Charcoal\Http\Server\Exceptions\RoutingBuilderException;
+use Charcoal\Http\Server\Routing\Group\AbstractRouteGroup;
+use Charcoal\Http\Server\Routing\Group\RouteGroupBuilder;
+use Charcoal\Http\Server\Routing\Registry\ConsolidatedRoutes;
+use Charcoal\Http\Server\Routing\Snapshot\AppRoutingSnapshot;
 
 /**
  * Represents a collection of application routes grouped together.

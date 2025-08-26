@@ -1,17 +1,16 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing;
+namespace Charcoal\Http\Server\Routing\Registry;
 
-use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
-use Charcoal\Http\Router\Internal\Constants;
-use Charcoal\Http\Router\Middleware\Bag\SealedBag;
-use Charcoal\Http\Router\Support\HttpMethods;
+use Charcoal\Http\Commons\Support\HttpMethods;
+use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
+use Charcoal\Http\Server\Internal\Constants;
 
 /**
  * Represents an HTTP Route configuration.
@@ -22,8 +21,6 @@ final readonly class Route
     public string $path;
     /** @var class-string<ControllerInterface> */
     public string $classname;
-    /** @var SealedBag */
-    public SealedBag $middleware;
 
     public function __construct(
         string              $path,
@@ -39,15 +36,5 @@ final readonly class Route
         };
 
         $this->classname = $classname;
-    }
-
-    /**
-     * Sets the route's sealed middleware bag, wired internally
-     * (This is a readonly class)
-     * @internal
-     */
-    public function finalize(SealedBag $bag): void
-    {
-        $this->middleware = $bag;
     }
 }

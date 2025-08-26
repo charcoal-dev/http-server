@@ -1,23 +1,22 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing\Registry;
+namespace Charcoal\Http\Server\Routing\Registry;
 
-use Charcoal\Http\Router\Contracts\Controllers\ControllerInterface;
-use Charcoal\Http\Router\Controllers\ValidatedController;
-use Charcoal\Http\Router\Internal\Constants;
-use Charcoal\Http\Router\Router;
-use Charcoal\Http\Router\Routing\AppRoutes;
-use Charcoal\Http\Router\Routing\Group\AbstractRouteGroup;
-use Charcoal\Http\Router\Routing\Route;
-use Charcoal\Http\Router\Routing\Snapshot\AppRoutingSnapshot;
-use Charcoal\Http\Router\Routing\Snapshot\ControllerBinding;
-use Charcoal\Http\Router\Routing\Snapshot\RouteSnapshot;
+use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
+use Charcoal\Http\Server\HttpServer;
+use Charcoal\Http\Server\Internal\Constants;
+use Charcoal\Http\Server\Routing\AppRoutes;
+use Charcoal\Http\Server\Routing\Group\AbstractRouteGroup;
+use Charcoal\Http\Server\Routing\Snapshot\AppRoutingSnapshot;
+use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
+use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
+use Charcoal\Http\Server\Routing\Snapshot\ControllerContext;
 
 /**
  * Represents a consolidated view of application routes.
@@ -27,7 +26,7 @@ final readonly class ConsolidatedRoutes
 {
     /** @var array<string, list<Route|AbstractRouteGroup>> */
     public array $declared;
-    /** @var array<class-string<ControllerInterface>,ValidatedController> */
+    /** @var array<class-string<ControllerInterface>,ControllerContext> */
     public array $controllers;
     /** @var array<string,<array<string,class-string<ControllerInterface>>> */
     public array $entryPoints;
@@ -96,10 +95,10 @@ final readonly class ConsolidatedRoutes
                 continue;
             }
 
-            $validatedControllers[$classname] = new ValidatedController(
+            $validatedControllers[$classname] = new ControllerContext(
                 $classname,
                 $methods,
-                !Router::$validateControllerClasses
+                !HttpServer::$validateControllerClasses
             );
         }
 
@@ -118,17 +117,16 @@ final readonly class ConsolidatedRoutes
         // Create a final binding map
         $snapshot = [];
         foreach ($this->declared as $path => $routes) {
-            /** @var array<ControllerBinding> $routeMap */
+            /** @var array<RouteControllerBinding> $routeMap */
             $pathBindings = [];
             foreach ($routes as $route) {
                 if (!$route instanceof Route) {
                     continue;
                 }
 
-                $pathBindings[] = new ControllerBinding(
+                $pathBindings[] = new RouteControllerBinding(
                     $this->controllers[$route->classname],
-                    $route->methods?->getArray() ?? true,
-                    $route->middleware
+                    $route->methods?->getArray() ?? true
                 );
             }
 

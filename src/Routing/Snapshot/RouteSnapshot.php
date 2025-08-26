@@ -1,14 +1,14 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Router\Routing\Snapshot;
+namespace Charcoal\Http\Server\Routing\Snapshot;
 
-use Charcoal\Http\Router\Internal\Constants;
+use Charcoal\Http\Server\Internal\Constants;
 
 /**
  * Represents inspection details of a route or route group.
@@ -18,14 +18,14 @@ use Charcoal\Http\Router\Internal\Constants;
 final readonly class RouteSnapshot
 {
     public string $matchRegExp;
-    /** @var array<ControllerBinding> */
+    /** @var array<RouteControllerBinding> */
     public array $controllers;
     /** @var null|array<string> */
     public ?array $params;
 
     public function __construct(
         public string       $path,
-        ControllerBinding ...$controllers
+        RouteControllerBinding ...$controllers
     )
     {
         $params = [];
