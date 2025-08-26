@@ -19,7 +19,7 @@ use Charcoal\Http\Server\Contracts\Middleware\RequestHeadersPipeline;
  * Implements the RequestHeadersPipeline contract, ensuring headers conform to specified validation rules
  * and do not exceed defined limits for count and size.
  */
-final readonly class RequestHeaderValidator implements RequestHeadersPipeline
+final readonly class RequestHeadersValidator implements RequestHeadersPipeline
 {
     public function execute(array $params): HeadersImmutable
     {
@@ -47,10 +47,10 @@ final readonly class RequestHeaderValidator implements RequestHeadersPipeline
             }
 
             if (strlen($name) > 96) {
-                throw new \OutOfRangeException("Header key exceeds maximum length: 96 bytes");
+                throw new \LengthException("Header key exceeds maximum length: 96 bytes", code: 0x01);
             } elseif (strlen($value) > $maxHeaderLength) {
-                throw new \OutOfRangeException("Header value for " . $name . " exceeds maximum length: " .
-                    $maxHeaderLength . " bytes");
+                throw new \LengthException("Header value for " . $name . " exceeds maximum length: " .
+                    $maxHeaderLength . " bytes", code: 0x02);
             }
 
             if (!$keyValidation->isValidValue($value, Charset::ASCII)) {

@@ -8,10 +8,11 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Middleware;
 
+use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
+use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
-use Charcoal\Http\Server\Config\RequestConstraints;
-use Charcoal\Http\Server\Contracts\Middleware\UrlValidatorPipeline;
 use Charcoal\Http\Server\Enums\Pipeline;
+use Charcoal\Http\Server\Pipelines\RequestHeadersValidator;
 use Charcoal\Http\Server\Pipelines\UrlValidator;
 use Charcoal\Http\Server\Request\Result\RedirectUrl;
 
@@ -26,16 +27,30 @@ final readonly class MiddlewareFacade
     }
 
     /**
-     * @param UrlInfo $url
-     * @param RequestConstraints $constraints
-     * @return RedirectUrl|null
-     * @see UrlValidatorPipeline
+     * Executes the URL validation pipeline with the specified URL and constraints.
      */
-    public function urlValidationPipeline(UrlInfo $url, RequestConstraints $constraints): ?RedirectUrl
+    public function urlValidationPipeline(UrlInfo $url, int $maxUriBytes): ?RedirectUrl
     {
         return $this->registry->execute(Pipeline::URL_Validator,
             UrlValidator::class,
-            [$url, $constraints]
+            [$url, $maxUriBytes]
+        );
+    }
+
+    /**
+     * Executes the header validation pipeline with the specified headers,
+     * constraints, and key validation rules.
+     */
+    public function headerValidationPipeline(
+        HeadersImmutable    $headers,
+        int                 $maxHeaders,
+        int                 $maxHeaderLength,
+        HeaderKeyValidation $keyValidation
+    ): HeadersImmutable
+    {
+        return $this->registry->execute(Pipeline::RequestHeaders_Validator,
+            RequestHeadersValidator::class,
+            [$headers, $maxHeaders, $maxHeaderLength, $keyValidation]
         );
     }
 }
