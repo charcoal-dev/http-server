@@ -8,7 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Config;
 
-use Charcoal\Http\Server\TrustProxy\TrustedProxy;
+use Charcoal\Http\Commons\Support\CorsPolicy;
+use Charcoal\Http\TrustProxy\Config\TrustedProxy;
 
 /**
  * Represents a server configuration that includes a list of HTTP servers
@@ -29,9 +30,10 @@ final readonly class ServerConfig
     public function __construct(
         array                     $hostnames,
         array                     $proxies,
+        public CorsPolicy         $corsPolicy,
         public RequestConstraints $requests,
         public bool               $enforceTls = true,
-        public bool               $wwwAlias = true
+        public bool               $wwwSupport = true
     )
     {
         // Hostnames Setup
@@ -67,5 +69,25 @@ final readonly class ServerConfig
         }
 
         $this->proxies = $proxies;
+    }
+
+    /**
+     * @param string $hostname
+     * @param int|null $port
+     * @return VirtualHost|null
+     */
+    public function matchHostname(string $hostname, ?int $port): ?VirtualHost
+    {
+        if ($this->wwwSupport && str_starts_with($hostname, "www.")) {
+            $hostname = substr($hostname, 4);
+        }
+
+        foreach ($this->hostnames as $profile) {
+            if ($profile->matches($hostname, $port)) {
+                return $profile;
+            }
+        }
+
+        return null;
     }
 }
