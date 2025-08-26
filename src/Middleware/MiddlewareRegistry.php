@@ -26,9 +26,7 @@ final class MiddlewareRegistry
     /** @var array<string, true> */
     private array $executed = [];
 
-    public function __construct()
-    {
-    }
+    private bool $locked = false;
 
     /**
      * @param Pipeline $contract
@@ -42,12 +40,24 @@ final class MiddlewareRegistry
         }
 
         if ($middleware instanceof StaticCallback) {
+            if ($this->locked) {
+                throw new \RuntimeException("Cannot register middleware after registry is locked");
+            }
+
             $this->persisted[$contract->value] = $middleware;
         }
 
         if ($middleware instanceof PipelineMiddlewareInterface || is_callable($middleware)) {
             $this->runtime[$contract->value] = $middleware;
         }
+    }
+
+    /**
+     * @return void
+     */
+    public function lock(): void
+    {
+        $this->locked = true;
     }
 
     /**
@@ -58,7 +68,8 @@ final class MiddlewareRegistry
         return [
             "persisted" => $this->persisted,
             "hot" => null,
-            "dispatched" => null
+            "dispatched" => null,
+            "locked" => $this->locked
         ];
     }
 
@@ -69,6 +80,7 @@ final class MiddlewareRegistry
     public function __unserialize(array $data): void
     {
         $this->persisted = $data["factory"];
+        $this->locked = $data["locked"];
         $this->runtime = [];
         $this->executed = [];
     }
