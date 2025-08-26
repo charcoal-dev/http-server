@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Contracts\Middleware;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
-use Charcoal\Http\Server\Config\RequestConstraints;
 use Charcoal\Http\Server\Request\Result\RedirectUrl;
 
 /**
@@ -20,5 +19,5 @@ use Charcoal\Http\Server\Request\Result\RedirectUrl;
  */
 interface UrlValidatorPipeline extends PipelineMiddlewareInterface
 {
-    public function __invoke(UrlInfo $url, RequestConstraints $constraints): ?RedirectUrl;
+    public function __invoke(UrlInfo $url, int $maxUriBytes): ?RedirectUrl;
 }

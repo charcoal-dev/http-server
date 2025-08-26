@@ -10,6 +10,7 @@ namespace Charcoal\Http\Server\Middleware;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Server\Config\RequestConstraints;
+use Charcoal\Http\Server\Contracts\Middleware\UrlValidatorPipeline;
 use Charcoal\Http\Server\Enums\Pipeline;
 use Charcoal\Http\Server\Pipelines\UrlValidator;
 use Charcoal\Http\Server\Request\Result\RedirectUrl;
@@ -28,6 +29,7 @@ final readonly class MiddlewareFacade
      * @param UrlInfo $url
      * @param RequestConstraints $constraints
      * @return RedirectUrl|null
+     * @see UrlValidatorPipeline
      */
     public function urlValidationPipeline(UrlInfo $url, RequestConstraints $constraints): ?RedirectUrl
     {
