@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server;
 
 use Charcoal\Base\Support\Helpers\UuidHelper;
+use Charcoal\Base\Traits\ControlledSerializableTrait;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Server\Config\ServerConfig;
 use Charcoal\Http\Server\Enums\RequestError;
@@ -36,6 +37,7 @@ use Charcoal\Http\TrustProxy\TrustGateway;
 final class HttpServer
 {
     use ServerTestableTrait;
+    use ControlledSerializableTrait;
 
     private readonly Router $router;
     private readonly MiddlewareRegistry $middleware;
@@ -57,6 +59,29 @@ final class HttpServer
 
         // Runtime (instanced & callback) registers are allowed even after lock:
         $this->middleware->lock();
+    }
+
+    /**
+     * @return array
+     */
+    public function collectSerializableData(): array
+    {
+        return [
+            "config" => $this->config,
+            "router" => $this->router,
+            "middleware" => $this->middleware,
+        ];
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->config = $data["config"];
+        $this->router = $data["router"];
+        $this->middleware = $data["middleware"];
     }
 
     /**

@@ -16,9 +16,9 @@ use Charcoal\Http\Server\Config\ServerConfig;
 use Charcoal\Http\Server\Config\VirtualHost;
 use Charcoal\Http\Server\Exceptions\RequestContextException;
 use Charcoal\Http\Server\Request\ServerRequest;
-use Charcoal\Http\Server\TrustProxy\ServerEnv;
-use Charcoal\Http\Server\TrustProxy\TrustedProxy;
-use Charcoal\Http\Server\TrustProxy\TrustGateway;
+use Charcoal\Http\TrustProxy\Config\ServerEnv;
+use Charcoal\Http\TrustProxy\Config\TrustedProxy;
+use Charcoal\Http\TrustProxy\TrustGateway;
 use PHPUnit\Framework\TestCase;
 
 /**
