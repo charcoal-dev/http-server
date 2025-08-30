@@ -71,7 +71,7 @@ final readonly class ControllerContext
         }
 
         if ($defaultEp) {
-            $entryPoints[] = $defaultEp;
+            $entryPoints = [$defaultEp];
         }
 
         // Check all mentioned entry-points exist and accessible
