@@ -18,7 +18,7 @@ use Charcoal\Http\Server\Routing\Snapshot\AppRoutingSnapshot;
  * Represents a collection of application routes grouped together.
  * Provides functionality for constructing and building route groups.
  */
-final readonly class AppRoutes extends AbstractRouteGroup
+readonly class AppRoutes extends AbstractRouteGroup
 {
     private ConsolidatedRoutes $compiled;
 
@@ -36,7 +36,7 @@ final readonly class AppRoutes extends AbstractRouteGroup
      * @return void
      * @throws RoutingBuilderException
      */
-    protected function build(RouteGroupBuilder $group): void
+    final protected function build(RouteGroupBuilder $group): void
     {
         parent::build($group);
         $this->compiled = new ConsolidatedRoutes($this);
@@ -45,7 +45,7 @@ final readonly class AppRoutes extends AbstractRouteGroup
     /**
      * @return ConsolidatedRoutes
      */
-    public function inspect(): ConsolidatedRoutes
+    final public function inspect(): ConsolidatedRoutes
     {
         return $this->compiled;
     }
@@ -53,7 +53,7 @@ final readonly class AppRoutes extends AbstractRouteGroup
     /**
      * Creates and returns a new instance of AppRoutingSnapshot using the current registry.
      */
-    public function snapshot(): AppRoutingSnapshot
+    final public function snapshot(): AppRoutingSnapshot
     {
         return $this->compiled->snapshot();
     }
