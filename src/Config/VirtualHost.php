@@ -8,7 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Config;
 
-use Charcoal\Base\Support\Helpers\NetworkHelper;
+use Charcoal\Net\Dns\HostnameHelper;
+use Charcoal\Net\Ip\IpHelper;
 
 /**
  * Represents a virtual host configuration with support for wildcard hostnames,
@@ -25,7 +26,7 @@ final readonly class VirtualHost
     {
         $hostname = str_ends_with($hostname, ".") ? substr($hostname, 0, -1) : $hostname;
         $this->wildcard = str_starts_with($hostname, "*.");
-        $this->isIpAddress = NetworkHelper::isValidIp($hostname);
+        $this->isIpAddress = IpHelper::isValidIp($hostname);
         $this->hostname = strtolower($this->wildcard ? substr($hostname, 2) : $hostname);
         if ($this->wildcard) {
             if ($this->isIpAddress) {
@@ -37,7 +38,7 @@ final readonly class VirtualHost
             }
         }
 
-        if (!NetworkHelper::isValidHostname($this->hostname, allowIpAddr: true, allowNonTld: true)) {
+        if (!HostnameHelper::isValidHostname($this->hostname, allowIpAddr: true, allowNonTld: true)) {
             throw new \InvalidArgumentException("Invalid hostname: " . $hostname);
         }
 
