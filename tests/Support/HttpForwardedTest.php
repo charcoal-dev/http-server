@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Tests\Server\Support;
 
-use Charcoal\Http\Server\TrustProxy\ForwardedHeaderParser;
+use Charcoal\Http\TrustProxy\ForwardedHeaderParser;
 
 /**
  * This class contains tests for processing HTTP Forwarded headers to extract proxy information.
