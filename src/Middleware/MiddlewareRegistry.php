@@ -28,6 +28,11 @@ final class MiddlewareRegistry
 
     private bool $locked = false;
 
+    /** @internal */
+    public function __construct()
+    {
+    }
+
     /**
      * @param Pipeline $contract
      * @param PipelineMiddlewareInterface|callable $middleware
