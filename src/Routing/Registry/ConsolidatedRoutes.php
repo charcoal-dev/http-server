@@ -11,7 +11,7 @@ namespace Charcoal\Http\Server\Routing\Registry;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Internal\Constants;
-use Charcoal\Http\Server\Routing\AppRoutes;
+use Charcoal\Http\Server\Routing\HttpRoutes;
 use Charcoal\Http\Server\Routing\Group\AbstractRouteGroup;
 use Charcoal\Http\Server\Routing\Snapshot\AppRoutingSnapshot;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
@@ -41,9 +41,9 @@ final readonly class ConsolidatedRoutes
     }
 
     /**
-     * @param AppRoutes $routes
+     * @param HttpRoutes $routes
      */
-    public function __construct(AppRoutes $routes)
+    public function __construct(HttpRoutes $routes)
     {
         $this->declared = self::createFor($routes);
 

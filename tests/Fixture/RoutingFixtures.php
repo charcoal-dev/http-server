@@ -10,7 +10,7 @@ namespace Charcoal\Http\Tests\Server\Fixture;
 
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Server\Exceptions\RoutingBuilderException;
-use Charcoal\Http\Server\Routing\AppRoutes;
+use Charcoal\Http\Server\Routing\HttpRoutes;
 use Charcoal\Http\Server\Routing\Group\RouteGroupBuilder;
 
 /**
@@ -25,9 +25,9 @@ final class RoutingFixtures
      * @throws RoutingBuilderException
      * @noinspection PhpUndefinedClassInspection
      */
-    public static function webBlogShipApi2AccountAdmin(): AppRoutes
+    public static function webBlogShipApi2AccountAdmin(): HttpRoutes
     {
-        return new AppRoutes(function (RouteGroupBuilder $group) {
+        return new HttpRoutes(function (RouteGroupBuilder $group) {
             // Top-level
             $group->route("/about", PageController::class)->methods(HttpMethod::GET, HttpMethod::HEAD);
             $group->route("/assets/:anyThing", AssetsController::class);

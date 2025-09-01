@@ -22,7 +22,7 @@ final readonly class Router
     private AppRoutingSnapshot $snapshot;
 
     /** @internal */
-    public function __construct(AppRoutes $routes)
+    public function __construct(HttpRoutes $routes)
     {
         $this->snapshot = $routes->snapshot();
     }

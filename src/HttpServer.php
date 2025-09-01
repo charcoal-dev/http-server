@@ -26,7 +26,7 @@ use Charcoal\Http\Server\Request\Result\RedirectResult;
 use Charcoal\Http\Server\Request\Result\RedirectUrl;
 use Charcoal\Http\Server\Request\Result\SuccessResult;
 use Charcoal\Http\Server\Request\ServerRequest;
-use Charcoal\Http\Server\Routing\AppRoutes;
+use Charcoal\Http\Server\Routing\HttpRoutes;
 use Charcoal\Http\Server\Routing\Router;
 use Charcoal\Http\TrustProxy\Config\ServerEnv;
 use Charcoal\Http\TrustProxy\TrustGateway;
@@ -45,12 +45,12 @@ final class HttpServer implements HttpServerApiInterface
 
     /**
      * @param ServerConfig $config
-     * @param AppRoutes $routes
+     * @param HttpRoutes $routes
      * @param \Closure(MiddlewareRegistry): void $callback
      */
     public function __construct(
         private readonly ServerConfig $config,
-        AppRoutes                     $routes,
+        HttpRoutes                    $routes,
         \Closure                      $callback
     )
     {

@@ -18,7 +18,7 @@ use Charcoal\Http\Server\Routing\Snapshot\AppRoutingSnapshot;
  * Represents a collection of application routes grouped together.
  * Provides functionality for constructing and building route groups.
  */
-readonly class AppRoutes extends AbstractRouteGroup
+readonly class HttpRoutes extends AbstractRouteGroup
 {
     private ConsolidatedRoutes $compiled;
 

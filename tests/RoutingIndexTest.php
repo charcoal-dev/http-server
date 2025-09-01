@@ -11,7 +11,7 @@ namespace Charcoal\Http\Tests\Server;
 use Charcoal\Http\Commons\Support\HttpMethods;
 use Charcoal\Http\Server\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Server\HttpServer;
-use Charcoal\Http\Server\Routing\AppRoutes;
+use Charcoal\Http\Server\Routing\HttpRoutes;
 use Charcoal\Http\Server\Routing\Group\RouteGroup;
 use Charcoal\Http\Server\Routing\Registry\Route;
 use Charcoal\Http\Server\Routing\Snapshot\AppRoutingSnapshot;
@@ -22,7 +22,7 @@ use Charcoal\Http\Tests\Server\Fixture\RoutingFixtures;
  */
 final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 {
-    private readonly AppRoutes $routes;
+    private readonly HttpRoutes $routes;
     private readonly AppRoutingSnapshot $routesDto;
 
     /**
@@ -73,7 +73,7 @@ final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
         // First, root AppRoutes group
         $this->assertArrayHasKey("/", $routes->declared);
         $this->assertCount(2, $routes->declared["/"]);
-        $this->assertInstanceOf(AppRoutes::class, $routes->declared["/"][0]);
+        $this->assertInstanceOf(HttpRoutes::class, $routes->declared["/"][0]);
         $this->assertInstanceOf(Route::class, $routes->declared["/"][1]);
         $this->assertEquals("GET,HEAD", implode(",", $this->httpMethodsToArray($routes->declared["/"][1]->methods)));
 
