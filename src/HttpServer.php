@@ -10,6 +10,7 @@ namespace Charcoal\Http\Server;
 
 use Charcoal\Base\Support\Helpers\UuidHelper;
 use Charcoal\Base\Traits\ControlledSerializableTrait;
+use Charcoal\Contracts\Http\HttpServerApiInterface;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Server\Config\ServerConfig;
 use Charcoal\Http\Server\Enums\RequestError;
@@ -34,7 +35,7 @@ use Charcoal\Http\TrustProxy\TrustGateway;
  * Represents an HTTP server capable of routing requests, managing middleware,
  * and handling various stages of HTTP request processing.
  */
-final class HttpServer
+final class HttpServer implements HttpServerApiInterface
 {
     use ServerTestableTrait;
     use ControlledSerializableTrait;
@@ -86,10 +87,10 @@ final class HttpServer
 
     /**
      * @param ServerRequest $request
-     * @param ServerEnv $env
+     * @param ServerEnv|null $env
      * @return AbstractResult
      */
-    public function handle(ServerRequest $request, ServerEnv $env = new ServerEnv()): AbstractResult
+    public function handle(ServerRequest $request, ?ServerEnv $env = null): AbstractResult
     {
         // Start with blank response for headers, proceed to random UUID first:
         $response = new Headers();
