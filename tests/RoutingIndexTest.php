@@ -14,7 +14,7 @@ use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Routing\HttpRoutes;
 use Charcoal\Http\Server\Routing\Group\RouteGroup;
 use Charcoal\Http\Server\Routing\Registry\Route;
-use Charcoal\Http\Server\Routing\Snapshot\AppRoutingSnapshot;
+use Charcoal\Http\Server\Routing\Snapshot\RoutingSnapshot;
 use Charcoal\Http\Tests\Server\Fixture\RoutingFixtures;
 
 /**
@@ -23,7 +23,7 @@ use Charcoal\Http\Tests\Server\Fixture\RoutingFixtures;
 final class RoutingIndexTest extends \PHPUnit\Framework\TestCase
 {
     private readonly HttpRoutes $routes;
-    private readonly AppRoutingSnapshot $routesDto;
+    private readonly RoutingSnapshot $routesDto;
 
     /**
      * @return void

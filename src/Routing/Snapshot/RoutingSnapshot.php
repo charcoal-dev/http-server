@@ -14,7 +14,7 @@ namespace Charcoal\Http\Server\Routing\Snapshot;
  * Upon instantiation, ensures that all provided route snapshots contain unique paths.
  * @implements \IteratorAggregate<RouteSnapshot>
  */
-final readonly class AppRoutingSnapshot implements \IteratorAggregate, \Countable
+final readonly class RoutingSnapshot implements \IteratorAggregate, \Countable
 {
     /** @var array<RouteSnapshot> */
     private array $routes;

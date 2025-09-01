@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Routing;
 
 use Charcoal\Http\Commons\Enums\HttpMethod;
-use Charcoal\Http\Server\Routing\Snapshot\AppRoutingSnapshot;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
 
@@ -19,12 +18,9 @@ use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
  */
 final readonly class Router
 {
-    private AppRoutingSnapshot $snapshot;
-
     /** @internal */
-    public function __construct(HttpRoutes $routes)
+    public function __construct(private HttpRoutes $snapshot)
     {
-        $this->snapshot = $routes->snapshot();
     }
 
     /**

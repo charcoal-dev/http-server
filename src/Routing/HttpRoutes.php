@@ -12,7 +12,7 @@ use Charcoal\Http\Server\Exceptions\RoutingBuilderException;
 use Charcoal\Http\Server\Routing\Group\AbstractRouteGroup;
 use Charcoal\Http\Server\Routing\Group\RouteGroupBuilder;
 use Charcoal\Http\Server\Routing\Registry\ConsolidatedRoutes;
-use Charcoal\Http\Server\Routing\Snapshot\AppRoutingSnapshot;
+use Charcoal\Http\Server\Routing\Snapshot\RoutingSnapshot;
 
 /**
  * Represents a collection of application routes grouped together.
@@ -53,7 +53,7 @@ readonly class HttpRoutes extends AbstractRouteGroup
     /**
      * Creates and returns a new instance of AppRoutingSnapshot using the current registry.
      */
-    final public function snapshot(): AppRoutingSnapshot
+    final public function snapshot(): RoutingSnapshot
     {
         return $this->compiled->snapshot();
     }

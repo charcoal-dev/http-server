@@ -91,10 +91,7 @@ final class MiddlewareRegistry
     }
 
     /**
-     * @param Pipeline $contract
-     * @param string|null $fallback
-     * @param array $params
-     * @return mixed
+     * @internal
      */
     public function execute(Pipeline $contract, ?string $fallback = null, array $params = []): mixed
     {

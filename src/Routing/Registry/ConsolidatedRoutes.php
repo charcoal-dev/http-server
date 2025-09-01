@@ -13,7 +13,7 @@ use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Internal\Constants;
 use Charcoal\Http\Server\Routing\HttpRoutes;
 use Charcoal\Http\Server\Routing\Group\AbstractRouteGroup;
-use Charcoal\Http\Server\Routing\Snapshot\AppRoutingSnapshot;
+use Charcoal\Http\Server\Routing\Snapshot\RoutingSnapshot;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
 use Charcoal\Http\Server\Routing\Snapshot\ControllerContext;
@@ -110,9 +110,9 @@ final readonly class ConsolidatedRoutes
     /**
      * Creates a snapshot of the currently declared routes along with their bindings.
      *
-     * @return AppRoutingSnapshot The snapshot containing all route paths and their associated controller bindings.
+     * @return RoutingSnapshot The snapshot containing all route paths and their associated controller bindings.
      */
-    public function snapshot(): AppRoutingSnapshot
+    public function snapshot(): RoutingSnapshot
     {
         // Create a final binding map
         $snapshot = [];
@@ -133,7 +133,7 @@ final readonly class ConsolidatedRoutes
             $snapshot[] = new RouteSnapshot($path, ...$pathBindings);
         }
 
-        return new AppRoutingSnapshot(...$snapshot);
+        return new RoutingSnapshot(...$snapshot);
     }
 
     /**
