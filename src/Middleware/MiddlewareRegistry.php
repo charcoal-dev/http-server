@@ -17,7 +17,7 @@ use Charcoal\Http\Server\Enums\Pipeline;
  * associated with specific pipelines. Middleware may be persisted or runtime-based
  * and can be executed with optional fallback mechanisms.
  */
-final class MiddlewareRegistry
+class MiddlewareRegistry
 {
     /** @var array<string, PipelineMiddlewareInterface|callable> */
     private array $persisted = [];
@@ -29,7 +29,12 @@ final class MiddlewareRegistry
     private bool $locked = false;
 
     /** @internal */
-    public function __construct()
+    final public function __construct()
+    {
+        $this->onConstructHook();
+    }
+
+    protected function onConstructHook(): void
     {
     }
 
@@ -38,7 +43,7 @@ final class MiddlewareRegistry
      * @param PipelineMiddlewareInterface|callable $middleware
      * @return void
      */
-    public function register(Pipeline $contract, PipelineMiddlewareInterface|callable $middleware): void
+    final public function register(Pipeline $contract, PipelineMiddlewareInterface|callable $middleware): void
     {
         if (isset($this->executed[$contract->value])) {
             throw new \RuntimeException("Middleware already dispatched for pipeline: " . $contract->name);
@@ -60,7 +65,7 @@ final class MiddlewareRegistry
     /**
      * @return void
      */
-    public function lock(): void
+    final public function lock(): void
     {
         $this->locked = true;
     }
@@ -68,7 +73,7 @@ final class MiddlewareRegistry
     /**
      * @return array
      */
-    public function __serialize(): array
+    final public function __serialize(): array
     {
         return [
             "persisted" => $this->persisted,
@@ -82,7 +87,7 @@ final class MiddlewareRegistry
      * @param array $data
      * @return void
      */
-    public function __unserialize(array $data): void
+    final public function __unserialize(array $data): void
     {
         $this->persisted = $data["factory"];
         $this->locked = $data["locked"];
@@ -93,7 +98,7 @@ final class MiddlewareRegistry
     /**
      * @internal
      */
-    public function execute(Pipeline $contract, ?string $fallback = null, array $params = []): mixed
+    final public function execute(Pipeline $contract, ?string $fallback = null, array $params = []): mixed
     {
         $executable = match (true) {
             isset($this->runtime[$contract->value]) => $this->runtime[$contract->value],
