@@ -11,6 +11,7 @@ namespace Charcoal\Http\Server\Routing;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
+use Charcoal\Http\Server\Routing\Snapshot\RoutingSnapshot;
 
 /**
  * Represents a router responsible for matching paths against predefined route patterns.
@@ -19,7 +20,7 @@ use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
 final readonly class Router
 {
     /** @internal */
-    public function __construct(private HttpRoutes $snapshot)
+    public function __construct(private RoutingSnapshot $snapshot)
     {
     }
 
