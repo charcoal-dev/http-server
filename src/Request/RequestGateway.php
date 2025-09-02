@@ -11,7 +11,6 @@ namespace Charcoal\Http\Server\Request;
 use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
-use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
@@ -131,12 +130,9 @@ final readonly class RequestGateway
             $this->responseHeaders->set("X-Request-ID", $requestId);
         }
 
-        // Finalized Request ID
-        $requestId = $this->responseHeaders->get("X-Request-ID");
-
         // Initialize Request Facade
         $this->requestFacade = new RequestFacade(
-            $requestId,
+            $this->responseHeaders->get("X-Request-ID"),
             $this->request->method,
             $this->request->headers,
             new QueryParams(explode("#", explode("?",
