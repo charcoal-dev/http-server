@@ -14,6 +14,10 @@ use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Enums\HttpProtocol;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Url\UrlInfo;
+use Charcoal\Http\Server\Request\Result\AbstractResult;
+use Charcoal\Http\Server\Request\Result\ErrorResult;
+use Charcoal\Http\Server\Request\Result\RedirectResult;
+use Charcoal\Http\Server\Request\Result\SuccessResult;
 use Charcoal\Http\Server\Request\ServerRequest;
 
 /**
@@ -75,5 +79,33 @@ abstract class SapiRequest
         };
 
         return new ServerRequest($method, $protocol, $headers, new UrlInfo($url), $isSecure);
+    }
+
+    /**
+     * This is an optional helper method, use this or implement your own logic following this.
+     * Sends an HTTP response based on the provided result object, including status code,
+     * headers, and response body. Handles redirects and errors as specific cases.
+     * @api
+     */
+    public static function serveResult(AbstractResult $result): never
+    {
+        // Set the HTTP status code and headers
+        http_response_code($result->statusCode);
+        foreach ($result->headers as $name => $value) {
+            header($name . ": " . $value);
+        }
+
+        if ($result instanceof RedirectResult) {
+            exit(0); // Location header already served
+        }
+
+        // Let the error boundary deal with any caught Exceptions
+        if ($result instanceof ErrorResult) {
+            throw $result->exception;
+        }
+
+        assert($result instanceof SuccessResult);
+        print $result->body;
+        exit(0); // Done!
     }
 }
