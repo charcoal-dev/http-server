@@ -20,10 +20,12 @@ use Charcoal\Http\Commons\Support\CorsPolicy;
 use Charcoal\Http\Commons\Support\HttpHelper;
 use Charcoal\Http\Server\Config\RequestConstraints;
 use Charcoal\Http\Server\Config\VirtualHost;
+use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\RequestContextException;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
+use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\TrustProxy\Result\TrustGatewayResult;
 
@@ -110,7 +112,7 @@ final readonly class RequestGateway
 
         // Negotiate X-Request-ID and Content-Type
         $requestId = $this->request->headers->get("X-Request-ID");
-        if($requestId) {
+        if ($requestId) {
             if (strlen($requestId) === 36 && str_contains($requestId, "-")) {
                 $requestId = str_replace("-", "", $requestId);
             }
@@ -169,6 +171,22 @@ final readonly class RequestGateway
         // Initiate Output Buffer
         $this->output = new WritablePayload();
         // Todo: $this->input = UnsafePayload from Decoder Pipeline
+    }
+
+    public function executeController(): void
+    {
+        try {
+            $requestFacade = new RequestFacade($this);
+            $controller = new $this->routeController->controller->classname($this);
+            if ($controller instanceof InvokableControllerInterface) {
+                $controller($requestFacade);
+                return;
+            }
+
+            call_user_func_array([$controller, $this->controllerEp], [$requestFacade]);
+        } catch (\Throwable $e) {
+
+        }
     }
 
     /**

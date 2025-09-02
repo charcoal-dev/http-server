@@ -155,21 +155,20 @@ final class HttpServer implements HttpServerApiInterface
         $requestGateway->accepted($virtualHost, $trustProxy);
 
         // Match with available routes
-        [$route, $matched] = $this->router->match($request->url->path);
-        if (!isset($route, $matched)) {
+        [$route, $tokens] = $this->router->match($request->url->path);
+        if (!isset($route, $tokens)) {
             return new ErrorResult($requestGateway->responseHeaders, RequestError::EndpointNotFound, null);
         }
 
         try {
             $entryPoint = $this->router->declaredControllersFor($route, $request->method);
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             $requestGateway->responseHeaders->set("Allow", implode(", ", $route->getAggregatedMethods()));
             return new ErrorResult($requestGateway->responseHeaders, RequestError::MethodNotDeclared, $e);
         }
 
         // Path parameters/tokens rendering:
         if ($route->params) {
-            if (!isset($tokens)) $tokens = [];
             $params = array_combine($route->params, array_pad(
                 array_map(fn($v) => $v[0] ?? null, $tokens),
                 count($route->params),
@@ -199,7 +198,6 @@ final class HttpServer implements HttpServerApiInterface
         // Todo: Concurrency Handling
         // Todo: Rate limiting
         // Todo: Authentication
-
         // Todo: Instantiate and Execute Controller (before Hooks)
         // Todo: Final Cleanups
 

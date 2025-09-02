@@ -25,7 +25,7 @@ use Charcoal\Http\Server\Request\ServerRequest;
  * leveraging the context from PHP's global state.
  * @api
  */
-abstract class SapiRequest
+abstract readonly class SapiRequest
 {
     /**
      * Creates and returns a ServerRequest instance using global server variables.
@@ -34,7 +34,7 @@ abstract class SapiRequest
      * @throws WrappedException
      * @api
      */
-    public static function fromGlobals(): ServerRequest
+    final public static function fromGlobals(): ServerRequest
     {
         // Server Protocol
         $protocol = HttpProtocol::find($_SERVER["SERVER_PROTOCOL"] ?? "");
@@ -87,7 +87,7 @@ abstract class SapiRequest
      * headers, and response body. Handles redirects and errors as specific cases.
      * @api
      */
-    public static function serveResult(AbstractResult $result): never
+    final public static function serveResult(AbstractResult $result): never
     {
         // Set the HTTP status code and headers
         http_response_code($result->statusCode);
@@ -95,22 +95,41 @@ abstract class SapiRequest
             header($name . ": " . $value);
         }
 
+        // RedirectResult: Location header already served, Just terminate execution here
         if ($result instanceof RedirectResult) {
-            exit(0); // Location header already served
-        }
-
-        // Let the error boundary deal with any caught Exceptions
-        if ($result instanceof ErrorResult) {
-            if ($result->exception) {
-                throw $result->exception;
-            }
-
-            var_dump($result->error->name);
             exit(0);
         }
 
+        // ErrorResult: Handle error cases
+        if ($result instanceof ErrorResult) {
+            self::handleErrorResult($result);
+        }
+
+        // SuccessResult: Send the response body
         assert($result instanceof SuccessResult);
-        print $result->body;
+        self::handleSuccessResult($result);
         exit(0); // Done!
+    }
+
+    /**
+     * Handle success result by printing the body.
+     * @api Extend this method to handle success cases.
+     */
+    protected static function handleSuccessResult(SuccessResult $result): void
+    {
+        print $result->body;
+    }
+
+    /**
+     * Handles an ErrorResult by throwing the exception if present, or exiting the script.
+     * @api Extend this method to handle success cases.
+     */
+    protected static function handleErrorResult(ErrorResult $result): never
+    {
+        if ($result->exception) {
+            throw $result->exception;
+        }
+
+        exit(0);
     }
 }
