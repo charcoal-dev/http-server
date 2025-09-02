@@ -156,7 +156,7 @@ final class HttpServer implements HttpServerApiInterface
 
         // Match with available routes
         [$route, $matched] = $this->router->match($request->url->path);
-        if (!$matched || !isset($route)) {
+        if (!isset($route, $matched)) {
             return new ErrorResult($requestGateway->responseHeaders, RequestError::EndpointNotFound, null);
         }
 
