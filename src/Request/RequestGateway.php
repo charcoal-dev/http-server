@@ -14,6 +14,7 @@ use Charcoal\Base\Traits\NotSerializableTrait;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
+use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Commons\Support\CorsPolicy;
@@ -23,14 +24,17 @@ use Charcoal\Http\Server\Config\VirtualHost;
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\AfterEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\BeforeEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
+use Charcoal\Http\Server\Enums\ControllerError;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Exceptions\Controllers\ValidationErrorException;
 use Charcoal\Http\Server\Exceptions\Controllers\ValidationException;
 use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
-use Charcoal\Http\Server\Exceptions\RequestContextException;
+use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Routing\Router;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
+use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
 use Charcoal\Http\TrustProxy\Result\TrustGatewayResult;
 
 /**
@@ -61,7 +65,7 @@ final readonly class RequestGateway
     public ?CacheControlDirectives $cacheControl;
 
     /**
-     * @throws RequestContextException
+     * @throws RequestGatewayException
      */
     public function __construct(
         public string              $uuid,
@@ -75,7 +79,7 @@ final readonly class RequestGateway
         try {
             $this->middleware->urlValidationPipeline($request->url, $this->constraints->maxUriBytes);
         } catch (\Exception $e) {
-            throw new RequestContextException(match ($e->getCode()) {
+            throw new RequestGatewayException(match ($e->getCode()) {
                 414 => RequestError::BadUrlLength,
                 default => RequestError::BadUrlEncoding
             }, $e);
@@ -90,7 +94,7 @@ final readonly class RequestGateway
                 $this->constraints->headerKeyValidation
             );
         } catch (\Exception $e) {
-            throw new RequestContextException(match (true) {
+            throw new RequestGatewayException(match (true) {
                 $e instanceof \OutOfRangeException => RequestError::HeadersCountCap,
                 $e instanceof \InvalidArgumentException => RequestError::BadHeaderName,
                 $e instanceof \LengthException => RequestError::HeaderLength,
@@ -139,38 +143,49 @@ final readonly class RequestGateway
     }
 
     /**
-     * @throws RequestContextException
+     * @throws RequestGatewayException
      * @throws PreFlightTerminateException
-     * @noinspection PhpDocRedundantThrowsInspection
      */
-    public function preFlightCorsControl(
+    public function preFlightControl(
+        Router                 $router,
         CorsPolicy             $corsPolicy,
-        RouteControllerBinding $routeController,
-        string                 $entrypoint,
+        RouteSnapshot          $route,
+        RouteControllerBinding $controller,
         array                  $pathParams
     ): void
     {
+        $this->routeController = $controller;
         $this->pathParams = $pathParams;
-        $this->routeController = $routeController;
-        $this->controllerEp = $entrypoint;
 
         // Cors policy applicable if Origin header is present
+        $isPreFlight = $this->request->method === HttpMethod::OPTIONS;
         $origin = $this->request->headers->get("Origin");
         if ($origin) {
             // Validate Origin Header
             if (!HttpHelper::isValidOrigin($origin)) {
-                throw new RequestContextException(RequestError::BadOriginHeader, null);
+                $this->responseHeaders->set("Vary", "Origin");
+                throw new RequestGatewayException(RequestError::BadOriginHeader, null);
             }
 
-            /** @see PreFlightTerminateException */
-            $this->middleware->optionsMethodHandler($origin, $corsPolicy, $this->responseHeaders);
-
-            // Continuing?
-            if (!$this->responseHeaders->has("Access-Control-Allow-Origin") ||
-                $this->responseHeaders->get("Vary") !== "Origin") {
-                throw new RequestContextException(RequestError::BadOriginHeader, null);
-            }
+            match ($corsPolicy->enforce) {
+                false => $this->responseHeaders->set("Access-Control-Allow-Origin", "*"),
+                true => $this->validateOrigin($origin, $corsPolicy, $this->request->method)
+            };
         }
+
+        // Resolve Entrypoint
+        $entryPoint = $controller->matchEntryPoint($this->request->method);
+        if (!$entryPoint) {
+            $allowed = implode(", ", $router->getAllowedMethodsFor($route));
+            if ($origin && $isPreFlight) {
+                $this->defaultPreFlightRequestHandler($allowed, $corsPolicy);
+            }
+
+            $this->responseHeaders->set("Allow", $allowed);
+            throw new RequestGatewayException(RequestError::MethodNotAllowed, null);
+        }
+
+        $this->controllerEp = $entryPoint;
 
         // Initiate Output Buffer
         $this->output = new WritablePayload();
@@ -178,8 +193,52 @@ final readonly class RequestGateway
     }
 
     /**
-     * @noinspection PhpRedundantCatchClauseInspection
-     * @throws RequestContextException
+     * @throws PreFlightTerminateException
+     */
+    private function defaultPreFlightRequestHandler(string $methods, CorsPolicy $corsPolicy): void
+    {
+        $this->responseHeaders->set("Access-Control-Allow-Methods", $methods)
+            ->set("Access-Control-Allow-Headers", $corsPolicy->allow)
+            ->set("Access-Control-Max-Age", strval($corsPolicy->maxAge))
+            ->set("Cache-Control", "no-store");
+
+        if ($corsPolicy->enforce) {
+            $this->responseHeaders->set("Vary",
+                "Origin, Access-Control-Request-Method, Access-Control-Request-Headers");
+        } else {
+            $this->responseHeaders->set("Vary",
+                "Access-Control-Request-Method, Access-Control-Request-Headers");
+        }
+
+        throw new PreFlightTerminateException();
+    }
+
+    /**
+     * @throws RequestGatewayException
+     */
+    private function validateOrigin(string $origin, CorsPolicy $corsPolicy, HttpMethod $method): void
+    {
+        // Validate Origin against the approved
+        if (!in_array(strtolower($origin), $corsPolicy->origins, true)) {
+            $this->responseHeaders->set("Vary", "Origin");
+            throw new RequestGatewayException(RequestError::CorsOriginNotAllowed, null);
+        }
+
+        $this->responseHeaders->set("Access-Control-Allow-Origin", $origin)
+            ->set("Access-Control-Expose-Headers", $corsPolicy->expose);
+
+        if ($corsPolicy->withCredentials) {
+            $this->responseHeaders->set("Access-Control-Allow-Credentials", "true");
+        }
+
+        if ($method !== HttpMethod::OPTIONS) {
+            $this->responseHeaders->set("Vary", "Origin");
+        }
+    }
+
+    /**
+     * @return void
+     * @throws RequestGatewayException
      */
     public function executeController(): void
     {
@@ -206,14 +265,16 @@ final readonly class RequestGateway
             if ($controller instanceof AfterEntrypointCallback) {
                 $controller->afterEntrypointCallback($requestFacade);
             }
-        } catch (ValidationException $e) {
+        } catch (\Exception $e) {
             if ($e instanceof ValidationErrorException) {
                 $e->setContextMessage($requestFacade);
             }
 
-            throw new RequestContextException(RequestError::ValidationException, $e);
-        } catch (\Exception $e) {
-            throw new RequestContextException(RequestError::ControllerExecuteError, $e);
+            if ($e instanceof ValidationException) {
+                throw new RequestGatewayException(ControllerError::ValidationException, $e);
+            }
+
+            throw new RequestGatewayException(ControllerError::ExecutionFlow, $e);
         }
     }
 
