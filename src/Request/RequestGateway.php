@@ -23,6 +23,7 @@ use Charcoal\Http\Server\Config\VirtualHost;
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\AfterEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\BeforeEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
+use Charcoal\Http\Server\Enums\ContentEncoding;
 use Charcoal\Http\Server\Enums\ControllerError;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Enums\TransferEncoding;
@@ -134,14 +135,18 @@ final readonly class RequestGateway
 
         // Content Length
         $contentLength = (int)$this->request->headers->get("Content-Length");
-        $transferEncoding = $this->request->headers->get("Transfer-Encoding");
-        if ($transferEncoding && strtolower($transferEncoding) !== "chunked") {
-            throw new RequestGatewayException(RequestError::BadTransferEncoding, null);
+        $transferEncoding = TransferEncoding::find($this->request->headers->get("Transfer-Encoding"));
+        if ($transferEncoding && $transferEncoding !== TransferEncoding::Chunked) {
+            throw new RequestGatewayException(RequestError::UnsupportedTransferEncoding, null);
         }
 
-        $transferEncoding = TransferEncoding::Chunked;
         if ($transferEncoding && $contentLength > 0) {
             throw new RequestGatewayException(RequestError::ContentHandlingConflict, null);
+        }
+
+        $contentEncoding = ContentEncoding::find($this->request->headers->get("Content-Encoding"));
+        if ($contentEncoding !== ContentEncoding::Identity) {
+            throw new RequestGatewayException(RequestError::UnsupportedContentEncoding, null);
         }
 
         // Initialize Request Facade

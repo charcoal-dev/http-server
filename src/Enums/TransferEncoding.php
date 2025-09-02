@@ -16,4 +16,9 @@ namespace Charcoal\Http\Server\Enums;
 enum TransferEncoding: string
 {
     case Chunked = "chunked";
+
+    public static function find(string $value): ?self
+    {
+        return self::tryFrom(strtolower($value));
+    }
 }
