@@ -87,7 +87,7 @@ final readonly class ControllerContext
                 throw new \InvalidArgumentException("Controller entrypoint must be public: " . $classname . "::" . $entrypoint);
             }
 
-            $epAttributes[$entrypoint] = $epMethod->getAttributes();
+            $epAttributes[$entrypoint] = $epMethod;
         }
 
         if (!$entryPoints) {
