@@ -51,7 +51,7 @@ final readonly class Router
      * @param HttpMethod $method
      * @return RouteControllerBinding
      */
-    public function declaredControllersFor(RouteSnapshot $route, HttpMethod $method): RouteControllerBinding
+    public function getControllerForRoute(RouteSnapshot $route, HttpMethod $method): RouteControllerBinding
     {
         $defaultController = null;
         $matchedController = null;
@@ -74,5 +74,20 @@ final readonly class Router
         }
 
         return $controller;
+    }
+
+    /**
+     * Aggregates methods from all controllers associated with the instance.
+     */
+    public function getAllowedMethodsFor(RouteSnapshot $route): array
+    {
+        $methods = [];
+        foreach ($route->controllers as $controller) {
+            if (is_array($controller->methods)) {
+                $methods = [...$methods, ...array_map(fn($m) => $m->name, $controller->methods)];
+            }
+        }
+
+        return array_unique($methods);
     }
 }
