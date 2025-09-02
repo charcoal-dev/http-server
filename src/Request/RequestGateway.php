@@ -110,20 +110,22 @@ final readonly class RequestGateway
 
         // Negotiate X-Request-ID and Content-Type
         $requestId = $this->request->headers->get("X-Request-ID");
-        if (strlen($requestId) === 36 && str_contains($requestId, "-")) {
-            $requestId = str_replace("-", "", $requestId);
-        }
-
-        if (strlen($requestId) === 32 && ctype_xdigit($requestId)) {
-            if ($requestId === str_repeat("0", 32)) {
-                $requestId = null;
+        if($requestId) {
+            if (strlen($requestId) === 36 && str_contains($requestId, "-")) {
+                $requestId = str_replace("-", "", $requestId);
             }
+
+            if (strlen($requestId) === 32 && ctype_xdigit($requestId)) {
+                if ($requestId === str_repeat("0", 32)) {
+                    $requestId = null;
+                }
+            }
+
+            // Override our randomly generated one with the one that came with request
+            $this->responseHeaders->set("X-Request-ID", $requestId);
         }
 
-        $this->requestId ??= $requestId;
-        if ($this->requestId) {
-            $this->responseHeaders->set("X-Request-ID", $this->requestId);
-        }
+        $this->requestId = $this->responseHeaders->get("X-Request-ID");
 
         // Content-Type and Content-Length
         $this->contentType = ContentType::find($this->request->headers->get("Content-Type") ?? "");
