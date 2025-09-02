@@ -15,9 +15,9 @@ namespace Charcoal\Http\Server\Exceptions\Controllers;
 class ValidationException extends \Exception
 {
     public function __construct(
-        string                  $message,
-        int                     $code = 0,
-        public readonly ?string $param = null
+        string                $message,
+        int                   $code = 0,
+        public readonly array $context = []
     )
     {
         parent::__construct($message, $code);
