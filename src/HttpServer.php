@@ -146,7 +146,8 @@ final class HttpServer implements HttpServerApiInterface
                 }
             }
 
-            return new ErrorResult($response, RequestError::IncorrectHost,
+            $response->set("Upgrade", "TLS/1.3");
+            return new ErrorResult($response, RequestError::TlsEnforced,
                 new TlsRequiredException());
         }
 

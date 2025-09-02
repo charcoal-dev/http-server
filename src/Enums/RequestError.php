@@ -20,7 +20,7 @@ enum RequestError
     /** @for=Peer */
     case BadPeerIp;
     case IncorrectHost;
-    case TlsEnforcedRedirect;
+    case TlsEnforced;
 
     /** @for=Url */
     case BadUrlLength;
