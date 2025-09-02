@@ -14,6 +14,7 @@ use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
+use Charcoal\Http\Server\Enums\TransferEncoding;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
 
 /**
@@ -26,12 +27,13 @@ final readonly class RequestFacade
     public array $pathParams;
 
     public function __construct(
-        public string           $requestId,
-        public HttpMethod       $method,
-        public HeadersImmutable $headers,
-        public QueryParams      $queryParams,
-        public ?ContentType     $contentType,
-        public int              $contentLength
+        public string            $requestId,
+        public HttpMethod        $method,
+        public HeadersImmutable  $headers,
+        public QueryParams       $queryParams,
+        public ?ContentType      $contentType,
+        public int               $contentLength,
+        public ?TransferEncoding $transferEncoding,
     )
     {
     }

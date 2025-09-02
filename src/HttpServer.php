@@ -152,18 +152,22 @@ final class HttpServer implements HttpServerApiInterface
         }
 
         // Update Gateway/Context with acceptance:
-        $requestGateway->accepted($virtualHost, $trustProxy);
+        try {
+            $requestGateway->accepted($virtualHost, $trustProxy);
+        } catch (RequestGatewayException $e) {
+            return new ErrorResult($response, $e->error, $e);
+        }
 
         // Match with available routes
         [$route, $tokens] = $this->router->match($request->url->path);
         if (!isset($route, $tokens)) {
-            return new ErrorResult($requestGateway->responseHeaders, RequestError::EndpointNotFound, null);
+            return new ErrorResult($response, RequestError::EndpointNotFound, null);
         }
 
         try {
             $controller = $this->router->getControllerForRoute($route, $request->method);
         } catch (\Exception $e) {
-            return new ErrorResult($requestGateway->responseHeaders,
+            return new ErrorResult($response,
                 RequestError::ControllerResolveError, $e);
         }
 
@@ -186,9 +190,9 @@ final class HttpServer implements HttpServerApiInterface
                 $params ?? []
             );
         } catch (PreFlightTerminateException) {
-            return new SuccessResult(204, $requestGateway->responseHeaders, null);
+            return new SuccessResult(204, $response, null);
         } catch (RequestGatewayException $e) {
-            return new ErrorResult($requestGateway->responseHeaders, $e->error, $e);
+            return new ErrorResult($response, $e->error, $e);
         }
 
         // Todo: Init Logging
@@ -199,9 +203,9 @@ final class HttpServer implements HttpServerApiInterface
         try {
             $requestGateway->executeController();
         } catch (RequestGatewayException $e) {
-            return new ErrorResult($requestGateway->responseHeaders, $e->error, $e);
+            return new ErrorResult($response, $e->error, $e);
         }
 
-        return new SuccessResult(200, $requestGateway->responseHeaders, $requestGateway->output);
+        return new SuccessResult(200, $response, $requestGateway->output);
     }
 }

@@ -40,6 +40,10 @@ enum RequestError implements RequestErrorCodeInterface
     case ControllerResolveError;
     case MethodNotAllowed;
 
+    /** @for=BodyHandler */
+    case BadTransferEncoding;
+    case ContentHandlingConflict;
+
     /** @for=Cors */
     case BadOriginHeader;
     case CorsOriginNotAllowed;

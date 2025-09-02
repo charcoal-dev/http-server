@@ -25,6 +25,7 @@ use Charcoal\Http\Server\Contracts\Controllers\Hooks\BeforeEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
 use Charcoal\Http\Server\Enums\ControllerError;
 use Charcoal\Http\Server\Enums\RequestError;
+use Charcoal\Http\Server\Enums\TransferEncoding;
 use Charcoal\Http\Server\Exceptions\Controllers\ValidationErrorException;
 use Charcoal\Http\Server\Exceptions\Controllers\ValidationException;
 use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
@@ -106,6 +107,7 @@ final readonly class RequestGateway
      * @param VirtualHost $host
      * @param TrustGatewayResult $trustProxy
      * @return void
+     * @throws RequestGatewayException
      */
     public function accepted(VirtualHost $host, TrustGatewayResult $trustProxy): void
     {
@@ -130,6 +132,18 @@ final readonly class RequestGateway
             $this->responseHeaders->set("X-Request-ID", $requestId);
         }
 
+        // Content Length
+        $contentLength = (int)$this->request->headers->get("Content-Length");
+        $transferEncoding = $this->request->headers->get("Transfer-Encoding");
+        if ($transferEncoding && strtolower($transferEncoding) !== "chunked") {
+            throw new RequestGatewayException(RequestError::BadTransferEncoding, null);
+        }
+
+        $transferEncoding = TransferEncoding::Chunked;
+        if ($transferEncoding && $contentLength > 0) {
+            throw new RequestGatewayException(RequestError::ContentHandlingConflict, null);
+        }
+
         // Initialize Request Facade
         $this->requestFacade = new RequestFacade(
             $this->responseHeaders->get("X-Request-ID"),
@@ -138,7 +152,8 @@ final readonly class RequestGateway
             new QueryParams(explode("#", explode("?",
                 $this->request->url->complete, 2)[1] ?? "", 2)[0]),
             ContentType::find($this->request->headers->get("Content-Type") ?? ""),
-            (int)$this->request->headers->get("Content-Length")
+            $contentLength,
+            $transferEncoding
         );
     }
 
