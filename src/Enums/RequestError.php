@@ -8,12 +8,14 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Enums;
 
+use Charcoal\Http\Server\Contracts\RequestErrorCodeInterface;
+
 /**
  * Each case corresponds to a specific category of error that can occur during
  * processing of a request. The enum also provides a method to retrieve the
  * associated HTTP status code for the error type.
  */
-enum RequestError
+enum RequestError implements RequestErrorCodeInterface
 {
     case InternalError;
 
@@ -35,19 +37,12 @@ enum RequestError
 
     /** @for=Routing */
     case EndpointNotFound;
-    case MethodNotDeclared;
+    case ControllerResolveError;
+    case MethodNotAllowed;
 
     /** @for=Cors */
     case BadOriginHeader;
     case CorsOriginNotAllowed;
-    case MethodNotAllowed;
-    case CorsNotImplemented;
-
-    /** @for=Controller */
-    case ControllerExecuteError;
-    case UnrecognizedParamReceived;
-    case RequiredParamMissing;
-    case ValidationException;
 
     case BadContentType;
     case RequestBodyDecodeError;
@@ -59,9 +54,6 @@ enum RequestError
     public function getStatusCode(): int
     {
         return match ($this) {
-            self::ValidationException,
-            self::UnrecognizedParamReceived,
-            self::RequiredParamMissing,
             self::BadUrlEncoding,
             self::BadHeaderName,
             self::BadHeaderValue,
@@ -70,10 +62,11 @@ enum RequestError
             self::BadPeerIp => 400,
             self::CorsOriginNotAllowed => 403,
             self::EndpointNotFound => 404,
-            self::MethodNotDeclared => 405,
+            self::MethodNotAllowed => 405,
             self::BadUrlLength => 414,
             self::BadContentType => 415,
             self::IncorrectHost => 421,
+            self::TlsEnforced => 426,
             self::HeadersCountCap,
             self::HeaderLength => 431,
             default => 500,
