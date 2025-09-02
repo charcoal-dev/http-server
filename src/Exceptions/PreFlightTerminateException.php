@@ -15,8 +15,4 @@ namespace Charcoal\Http\Server\Exceptions;
  */
 final class PreFlightTerminateException extends \Exception
 {
-    public function __construct(public readonly bool $success)
-    {
-        parent::__construct(self::class, 0, null);
-    }
 }
