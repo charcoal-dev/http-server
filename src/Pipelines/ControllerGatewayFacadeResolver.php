@@ -8,23 +8,23 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Pipelines;
 
-use Charcoal\Http\Server\Contracts\Middleware\ControllerContextFacadePipeline;
-use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Contracts\Middleware\ControllerGatewayFacadePipeline;
+use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 use Charcoal\Http\Server\Request\RequestGateway;
 
 /**
  * Represents a resolver that facilitates the handling of controller context facades
  * by executing the pipeline and invoking the necessary operations to produce a RequestFacade.
  */
-final readonly class ControllerContextFacadeResolver implements ControllerContextFacadePipeline
+final readonly class ControllerGatewayFacadeResolver implements ControllerGatewayFacadePipeline
 {
-    public function execute(array $params): RequestFacade
+    public function execute(array $params): GatewayFacade
     {
         return $this->__invoke(...$params);
     }
 
-    public function __invoke(RequestGateway $request): RequestFacade
+    public function __invoke(RequestGateway $request): GatewayFacade
     {
-        return new RequestFacade($request);
+        return new GatewayFacade($request);
     }
 }

@@ -8,14 +8,14 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Contracts\Middleware;
 
-use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 use Charcoal\Http\Server\Request\RequestGateway;
 
 /**
  * Declare a facade/context given to controllers for execution.
  * Default RequestFace exposes the recommended amount of context to controllers.
  */
-interface ControllerContextFacadePipeline extends PipelineMiddlewareInterface
+interface ControllerGatewayFacadePipeline extends PipelineMiddlewareInterface
 {
-    public function __invoke(RequestGateway $request): RequestFacade;
+    public function __invoke(RequestGateway $request): GatewayFacade;
 }

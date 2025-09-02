@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Contracts\Controllers;
 
-use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 
 /**
  * Represents a controller interface that ensures the implementation of an invokable method.
@@ -16,5 +16,5 @@ use Charcoal\Http\Server\Request\Controller\RequestFacade;
  */
 interface InvokableControllerInterface extends ControllerInterface
 {
-    public function __invoke(RequestFacade $request): void;
+    public function __invoke(GatewayFacade $request): void;
 }

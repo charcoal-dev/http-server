@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Exceptions\Controllers;
 
 use Charcoal\Http\Server\Contracts\Controllers\ValidationErrorEnumInterface;
-use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 
 /**
  * Represents a translated validation exception that includes a specific error type,
@@ -35,7 +35,7 @@ class ValidationErrorException extends ValidationException
      * Sets the context message by translating the error message using the provided request context.
      * @internal
      */
-    public function setContextMessage(RequestFacade $context): void
+    public function setContextMessage(GatewayFacade $context): void
     {
         $this->translatedMessage = $this->error->getTranslatedMessage($context);
     }

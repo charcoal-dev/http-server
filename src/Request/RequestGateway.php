@@ -241,7 +241,7 @@ final readonly class RequestGateway
      */
     public function executeController(): void
     {
-        $requestFacade = $this->middleware->controllerRequestFacadePipeline($this);
+        $requestFacade = $this->middleware->controllerGatewayFacadePipeline($this);
         $controllerContext = $this->routeController->controller;
 
         try {

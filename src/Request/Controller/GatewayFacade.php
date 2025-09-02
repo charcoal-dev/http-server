@@ -21,7 +21,7 @@ use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
 /**
  * Represents a controller API that interacts with request and response contexts.
  */
-readonly class RequestFacade implements ControllerApiInterface
+readonly class GatewayFacade implements ControllerApiInterface
 {
     protected bool $enforcedRequiredParams;
 

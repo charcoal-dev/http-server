@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Contracts\Controllers\Hooks;
 
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
-use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 
 /**
  * Describes a contract for classes that need to execute logic
@@ -17,5 +17,5 @@ use Charcoal\Http\Server\Request\Controller\RequestFacade;
  */
 interface BeforeEntrypointCallback extends ControllerInterface
 {
-    public function beforeEntrypointCallback(RequestFacade $request): void;
+    public function beforeEntrypointCallback(GatewayFacade $request): void;
 }
