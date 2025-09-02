@@ -17,7 +17,7 @@ use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\Request\HostnamePortMismatchException;
 use Charcoal\Http\Server\Exceptions\Request\TlsRequiredException;
-use Charcoal\Http\Server\Exceptions\RequestContextException;
+use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\Internal\ServerTestableTrait;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Middleware\MiddlewareRegistry;
@@ -115,7 +115,7 @@ final class HttpServer implements HttpServerApiInterface
                 clone $this->config->requests,
                 new MiddlewareFacade($this->middleware)
             );
-        } catch (RequestContextException $e) {
+        } catch (RequestGatewayException $e) {
             return new ErrorResult($response, $e->error, $e);
         }
 
@@ -161,10 +161,10 @@ final class HttpServer implements HttpServerApiInterface
         }
 
         try {
-            $entryPoint = $this->router->declaredControllersFor($route, $request->method);
+            $controller = $this->router->getControllerForRoute($route, $request->method);
         } catch (\Exception $e) {
-            $requestGateway->responseHeaders->set("Allow", implode(", ", $route->getAggregatedMethods()));
-            return new ErrorResult($requestGateway->responseHeaders, RequestError::MethodNotDeclared, $e);
+            return new ErrorResult($requestGateway->responseHeaders,
+                RequestError::ControllerResolveError, $e);
         }
 
         // Path parameters/tokens rendering:
@@ -176,21 +176,18 @@ final class HttpServer implements HttpServerApiInterface
             ));
         }
 
-        // Pre-Flight Control
+        // Pre-Flight Control (Resolve actual entrypoint method and CORS enforcement)
         try {
-            $requestGateway->preFlightCorsControl(
+            $requestGateway->preFlightControl(
+                $this->router,
                 $this->config->corsPolicy,
-                $entryPoint[0],
-                $entryPoint[1],
+                $route,
+                $controller,
                 $params ?? []
             );
-        } catch (PreFlightTerminateException $e) {
-            return match ($e->success) {
-                true => new SuccessResult(204, $requestGateway->responseHeaders, null),
-                default => new ErrorResult($requestGateway->responseHeaders,
-                    RequestError::CorsOriginNotAllowed, null),
-            };
-        } catch (RequestContextException $e) {
+        } catch (PreFlightTerminateException) {
+            return new SuccessResult(204, $requestGateway->responseHeaders, null);
+        } catch (RequestGatewayException $e) {
             return new ErrorResult($requestGateway->responseHeaders, $e->error, $e);
         }
 
@@ -201,11 +198,9 @@ final class HttpServer implements HttpServerApiInterface
 
         try {
             $requestGateway->executeController();
-        } catch (RequestContextException $e) {
+        } catch (RequestGatewayException $e) {
             return new ErrorResult($requestGateway->responseHeaders, $e->error, $e);
         }
-
-        // Todo: Final Cleanups
 
         return new SuccessResult(200, $requestGateway->responseHeaders, $requestGateway->output);
     }
