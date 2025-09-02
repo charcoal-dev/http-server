@@ -29,6 +29,7 @@ final readonly class ControllerAttributes
         if (!$reflect) {
             $this->allowedParams = [];
             $this->rejectUnrecognizedParams = true;
+            $this->constraints = [];
             return;
         }
 
