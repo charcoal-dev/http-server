@@ -61,7 +61,8 @@ final readonly class Router
                 continue;
             }
 
-            if (is_array($controller->methods) && in_array(strtolower($method->value), $controller->methods)) {
+            assert(is_array($controller->methods));
+            if (in_array($method, $controller->methods)) {
                 $matchedController = $controller;
                 break;
             }
