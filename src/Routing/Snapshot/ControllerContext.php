@@ -71,7 +71,8 @@ final readonly class ControllerContext
         }
 
         if ($defaultEp) {
-            $entryPoints = [$defaultEp];
+            $this->defaultEntrypoint = $defaultEp;
+            $entryPoints = [$this->defaultEntrypoint];
         }
 
         // Check all mentioned entry-points exist and accessible
@@ -84,6 +85,10 @@ final readonly class ControllerContext
             if (!$epMethod->isPublic() || $epMethod->isStatic()) {
                 throw new \InvalidArgumentException("Controller entrypoint must be public: " . $classname . "::" . $entrypoint);
             }
+        }
+
+        if (!$entryPoints) {
+            throw new \InvalidArgumentException("Controller must declare at least one entrypoint: " . $classname);
         }
 
         $this->attributes = new ControllerAttributes($reflect);
