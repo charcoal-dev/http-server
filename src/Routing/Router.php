@@ -49,9 +49,9 @@ final readonly class Router
      * the method is not declared, an exception is thrown.
      * @param RouteSnapshot $route
      * @param HttpMethod $method
-     * @return array{RouteControllerBinding, string|null}|null
+     * @return RouteControllerBinding
      */
-    public function declaredControllersFor(RouteSnapshot $route, HttpMethod $method): ?array
+    public function declaredControllersFor(RouteSnapshot $route, HttpMethod $method): RouteControllerBinding
     {
         $defaultController = null;
         $matchedController = null;
@@ -73,7 +73,6 @@ final readonly class Router
             throw new \RuntimeException("No controller resolved with HTTP method: " . $method->value);
         }
 
-        $entryPoint = $controller->matchEntryPoint($method);
-        return [$controller, $entryPoint];
+        return $controller;
     }
 }
