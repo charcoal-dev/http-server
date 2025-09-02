@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Support;
 
 use Charcoal\Base\Abstracts\Dataset\BatchEnvelope;
+use Charcoal\Base\Exceptions\WrappedException;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Enums\HttpProtocol;
 use Charcoal\Http\Commons\Headers\Headers;
@@ -18,6 +19,7 @@ use Charcoal\Http\Server\Request\ServerRequest;
 /**
  * This class is useful for handling HTTP requests in server-side applications,
  * leveraging the context from PHP's global state.
+ * @api
  */
 abstract class SapiRequest
 {
@@ -25,6 +27,8 @@ abstract class SapiRequest
      * Creates and returns a ServerRequest instance using global server variables.
      * Parses the HTTP protocol, method, request URI, headers, and determines
      * whether the connection is secure based on the values in the $_SERVER superglobal.
+     * @throws WrappedException
+     * @api
      */
     public static function fromGlobals(): ServerRequest
     {
