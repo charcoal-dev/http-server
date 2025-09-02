@@ -43,6 +43,10 @@ enum RequestError
     case MethodNotAllowed;
     case CorsNotImplemented;
 
+    /** @for=Controller */
+    case ControllerExecuteError;
+    case ValidationException;
+
     case BadContentType;
     case RequestBodyDecodeError;
 
@@ -53,6 +57,7 @@ enum RequestError
     public function getStatusCode(): int
     {
         return match ($this) {
+            self::ValidationException,
             self::BadUrlEncoding,
             self::BadHeaderName,
             self::BadHeaderValue,

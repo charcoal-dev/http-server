@@ -16,5 +16,5 @@ use Charcoal\Http\Server\Request\Controller\RequestFacade;
  */
 interface InvokableControllerInterface extends ControllerInterface
 {
-    public function __invoke(RequestFacade $context): void;
+    public function __invoke(RequestFacade $request): void;
 }

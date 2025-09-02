@@ -20,8 +20,12 @@ use Charcoal\Http\Commons\Support\CorsPolicy;
 use Charcoal\Http\Commons\Support\HttpHelper;
 use Charcoal\Http\Server\Config\RequestConstraints;
 use Charcoal\Http\Server\Config\VirtualHost;
+use Charcoal\Http\Server\Contracts\Controllers\Hooks\AfterEntrypointCallback;
+use Charcoal\Http\Server\Contracts\Controllers\Hooks\BeforeEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
 use Charcoal\Http\Server\Enums\RequestError;
+use Charcoal\Http\Server\Exceptions\Controllers\ValidationErrorException;
+use Charcoal\Http\Server\Exceptions\Controllers\ValidationException;
 use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\RequestContextException;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
@@ -173,19 +177,37 @@ final readonly class RequestGateway
         // Todo: $this->input = UnsafePayload from Decoder Pipeline
     }
 
+    /**
+     * @noinspection PhpRedundantCatchClauseInspection
+     * @throws RequestContextException
+     */
     public function executeController(): void
     {
+        $requestFacade = new RequestFacade($this);
+
         try {
-            $requestFacade = new RequestFacade($this);
             $controller = new $this->routeController->controller->classname($this);
-            if ($controller instanceof InvokableControllerInterface) {
-                $controller($requestFacade);
-                return;
+            if ($controller instanceof BeforeEntrypointCallback) {
+                $controller->beforeEntrypointCallback($requestFacade);
             }
 
-            call_user_func_array([$controller, $this->controllerEp], [$requestFacade]);
-        } catch (\Throwable $e) {
+            if ($controller instanceof InvokableControllerInterface) {
+                $controller($requestFacade);
+            } else {
+                call_user_func_array([$controller, $this->controllerEp], [$requestFacade]);
+            }
 
+            if ($controller instanceof AfterEntrypointCallback) {
+                $controller->afterEntrypointCallback($requestFacade);
+            }
+        } catch (ValidationException $e) {
+            if ($e instanceof ValidationErrorException) {
+                $e->setContextMessage($requestFacade);
+            }
+
+            throw new RequestContextException(RequestError::ValidationException, $e);
+        } catch (\Exception $e) {
+            throw new RequestContextException(RequestError::ControllerExecuteError, $e);
         }
     }
 

@@ -198,7 +198,13 @@ final class HttpServer implements HttpServerApiInterface
         // Todo: Concurrency Handling
         // Todo: Rate limiting
         // Todo: Authentication
-        // Todo: Instantiate and Execute Controller (before Hooks)
+
+        try {
+            $requestGateway->executeController();
+        } catch (RequestContextException $e) {
+            return new ErrorResult($requestGateway->responseHeaders, $e->error, $e);
+        }
+
         // Todo: Final Cleanups
 
         return new ErrorResult($requestGateway->responseHeaders, RequestError::InternalError,

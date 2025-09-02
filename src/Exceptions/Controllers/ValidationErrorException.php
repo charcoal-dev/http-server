@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Exceptions\Controllers;
 
 use Charcoal\Http\Server\Contracts\Controllers\ValidationErrorEnumInterface;
+use Charcoal\Http\Server\Request\Controller\RequestFacade;
 
 /**
  * Represents a translated validation exception that includes a specific error type,
@@ -18,6 +19,8 @@ use Charcoal\Http\Server\Contracts\Controllers\ValidationErrorEnumInterface;
  */
 class ValidationErrorException extends ValidationException
 {
+    public readonly string $translatedMessage;
+
     public function __construct(
         public readonly ValidationErrorEnumInterface $error,
         ?string                                      $param = null,
@@ -26,5 +29,14 @@ class ValidationErrorException extends ValidationException
     )
     {
         parent::__construct($message ?? $error->name, $code, $param);
+    }
+
+    /**
+     * Sets the context message by translating the error message using the provided request context.
+     * @internal
+     */
+    public function setContextMessage(RequestFacade $context): void
+    {
+        $this->translatedMessage = $this->error->getTranslatedMessage($context);
     }
 }

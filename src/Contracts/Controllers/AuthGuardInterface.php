@@ -12,6 +12,7 @@ namespace Charcoal\Http\Server\Contracts\Controllers;
  * Fail-safe authentication guard interface.
  * Defines a contract for classes that act as an authentication guard,
  * responsible for handling user authentication and access control.
+ * Todo: ???
  */
 interface AuthGuardInterface
 {
