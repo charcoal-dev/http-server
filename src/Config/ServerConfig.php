@@ -43,12 +43,14 @@ final readonly class ServerConfig
                 throw new \InvalidArgumentException("Required instance of: " . VirtualHost::class);
             }
 
-            $hostname = $hostname->wildcard ? "*." . $hostname->hostname : $hostname->hostname;
-            if (isset($checked[$hostname])) {
-                throw new \InvalidArgumentException("Duplicate hostname: " . $hostname);
+            $indexId = $hostname->hostname;
+            if ($hostname->wildcard) $indexId = "*." . $indexId;
+            if ($hostname->isSecure) $indexId .= "_ssl";
+            if (isset($checked[$indexId])) {
+                throw new \InvalidArgumentException("Duplicate hostname: " . $indexId);
             }
 
-            $checked[$hostname] = true;
+            $checked[$indexId] = true;
         }
 
         $this->hostnames = $hostnames;

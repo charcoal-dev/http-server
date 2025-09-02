@@ -15,6 +15,7 @@ use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Server\Config\ServerConfig;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
+use Charcoal\Http\Server\Exceptions\Request\HostnamePortMismatchException;
 use Charcoal\Http\Server\Exceptions\RequestContextException;
 use Charcoal\Http\Server\Internal\ServerTestableTrait;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
@@ -131,7 +132,7 @@ final class HttpServer implements HttpServerApiInterface
             strtolower(trim($trustProxy->hostname)), $trustProxy->port);
         if (!$virtualHost) {
             return new ErrorResult($response, RequestError::IncorrectHost,
-                new \RuntimeException("Incorrect hostname or port"));
+                new HostnamePortMismatchException($trustProxy->hostname, $trustProxy->port));
         }
 
         if ($this->config->enforceTls && $trustProxy->scheme !== "https") {

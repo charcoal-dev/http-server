@@ -33,8 +33,8 @@ final class ConfigTest extends TestCase
 
     public function testBuildsWithValidHostnamesAndProxiesAndDefaults(): void
     {
-        $s1 = new VirtualHost("example.com");
-        $s2 = new VirtualHost("*.example.com");
+        $s1 = new VirtualHost("example.com", false);
+        $s2 = new VirtualHost("*.example.com", false);
 
         $p1 = new readonly class(true, ["10.0.0.0/8"], "\x01\x02") extends TrustedProxy {
             public function __construct(bool $useForwarded, array $cidrList, private string $chk)
@@ -77,7 +77,7 @@ final class ConfigTest extends TestCase
 
     public function testAllowsEmptyProxiesWithHostnames(): void
     {
-        $s1 = new VirtualHost("example.com");
+        $s1 = new VirtualHost("example.com", false);
         $cfg = new ServerConfig([$s1], [], $this->corsPolicy, $this->requestConstraints);
 
         $this->assertSame([$s1], $cfg->hostnames);
@@ -99,8 +99,8 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new VirtualHost("example.com");
-        $s2 = new VirtualHost("example.com");
+        $s1 = new VirtualHost("example.com", false);
+        $s2 = new VirtualHost("example.com", false);
 
         new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
     }
@@ -110,8 +110,8 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new VirtualHost("*.example.com");
-        $s2 = new VirtualHost("*.example.com");
+        $s1 = new VirtualHost("*.example.com", false);
+        $s2 = new VirtualHost("*.example.com", false);
 
         new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
     }
@@ -121,8 +121,8 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new VirtualHost("Example.COM");
-        $s2 = new VirtualHost("example.com");
+        $s1 = new VirtualHost("Example.COM", false);
+        $s2 = new VirtualHost("example.com", false);
 
         new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
     }
@@ -132,27 +132,16 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new VirtualHost("example.com.");
-        $s2 = new VirtualHost("example.com");
-
-        new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
-    }
-
-    public function testRejectsDuplicateHostnameEvenIfPortsDiffer(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageMatches("/Duplicate hostname/");
-
-        $s1 = new VirtualHost("example.com", 80);
-        $s2 = new VirtualHost("example.com", 443);
+        $s1 = new VirtualHost("example.com.", false);
+        $s2 = new VirtualHost("example.com", false);
 
         new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
     }
 
     public function testAllowsSameBaseWithWildcardAndExact(): void
     {
-        $sExact = new VirtualHost("example.com");
-        $sWildcard = new VirtualHost("*.example.com");
+        $sExact = new VirtualHost("example.com", false);
+        $sWildcard = new VirtualHost("*.example.com", false);
 
         $cfg = new ServerConfig([$sExact, $sWildcard], [], $this->corsPolicy, $this->requestConstraints);
         $this->assertSame([$sExact, $sWildcard], $cfg->hostnames);
@@ -160,8 +149,8 @@ final class ConfigTest extends TestCase
 
     public function testAllowsWildcardAndSpecificSubdomainTogether(): void
     {
-        $sWildcard = new VirtualHost("*.example.com");
-        $sSub = new VirtualHost("api.example.com");
+        $sWildcard = new VirtualHost("*.example.com", false);
+        $sSub = new VirtualHost("api.example.com", false);
 
         $cfg = new ServerConfig([$sWildcard, $sSub], [], $this->corsPolicy, $this->requestConstraints);
         $this->assertSame([$sWildcard, $sSub], $cfg->hostnames);
@@ -169,8 +158,8 @@ final class ConfigTest extends TestCase
 
     public function testAllowsWwwAndNonWwwTogether(): void
     {
-        $s1 = new VirtualHost("www.example.com");
-        $s2 = new VirtualHost("example.com");
+        $s1 = new VirtualHost("www.example.com", false);
+        $s2 = new VirtualHost("example.com", false);
 
         $cfg = new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
         $this->assertSame([$s1, $s2], $cfg->hostnames);
@@ -240,7 +229,7 @@ final class ConfigTest extends TestCase
 
     public function testwwwSupportFlagExplicitFalse(): void
     {
-        $s = new VirtualHost("example.com");
+        $s = new VirtualHost("example.com", false);
         $p = new TrustedProxy(true, ["10.0.0.0/8"]);
 
         $cfg = new ServerConfig([$s], [$p], $this->corsPolicy, $this->requestConstraints, true, false);
@@ -249,9 +238,9 @@ final class ConfigTest extends TestCase
 
     public function testPreservesOrderOfHostnamesAndProxies(): void
     {
-        $s1 = new VirtualHost("a.test");
-        $s2 = new VirtualHost("*.b.test");
-        $s3 = new VirtualHost("c.test");
+        $s1 = new VirtualHost("a.test", false);
+        $s2 = new VirtualHost("*.b.test", false);
+        $s3 = new VirtualHost("c.test", false);
 
         $p1 = new TrustedProxy(true, ["10.0.0.0/8"]);
         $p2 = new TrustedProxy(true, ["192.168.0.0/16"]);

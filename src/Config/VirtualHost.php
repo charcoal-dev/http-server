@@ -22,7 +22,7 @@ final readonly class VirtualHost
     public bool $isIpAddress;
     public ?array $ports;
 
-    public function __construct(string $hostname, int ...$ports)
+    public function __construct(string $hostname, public bool $isSecure, int ...$ports)
     {
         $hostname = str_ends_with($hostname, ".") ? substr($hostname, 0, -1) : $hostname;
         $this->wildcard = str_starts_with($hostname, "*.");
@@ -38,8 +38,10 @@ final readonly class VirtualHost
             }
         }
 
-        if (!HostnameHelper::isValidHostname($this->hostname, allowIpAddr: true, allowNonTld: true)) {
-            throw new \InvalidArgumentException("Invalid hostname: " . $hostname);
+        if (!$this->isIpAddress) {
+            if (!HostnameHelper::isValidHostname($this->hostname, allowIpAddr: false, allowNonTld: true)) {
+                throw new \InvalidArgumentException("Invalid hostname: " . $hostname);
+            }
         }
 
         if ($ports) {
