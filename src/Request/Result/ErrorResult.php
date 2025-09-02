@@ -23,6 +23,7 @@ final readonly class ErrorResult extends AbstractResult
         public ?\Throwable               $exception,
     )
     {
+        $headers->set("Connection", "close");
         parent::__construct($this->error->getStatusCode(), $headers);
     }
 }
