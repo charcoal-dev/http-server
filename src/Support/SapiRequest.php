@@ -101,7 +101,12 @@ abstract class SapiRequest
 
         // Let the error boundary deal with any caught Exceptions
         if ($result instanceof ErrorResult) {
-            throw $result->exception;
+            if ($result->exception) {
+                throw $result->exception;
+            }
+
+            var_dump($result->error->name);
+            exit(0);
         }
 
         assert($result instanceof SuccessResult);
