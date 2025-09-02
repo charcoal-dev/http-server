@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Request\Result;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
+use Charcoal\Http\Server\Config\VirtualHost;
 
 /**
  * Represents URL redirection details, including information about the original URL,
@@ -17,12 +18,13 @@ use Charcoal\Http\Commons\Url\UrlInfo;
 final readonly class RedirectUrl
 {
     public function __construct(
-        public UrlInfo $previous,
-        public int     $statusCode,
-        public ?string $changePath = null,
-        public bool    $toggleScheme = false,
-        public bool    $absolute = false,
-        public bool    $queryStr = false,
+        public UrlInfo      $previous,
+        public int          $statusCode,
+        public ?string      $changePath = null,
+        public ?VirtualHost $changeHost = null,
+        public ?bool        $tlsScheme = null,
+        public bool         $absolute = false,
+        public bool         $queryStr = false,
     )
     {
     }
@@ -40,6 +42,7 @@ final readonly class RedirectUrl
         $previous ??= $this->previous;
         $absolute ??= $this->absolute;
         $queryStr ??= $this->queryStr;
+        $tlsScheme ??= $this->tlsScheme;
 
         $redirectTo = $this->changePath ? "/" . ltrim($this->changePath, "/") : $this->previous->path;
         if ($queryStr) {
@@ -47,11 +50,16 @@ final readonly class RedirectUrl
             $redirectTo .= $previous->fragment ? ("#" . $previous->fragment) : "";
         }
 
-        $scheme = $this->toggleScheme ? ($previous->scheme === "https" ? "http" : "https") : $previous->scheme;
-        return $absolute && ($previous->scheme && $previous->host) ?
+        $scheme = $tlsScheme ? "https" : $this->previous->scheme;
+        $hostname = $this->changeHost ? $this->changeHost->hostname : $this->previous->host;
+        $port = $this->changeHost ? ($this->changeHost->ports[0] ?? null) : null;
+        if ($port === 80 || $port === 443) {
+            $port = null;
+        }
+
+        return $absolute && ($scheme && $hostname) ?
             (($scheme . "://") .
-                ((str_contains($previous->host, ":") && $previous->host[0] !== "[") ?
-                    ("[" . $previous->host . "]") : $previous->host) .
+                ((str_contains($hostname, ":") && $hostname[0] !== "[") ? ("[" . $hostname . "]") : $hostname) .
                 ($previous->port ? (":" . $previous->port) : "") .
                 $redirectTo) : $redirectTo;
     }

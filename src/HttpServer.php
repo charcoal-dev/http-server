@@ -16,6 +16,7 @@ use Charcoal\Http\Server\Config\ServerConfig;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\Request\HostnamePortMismatchException;
+use Charcoal\Http\Server\Exceptions\Request\TlsRequiredException;
 use Charcoal\Http\Server\Exceptions\RequestContextException;
 use Charcoal\Http\Server\Internal\ServerTestableTrait;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
@@ -136,8 +137,17 @@ final class HttpServer implements HttpServerApiInterface
         }
 
         if ($this->config->enforceTls && $trustProxy->scheme !== "https") {
-            return new RedirectResult($response,
-                new RedirectUrl($request->url, 308, toggleScheme: true, absolute: true, queryStr: true));
+            // Check configured hostnames if one with SSL is configured
+            foreach ($this->config->hostnames as $profile) {
+                if ($profile->isSecure) {
+                    return new RedirectResult($response,
+                        new RedirectUrl($request->url, 308,
+                            changeHost: $profile, tlsScheme: true, absolute: true, queryStr: true));
+                }
+            }
+
+            return new ErrorResult($response, RequestError::IncorrectHost,
+                new TlsRequiredException());
         }
 
         // Update Gateway/Context with acceptance:
