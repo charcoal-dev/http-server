@@ -17,5 +17,5 @@ use Charcoal\Http\Server\Request\RequestGateway;
  */
 interface ControllerGatewayFacadePipeline extends PipelineMiddlewareInterface
 {
-    public function __invoke(RequestGateway $request): GatewayFacade;
+    public function __invoke(RequestGateway $gateway): GatewayFacade;
 }

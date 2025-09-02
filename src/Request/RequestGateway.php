@@ -32,6 +32,7 @@ use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
+use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Routing\Router;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
@@ -49,19 +50,13 @@ final readonly class RequestGateway
     use NotSerializableTrait;
     use NotCloneableTrait;
 
-    public ?string $requestId;
     public ServerRequest $request;
+    public RequestFacade $requestFacade;
     public RouteControllerBinding $routeController;
-    public ?ContentType $contentType;
-    public int $contentLength;
     public string $controllerEp;
-    public array $pathParams;
-    public QueryParams $queryParams;
 
     private VirtualHost $host;
     private TrustGatewayResult $trustProxy;
-
-    public UnsafePayload $input;
     public WritablePayload $output;
     public ?CacheControlDirectives $cacheControl;
 
@@ -136,15 +131,19 @@ final readonly class RequestGateway
             $this->responseHeaders->set("X-Request-ID", $requestId);
         }
 
-        $this->requestId = $this->responseHeaders->get("X-Request-ID");
+        // Finalized Request ID
+        $requestId = $this->responseHeaders->get("X-Request-ID");
 
-        // Parse Query String
-        $this->queryParams = new QueryParams(explode("#", explode("?",
-            $this->request->url->complete, 2)[1] ?? "", 2)[0]);
-
-        // Content-Type and Content-Length
-        $this->contentType = ContentType::find($this->request->headers->get("Content-Type") ?? "");
-        $this->contentLength = (int)$this->request->headers->get("Content-Length");
+        // Initialize Request Facade
+        $this->requestFacade = new RequestFacade(
+            $requestId,
+            $this->request->method,
+            $this->request->headers,
+            new QueryParams(explode("#", explode("?",
+                $this->request->url->complete, 2)[1] ?? "", 2)[0]),
+            ContentType::find($this->request->headers->get("Content-Type") ?? ""),
+            (int)$this->request->headers->get("Content-Length")
+        );
     }
 
     /**
@@ -160,7 +159,7 @@ final readonly class RequestGateway
     ): void
     {
         $this->routeController = $controller;
-        $this->pathParams = $pathParams;
+        $this->requestFacade->setPathParams($pathParams);
 
         // Cors policy applicable if Origin header is present
         $isPreFlight = $this->request->method === HttpMethod::OPTIONS;
@@ -247,34 +246,34 @@ final readonly class RequestGateway
      */
     public function executeController(): void
     {
-        $requestFacade = $this->middleware->controllerGatewayFacadePipeline($this);
+        $gatewayFacade = $this->middleware->controllerGatewayFacadePipeline($this);
         $controllerContext = $this->routeController->controller;
 
         try {
             $controller = new $controllerContext->classname($this);
             if ($controller instanceof BeforeEntrypointCallback) {
-                $controller->beforeEntrypointCallback($requestFacade);
+                $controller->beforeEntrypointCallback($gatewayFacade);
             }
 
             // Single Entrypoint?
             if (count($controllerContext->entryPoints) === 1) {
-                $requestFacade->enforceRequiredParams();
+                $gatewayFacade->enforceRequiredParams();
             }
 
             if ($controller instanceof InvokableControllerInterface) {
-                $controller($requestFacade);
+                $controller($gatewayFacade);
             } else {
-                call_user_func_array([$controller, $this->controllerEp], [$requestFacade]);
+                call_user_func_array([$controller, $this->controllerEp], [$gatewayFacade]);
             }
 
             if ($controller instanceof AfterEntrypointCallback) {
-                $controller->afterEntrypointCallback($requestFacade);
+                $controller->afterEntrypointCallback($gatewayFacade);
             }
         } catch (RequestGatewayException $e) {
             throw $e;
         } catch (\Exception $e) {
             if ($e instanceof ValidationErrorException) {
-                $e->setContextMessage($requestFacade);
+                $e->setContextMessage($gatewayFacade);
             }
 
             if ($e instanceof ValidationException) {

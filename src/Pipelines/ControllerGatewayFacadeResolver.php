@@ -14,7 +14,7 @@ use Charcoal\Http\Server\Request\RequestGateway;
 
 /**
  * Represents a resolver that facilitates the handling of controller context facades
- * by executing the pipeline and invoking the necessary operations to produce a RequestFacade.
+ * by executing the pipeline and invoking the necessary operations to produce a GatewayFacade.
  */
 final readonly class ControllerGatewayFacadeResolver implements ControllerGatewayFacadePipeline
 {
@@ -23,8 +23,8 @@ final readonly class ControllerGatewayFacadeResolver implements ControllerGatewa
         return $this->__invoke(...$params);
     }
 
-    public function __invoke(RequestGateway $request): GatewayFacade
+    public function __invoke(RequestGateway $gateway): GatewayFacade
     {
-        return new GatewayFacade($request);
+        return new GatewayFacade($gateway);
     }
 }

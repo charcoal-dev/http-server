@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Request\Controller;
 
-use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
@@ -25,16 +24,16 @@ readonly class GatewayFacade implements ControllerApiInterface
 {
     protected bool $enforcedRequiredParams;
 
-    public function __construct(private RequestGateway $request)
+    public function __construct(private RequestGateway $gateway)
     {
     }
 
     /**
-     * Returns the request payload object.
+     * Return RequestFacade object (requestId, headers, queryParams, pathParams, payload)
      */
-    public function request(): UnsafePayload
+    public function request(): RequestFacade
     {
-        return $this->request->input;
+        return $this->gateway->requestFacade;
     }
 
     /**
@@ -42,7 +41,7 @@ readonly class GatewayFacade implements ControllerApiInterface
      */
     public function response(): WritablePayload
     {
-        return $this->request->output;
+        return $this->gateway->output;
     }
 
     /**
@@ -50,15 +49,7 @@ readonly class GatewayFacade implements ControllerApiInterface
      */
     public function headers(): Headers
     {
-        return $this->request->responseHeaders;
-    }
-
-    /**
-     * Returns the path parameters.
-     */
-    public function pathParams(): ?array
-    {
-        return $this->request->pathParams;
+        return $this->gateway->responseHeaders;
     }
 
     /**
@@ -67,7 +58,7 @@ readonly class GatewayFacade implements ControllerApiInterface
      */
     public function setCacheControl(CacheControlDirectives $cacheControl): void
     {
-        $this->request->setCacheControl($cacheControl);
+        $this->gateway->setCacheControl($cacheControl);
     }
 
     /**
@@ -75,7 +66,7 @@ readonly class GatewayFacade implements ControllerApiInterface
      */
     public function attributes(): ControllerAttributes
     {
-        return $this->request->routeController->controller->attributes;
+        return $this->gateway->routeController->controller->attributes;
     }
 
     /**
@@ -91,7 +82,7 @@ readonly class GatewayFacade implements ControllerApiInterface
         $this->enforcedRequiredParams = true;
         $attr = $this->attributes();
         if ($attr->rejectUnrecognizedParams) {
-            $unrecognized = $this->request->input->getUnrecognizedKeys(...$attr->allowedParams);
+            $unrecognized = $this->request()->payload->getUnrecognizedKeys(...$attr->allowedParams);
             if (!empty($unrecognized)) {
                 throw new RequestGatewayException(ControllerError::UnrecognizedParam, null);
             }

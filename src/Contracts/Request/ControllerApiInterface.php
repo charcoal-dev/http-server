@@ -8,23 +8,27 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Contracts\Request;
 
-use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
+use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
+use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\RequestGateway;
+use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
 
 /**
  * Interface representing a controller API that manages the lifecycle of HTTP requests and responses.
  */
 interface ControllerApiInterface
 {
-    public function __construct(RequestGateway $context);
+    public function __construct(RequestGateway $gateway);
 
-    public function request(): UnsafePayload;
+    public function attributes(): ControllerAttributes;
+
+    public function request(): RequestFacade;
 
     public function response(): WritablePayload;
 
-    public function pathParams(): ?array;
+    public function headers(): Headers;
 
     public function enforceRequiredParams(): void;
 
