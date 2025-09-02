@@ -49,7 +49,7 @@ final readonly class Router
      * the method is not declared, an exception is thrown.
      * @param RouteSnapshot $route
      * @param HttpMethod $method
-     * @return array{RouteControllerBinding, string}|null
+     * @return array{RouteControllerBinding, string|null}|null
      */
     public function declaredControllersFor(RouteSnapshot $route, HttpMethod $method): ?array
     {
@@ -74,11 +74,6 @@ final readonly class Router
         }
 
         $entryPoint = $controller->matchEntryPoint($method);
-        if (!$entryPoint) {
-            throw new \RuntimeException(sprintf("Method %s not declared in: %s",
-                $method->name, $controller->controller->classname));
-        }
-
         return [$controller, $entryPoint];
     }
 }
