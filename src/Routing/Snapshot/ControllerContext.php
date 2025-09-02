@@ -76,6 +76,7 @@ final readonly class ControllerContext
         }
 
         // Check all mentioned entry-points exist and accessible
+        $epAttributes = [];
         foreach ($entryPoints as $entrypoint) {
             if (!$reflect->hasMethod($entrypoint)) {
                 throw new \InvalidArgumentException("Controller entrypoint does not exist: " . $classname . "::" . $entrypoint);
@@ -85,14 +86,16 @@ final readonly class ControllerContext
             if (!$epMethod->isPublic() || $epMethod->isStatic()) {
                 throw new \InvalidArgumentException("Controller entrypoint must be public: " . $classname . "::" . $entrypoint);
             }
+
+            $epAttributes[$entrypoint] = $epMethod->getAttributes();
         }
 
         if (!$entryPoints) {
             throw new \InvalidArgumentException("Controller must declare at least one entrypoint: " . $classname);
         }
 
-        $this->attributes = new ControllerAttributes($reflect);
         $this->entryPoints = $entryPoints;
+        $this->attributes = new ControllerAttributes($reflect, $epAttributes);
         $this->validated = true;
     }
 }
