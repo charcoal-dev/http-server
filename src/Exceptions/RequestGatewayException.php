@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Exceptions;
 
+use Charcoal\Http\Server\Contracts\ExceptionHasErrorCodeInterface;
 use Charcoal\Http\Server\Contracts\RequestErrorCodeInterface;
 use Charcoal\Http\Server\Request\Result\RedirectUrl;
 
@@ -16,7 +17,7 @@ use Charcoal\Http\Server\Request\Result\RedirectUrl;
  * It extends the base Exception class and provides additional details such as the request error instance
  * and an optional redirect target.
  */
-class RequestGatewayException extends \Exception
+final class RequestGatewayException extends \Exception implements ExceptionHasErrorCodeInterface
 {
     public function __construct(
         public readonly RequestErrorCodeInterface $error,
@@ -25,6 +26,14 @@ class RequestGatewayException extends \Exception
     )
     {
         parent::__construct($previous?->getMessage() ?? $this->error->name, 0, $previous);
+    }
+
+    /**
+     * @return RequestErrorCodeInterface
+     */
+    public function errorCode(): RequestErrorCodeInterface
+    {
+        return $this->error;
     }
 
     /**
