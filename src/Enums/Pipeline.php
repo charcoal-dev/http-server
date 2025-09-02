@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Enums;
 
+use Charcoal\Http\Server\Contracts\Middleware\ControllerContextFacadePipeline;
 use Charcoal\Http\Server\Contracts\Middleware\RequestHeadersPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\UrlValidatorPipeline;
 
@@ -19,5 +20,6 @@ use Charcoal\Http\Server\Contracts\Middleware\UrlValidatorPipeline;
 enum Pipeline: string
 {
     case URL_Validator = UrlValidatorPipeline::class;
-    case RequestHeaders_Validator = RequestHeadersPipeline::class;
+    case Request_HeadersValidator = RequestHeadersPipeline::class;
+    case Controller_ContextFacadeResolver = ControllerContextFacadePipeline::class;
 }

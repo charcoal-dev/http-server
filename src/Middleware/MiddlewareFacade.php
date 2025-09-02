@@ -12,8 +12,11 @@ use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Server\Enums\Pipeline;
+use Charcoal\Http\Server\Pipelines\ControllerContextFacadeResolver;
 use Charcoal\Http\Server\Pipelines\RequestHeadersValidator;
 use Charcoal\Http\Server\Pipelines\UrlValidator;
+use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Request\Result\RedirectUrl;
 
 /**
@@ -48,9 +51,22 @@ final readonly class MiddlewareFacade
         HeaderKeyValidation $keyValidation
     ): HeadersImmutable
     {
-        return $this->registry->execute(Pipeline::RequestHeaders_Validator,
+        return $this->registry->execute(Pipeline::Request_HeadersValidator,
             RequestHeadersValidator::class,
             [$headers, $maxHeaders, $maxHeaderLength, $keyValidation]
+        );
+    }
+
+    /**
+     * Executes the controller request facade pipeline with the specified request gateway.
+     */
+    public function controllerRequestFacadePipeline(
+        RequestGateway $requestGateway,
+    ): RequestFacade
+    {
+        return $this->registry->execute(Pipeline::Controller_ContextFacadeResolver,
+            ControllerContextFacadeResolver::class,
+            [$requestGateway]
         );
     }
 }

@@ -23,12 +23,12 @@ class ValidationErrorException extends ValidationException
 
     public function __construct(
         public readonly ValidationErrorEnumInterface $error,
-        ?string                                      $param = null,
+        ?array                                       $context = [],
         ?string                                      $message = null,
         int                                          $code = 0
     )
     {
-        parent::__construct($message ?? $error->name, $code, $param);
+        parent::__construct($message ?? $error->name, $code, $context);
     }
 
     /**
