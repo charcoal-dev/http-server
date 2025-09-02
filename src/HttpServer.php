@@ -195,10 +195,15 @@ final class HttpServer implements HttpServerApiInterface
             return new ErrorResult($response, $e->error, $e);
         }
 
+        // Todo: Sound spot for cached responses?
+
         // Todo: Init Logging
         // Todo: Concurrency Handling
         // Todo: Rate limiting
         // Todo: Authentication
+
+
+
 
         try {
             $requestGateway->executeController();

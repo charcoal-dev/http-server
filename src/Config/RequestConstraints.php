@@ -44,9 +44,7 @@ final class RequestConstraints
     }
 
     /**
-     * @param RequestConstraint $override
-     * @param mixed $value
-     * @return void
+     * @deprecated
      */
     public function change(RequestConstraint $override, mixed $value): void
     {
@@ -58,11 +56,11 @@ final class RequestConstraints
     }
 
     /**
-     * @param RequestConstraint $override
+     * @param RequestConstraint $enum
      * @return int
      */
-    public function get(RequestConstraint $override): int
+    public function get(RequestConstraint $enum): int
     {
-        return $this->{$override->name};
+        return $this->{$enum->name};
     }
 }

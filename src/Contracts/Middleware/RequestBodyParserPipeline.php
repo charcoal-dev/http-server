@@ -8,10 +8,16 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Contracts\Middleware;
 
-use Charcoal\Http\Commons\Enums\ContentType;
-use Charcoal\Http\Server\Request\ServerRequest;
+use Charcoal\Http\Server\Request\Controller\RequestFacade;
 
+/**
+ * Interface RequestBodyParserPipeline
+ * @package Charcoal\Http\Server\Contracts\Middleware
+ */
 interface RequestBodyParserPipeline extends PipelineMiddlewareInterface
 {
-    public function __invoke(ContentType $contentType, int $contentLength, ServerRequest $request);
+    /**
+     * Parse incoming request body
+     */
+    public function __invoke(RequestFacade $request);
 }

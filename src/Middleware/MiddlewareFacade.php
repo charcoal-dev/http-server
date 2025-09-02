@@ -8,14 +8,17 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Middleware;
 
+use Charcoal\Base\Abstracts\Dataset\BatchEnvelope;
 use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Server\Enums\Pipeline;
 use Charcoal\Http\Server\Pipelines\ControllerGatewayFacadeResolver;
+use Charcoal\Http\Server\Pipelines\RequestBodyParser;
 use Charcoal\Http\Server\Pipelines\RequestHeadersValidator;
 use Charcoal\Http\Server\Pipelines\UrlValidator;
 use Charcoal\Http\Server\Request\Controller\GatewayFacade;
+use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Request\Result\RedirectUrl;
 
@@ -67,6 +70,19 @@ final readonly class MiddlewareFacade
         return $this->registry->execute(Pipeline::Controller_ContextFacadeResolver,
             ControllerGatewayFacadeResolver::class,
             [$requestGateway]
+        );
+    }
+
+    /**
+     * Processes the request body using the specified pipeline and parser class.
+     */
+    public function requestBodyDecoderPipeline(
+        RequestFacade $request,
+    ): null|BatchEnvelope
+    {
+        return $this->registry->execute(Pipeline::Request_BodyDecoder,
+            RequestBodyParser::class,
+            [$request]
         );
     }
 }

@@ -25,6 +25,7 @@ use Charcoal\Http\Server\Contracts\Controllers\Hooks\BeforeEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
 use Charcoal\Http\Server\Enums\ContentEncoding;
 use Charcoal\Http\Server\Enums\ControllerError;
+use Charcoal\Http\Server\Enums\RequestConstraint;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Enums\TransferEncoding;
 use Charcoal\Http\Server\Exceptions\Controllers\ValidationErrorException;
@@ -140,20 +141,6 @@ final readonly class RequestGateway
             throw new RequestGatewayException(RequestError::BadContentLength, null);
         }
 
-        $transferEncoding = TransferEncoding::find($this->request->headers->get("Transfer-Encoding"));
-        if ($transferEncoding && $transferEncoding !== TransferEncoding::Chunked) {
-            throw new RequestGatewayException(RequestError::UnsupportedTransferEncoding, null);
-        }
-
-        if ($transferEncoding && $contentLength > 0) {
-            throw new RequestGatewayException(RequestError::ContentHandlingConflict, null);
-        }
-
-        $contentEncoding = ContentEncoding::find($this->request->headers->get("Content-Encoding"));
-        if ($contentEncoding !== ContentEncoding::Identity) {
-            throw new RequestGatewayException(RequestError::UnsupportedContentEncoding, null);
-        }
-
         // Initialize Request Facade
         $this->requestFacade = new RequestFacade(
             $this->responseHeaders->get("X-Request-ID"),
@@ -163,7 +150,8 @@ final readonly class RequestGateway
                 $this->request->url->complete, 2)[1] ?? "", 2)[0]),
             ContentType::find($this->request->headers->get("Content-Type") ?? ""),
             $contentLength,
-            $transferEncoding
+            TransferEncoding::find($this->request->headers->get("Transfer-Encoding")),
+            ContentEncoding::find($this->request->headers->get("Content-Encoding"))
         );
     }
 
@@ -259,6 +247,48 @@ final readonly class RequestGateway
         if ($method !== HttpMethod::OPTIONS) {
             $this->responseHeaders->set("Vary", "Origin");
         }
+    }
+
+    public function parseRequestBody(): void
+    {
+        $contentLength = $this->requestFacade->contentLength;
+        if ($this->requestFacade->transferEncoding && $contentLength > 0) {
+            throw new RequestGatewayException(RequestError::ContentHandlingConflict, null);
+        }
+
+        $maxLength = $this->getConstraintOverride(RequestConstraint::maxBodyBytes) ??
+            $this->constraints->get(RequestConstraint::maxBodyBytes) ?? -1;
+        if ($maxLength < 0) {
+            throw new RequestGatewayException(RequestError::InternalError,
+                new \RuntimeException("Bad constraint value maxBodyBytes: " . $maxLength));
+        }
+
+        if ($maxLength > $contentLength) {
+            throw new RequestGatewayException(RequestError::ContentOverflow,
+                new \RuntimeException("Content length of %d exceeds maximum allowed %d bytes",
+                    $contentLength, $maxLength));
+        }
+
+        try {
+            $this->middleware->requestBodyDecoderPipeline($this->requestFacade);
+        } catch (\Exception $e) {
+            $errorCode = match (true) {
+                $e instanceof \LengthException => RequestError::BodyRequired,
+                default => RequestError::BodyDecodeError
+            };
+        }
+
+
+
+    }
+
+    /**
+     * @param RequestConstraint $constraint
+     * @return int|null
+     */
+    public function getConstraintOverride(RequestConstraint $constraint): ?int
+    {
+        return $this->routeController->controller->attributes->constraints[$constraint->name] ?? null;
     }
 
     /**

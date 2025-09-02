@@ -41,6 +41,7 @@ enum RequestError implements RequestErrorCodeInterface
     case MethodNotAllowed;
 
     /** @for=BodyHandler */
+    case BodyDecodeError;
     case BadContentType;
     case BadContentLength;
     case ContentOverflow;
@@ -48,6 +49,7 @@ enum RequestError implements RequestErrorCodeInterface
     case UnsupportedTransferEncoding;
     case ContentHandlingConflict;
     case UnsupportedContentEncoding;
+    case BodyRequired;
 
     /** @for=Cors */
     case BadOriginHeader;
@@ -73,6 +75,7 @@ enum RequestError implements RequestErrorCodeInterface
             self::CorsOriginNotAllowed => 403,
             self::EndpointNotFound => 404,
             self::MethodNotAllowed => 405,
+            self::BodyRequired => 411,
             self::ContentOverflow => 413,
             self::BadUrlLength => 414,
             self::UnsupportedTransferEncoding,
