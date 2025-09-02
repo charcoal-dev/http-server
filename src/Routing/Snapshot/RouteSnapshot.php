@@ -51,7 +51,9 @@ final readonly class RouteSnapshot
     {
         $methods = [];
         foreach ($this->controllers as $controller) {
-            $methods = [...$methods, ...$controller->methods];
+            if (is_array($controller->methods)) {
+                $methods = [...$methods, ...$controller->methods];
+            }
         }
 
         return array_unique($methods);
