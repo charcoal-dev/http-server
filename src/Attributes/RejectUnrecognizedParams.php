@@ -12,7 +12,7 @@ namespace Charcoal\Http\Server\Attributes;
  * An attribute that can be applied to a method to enforce the rejection
  * of unrecognized parameters during its invocation or processing.
  */
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 final readonly class RejectUnrecognizedParams
 {
     public bool $enforce;

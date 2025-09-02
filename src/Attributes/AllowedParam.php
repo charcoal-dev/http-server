@@ -12,7 +12,7 @@ namespace Charcoal\Http\Server\Attributes;
  * Attribute class used to specify required parameters for methods.
  * This attribute can be applied to methods and is repeatable.
  */
-#[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 final readonly class AllowedParam
 {
     /** @var string[] */
