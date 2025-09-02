@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Exceptions;
 
-use Charcoal\Http\Server\Enums\RequestError;
+use Charcoal\Http\Server\Contracts\RequestErrorCodeInterface;
 use Charcoal\Http\Server\Request\Result\RedirectUrl;
 
 /**
@@ -16,23 +16,23 @@ use Charcoal\Http\Server\Request\Result\RedirectUrl;
  * It extends the base Exception class and provides additional details such as the request error instance
  * and an optional redirect target.
  */
-final class RequestContextException extends \Exception
+class RequestGatewayException extends \Exception
 {
     public function __construct(
-        public readonly RequestError $error,
-        ?\Throwable                  $previous,
-        public readonly ?RedirectUrl $redirectTo = null,
+        public readonly RequestErrorCodeInterface $error,
+        ?\Throwable                               $previous,
+        public readonly ?RedirectUrl              $redirectTo = null,
     )
     {
         parent::__construct($previous?->getMessage() ?? $this->error->name, 0, $previous);
     }
 
     /**
-     * @param RequestError $error
+     * @param RequestErrorCodeInterface $error
      * @param RedirectUrl $redirectTo
      * @return self
      */
-    public static function forRedirect(RequestError $error, RedirectUrl $redirectTo): self
+    public static function forRedirect(RequestErrorCodeInterface $error, RedirectUrl $redirectTo): self
     {
         return new self($error, null, $redirectTo);
     }
