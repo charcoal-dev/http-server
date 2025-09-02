@@ -52,7 +52,7 @@ final readonly class RouteSnapshot
         $methods = [];
         foreach ($this->controllers as $controller) {
             if (is_array($controller->methods)) {
-                $methods = [...$methods, ...$controller->methods];
+                $methods = [...$methods, ...array_map(fn($m) => strtolower($m->value), $controller->methods)];
             }
         }
 

@@ -14,7 +14,7 @@ use Charcoal\Http\Commons\Enums\HttpMethod;
  * Represents a binding between a validated controller and the associated HTTP methods.
  * This class ensures that a controller is properly associated with HTTP methods, and provides
  * functionality to determine the appropriate entry point based on the provided HTTP method.
- * @property array<string>|true $methods If default entrypoint: bool(true)
+ * @property array<HttpMethod>|true $methods If default entrypoint: bool(true)
  */
 final readonly class RouteControllerBinding
 {
