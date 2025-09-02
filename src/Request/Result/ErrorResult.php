@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Request\Result;
 
 use Charcoal\Http\Commons\Headers\Headers;
+use Charcoal\Http\Server\Contracts\ExceptionHasErrorCodeInterface;
 use Charcoal\Http\Server\Contracts\RequestErrorCodeInterface;
 
 /**
@@ -24,6 +25,10 @@ final readonly class ErrorResult extends AbstractResult
     )
     {
         $headers->set("Connection", "close");
-        parent::__construct($this->error->getStatusCode(), $headers);
+
+        $statusCodeEnum = $this->exception instanceof ExceptionHasErrorCodeInterface &&
+        $this->exception->errorCode() instanceof RequestErrorCodeInterface ?
+            $this->exception->errorCode() : $this->error;
+        parent::__construct($statusCodeEnum->getStatusCode(), $headers);
     }
 }
