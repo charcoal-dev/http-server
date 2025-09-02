@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Enums;
 
-use Charcoal\Http\Server\Contracts\Middleware\OptionsMethodHandlerPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\RequestHeadersPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\UrlValidatorPipeline;
 
@@ -21,5 +20,4 @@ enum Pipeline: string
 {
     case URL_Validator = UrlValidatorPipeline::class;
     case RequestHeaders_Validator = RequestHeadersPipeline::class;
-    case Options_MethodResolver = OptionsMethodHandlerPipeline::class;
 }
