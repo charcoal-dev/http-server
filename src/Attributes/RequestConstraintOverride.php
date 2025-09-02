@@ -17,7 +17,7 @@ use Charcoal\Http\Server\Enums\RequestConstraint;
  * 0 to 0xFFFFFFFF; otherwise, an exception will be thrown.
  */
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
-final readonly class RequestConstraints
+final readonly class RequestConstraintOverride
 {
     public function __construct(
         public RequestConstraint $constraint,

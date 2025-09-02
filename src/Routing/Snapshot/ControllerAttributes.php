@@ -10,6 +10,7 @@ namespace Charcoal\Http\Server\Routing\Snapshot;
 
 use Charcoal\Http\Server\Attributes\AllowedParam;
 use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
+use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
 
 /**
  * Represents metadata and configuration attributes for a controller.
@@ -21,6 +22,7 @@ final readonly class ControllerAttributes
 {
     public array $allowedParams;
     public bool $rejectUnrecognizedParams;
+    public array $constraints;
 
     public function __construct(?\ReflectionClass $reflect)
     {
@@ -45,5 +47,17 @@ final readonly class ControllerAttributes
         $rejectUnrecognizedParams = $reflect->getAttributes(RejectUnrecognizedParams::class);
         $this->rejectUnrecognizedParams = $rejectUnrecognizedParams ?
             $rejectUnrecognizedParams[0]->newInstance()->reject : true;
+
+        # Request constraints overrides
+        $constraintsOverrides = [];
+        $attrConstraintsOverrides = $reflect->getAttributes(RequestConstraintOverride::class);
+        if ($attrConstraintsOverrides) {
+            foreach ($attrConstraintsOverrides as $attrConstraintsOverride) {
+                $override = $attrConstraintsOverride->newInstance();
+                $constraintsOverrides[$override->constraint->name] = $override->value;
+            }
+        }
+
+        $this->constraints = $constraintsOverrides;
     }
 }
