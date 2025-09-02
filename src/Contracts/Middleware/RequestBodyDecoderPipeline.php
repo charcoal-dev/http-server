@@ -11,10 +11,9 @@ namespace Charcoal\Http\Server\Contracts\Middleware;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 
 /**
- * Interface RequestBodyParserPipeline
- * @package Charcoal\Http\Server\Contracts\Middleware
+ * Represents a pipeline responsible for decoding the body of incoming HTTP requests.
  */
-interface RequestBodyParserPipeline extends PipelineMiddlewareInterface
+interface RequestBodyDecoderPipeline extends PipelineMiddlewareInterface
 {
     /**
      * Parse incoming request body

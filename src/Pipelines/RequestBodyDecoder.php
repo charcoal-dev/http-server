@@ -9,20 +9,17 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Pipelines;
 
 use Charcoal\Http\Commons\Enums\HttpMethod;
-use Charcoal\Http\Server\Contracts\Middleware\RequestBodyParserPipeline;
+use Charcoal\Http\Server\Contracts\Middleware\RequestBodyDecoderPipeline;
 use Charcoal\Http\Server\Enums\ContentEncoding;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Enums\TransferEncoding;
 use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 
-class RequestBodyParser implements RequestBodyParserPipeline
+class RequestBodyDecoder implements RequestBodyDecoderPipeline
 {
-    public function execute(array $params): mixed
-    {
-    }
 
-    public function __invoke(RequestFacade $request)
+    final public function __invoke(RequestFacade $request)
     {
         $this->validateTransferEncoding($request->transferEncoding);
         $this->validateContentEncoding($request->contentType);
@@ -34,7 +31,6 @@ class RequestBodyParser implements RequestBodyParserPipeline
 
             return null;
         }
-
 
 
     }
@@ -69,5 +65,14 @@ class RequestBodyParser implements RequestBodyParserPipeline
         if ($contentEncoding && $contentEncoding !== ContentEncoding::Identity) {
             throw new RequestGatewayException(RequestError::UnsupportedContentEncoding, null);
         }
+    }
+
+    /**
+     * @param array $params
+     * @return mixed
+     */
+    final public function execute(array $params): mixed
+    {
+        return $this->__invoke(...$params);
     }
 }

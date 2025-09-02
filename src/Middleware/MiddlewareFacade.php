@@ -14,7 +14,7 @@ use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Server\Enums\Pipeline;
 use Charcoal\Http\Server\Pipelines\ControllerGatewayFacadeResolver;
-use Charcoal\Http\Server\Pipelines\RequestBodyParser;
+use Charcoal\Http\Server\Pipelines\RequestBodyDecoder;
 use Charcoal\Http\Server\Pipelines\RequestHeadersValidator;
 use Charcoal\Http\Server\Pipelines\UrlValidator;
 use Charcoal\Http\Server\Request\Controller\GatewayFacade;
@@ -81,7 +81,7 @@ final readonly class MiddlewareFacade
     ): null|BatchEnvelope
     {
         return $this->registry->execute(Pipeline::Request_BodyDecoder,
-            RequestBodyParser::class,
+            RequestBodyDecoder::class,
             [$request]
         );
     }
