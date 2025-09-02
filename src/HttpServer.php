@@ -122,7 +122,7 @@ final class HttpServer implements HttpServerApiInterface
 
         // Check configured trusted proxies CIDR for the peer IP & host
         try {
-            $trustProxy = TrustGateway::establishTrust($this->config->proxies, $env);
+            $trustProxy = TrustGateway::establishTrust($this->config->proxies, $env ?? new ServerEnv());
         } catch (\Exception $e) {
             return new ErrorResult($response, RequestError::BadPeerIp, $e);
         }
