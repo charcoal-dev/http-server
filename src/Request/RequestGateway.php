@@ -265,6 +265,8 @@ final readonly class RequestGateway
             if ($controller instanceof AfterEntrypointCallback) {
                 $controller->afterEntrypointCallback($requestFacade);
             }
+        } catch (RequestGatewayException $e) {
+            throw $e;
         } catch (\Exception $e) {
             if ($e instanceof ValidationErrorException) {
                 $e->setContextMessage($requestFacade);

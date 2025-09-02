@@ -10,8 +10,11 @@ namespace Charcoal\Http\Server\Request\Controller;
 
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Body\WritablePayload;
+use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Contracts\Request\ControllerApiInterface;
+use Charcoal\Http\Server\Enums\ControllerError;
+use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
 
@@ -20,6 +23,8 @@ use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
  */
 readonly class RequestFacade implements ControllerApiInterface
 {
+    protected bool $enforcedRequiredParams;
+
     public function __construct(private RequestGateway $request)
     {
     }
@@ -38,6 +43,14 @@ readonly class RequestFacade implements ControllerApiInterface
     public function response(): WritablePayload
     {
         return $this->request->output;
+    }
+
+    /**
+     * @return Headers
+     */
+    public function headers(): Headers
+    {
+        return $this->request->responseHeaders;
     }
 
     /**
@@ -65,13 +78,22 @@ readonly class RequestFacade implements ControllerApiInterface
         return $this->request->routeController->controller->attributes;
     }
 
+    /**
+     * Checks for unrecognized parameters if the configuration dictates, and throws an exception if any are found.
+     * @throws RequestGatewayException
+     */
     public function enforceRequiredParams(): void
     {
+        if (isset($this->enforcedRequiredParams)) {
+            return;
+        }
+
+        $this->enforcedRequiredParams = true;
         $attr = $this->attributes();
         if ($attr->rejectUnrecognizedParams) {
             $unrecognized = $this->request->input->getUnrecognizedKeys(...$attr->allowedParams);
             if (!empty($unrecognized)) {
-                // Todo: throw exception
+                throw new RequestGatewayException(ControllerError::UnrecognizedParam, null);
             }
         }
     }
