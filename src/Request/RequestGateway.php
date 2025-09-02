@@ -31,7 +31,6 @@ use Charcoal\Http\Server\Exceptions\Controllers\ValidationException;
 use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
-use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Routing\Router;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
