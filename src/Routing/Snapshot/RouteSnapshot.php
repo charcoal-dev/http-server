@@ -43,19 +43,4 @@ final readonly class RouteSnapshot
         $this->params = $params ?: null;
         $this->controllers = $controllers;
     }
-
-    /**
-     * Aggregates methods from all controllers associated with the instance.
-     */
-    public function getAggregatedMethods(): array
-    {
-        $methods = [];
-        foreach ($this->controllers as $controller) {
-            if (is_array($controller->methods)) {
-                $methods = [...$methods, ...array_map(fn($m) => $m->name, $controller->methods)];
-            }
-        }
-
-        return array_unique($methods);
-    }
 }
