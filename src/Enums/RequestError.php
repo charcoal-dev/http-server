@@ -45,6 +45,8 @@ enum RequestError
 
     /** @for=Controller */
     case ControllerExecuteError;
+    case UnrecognizedParamReceived;
+    case RequiredParamMissing;
     case ValidationException;
 
     case BadContentType;
@@ -58,6 +60,8 @@ enum RequestError
     {
         return match ($this) {
             self::ValidationException,
+            self::UnrecognizedParamReceived,
+            self::RequiredParamMissing,
             self::BadUrlEncoding,
             self::BadHeaderName,
             self::BadHeaderValue,
@@ -72,7 +76,7 @@ enum RequestError
             self::IncorrectHost => 421,
             self::HeadersCountCap,
             self::HeaderLength => 431,
-            default => 500
+            default => 500,
         };
     }
 }

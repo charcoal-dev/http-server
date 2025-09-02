@@ -30,9 +30,16 @@ final readonly class ControllerAttributes
             return;
         }
 
-        // Required params
-        $requiredParams = $reflect->getAttributes(AllowedParam::class);
-        $this->allowedParams = $requiredParams ? $requiredParams[0]->newInstance()->params : [];
+        // Allowed list params
+        $allowedParams = [];
+        $allowedList = $reflect->getAttributes(AllowedParam::class);
+        if ($allowedList) {
+            foreach ($allowedList as $attrAllows) {
+                $allowedParams = array_merge($allowedParams, $attrAllows->newInstance()->params);
+            }
+        }
+
+        $this->allowedParams = $allowedParams;
 
         // Reject unrecognized params
         $rejectUnrecognizedParams = $reflect->getAttributes(RejectUnrecognizedParams::class);

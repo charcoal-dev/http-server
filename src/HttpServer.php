@@ -207,8 +207,6 @@ final class HttpServer implements HttpServerApiInterface
 
         // Todo: Final Cleanups
 
-        return new ErrorResult($requestGateway->responseHeaders, RequestError::InternalError,
-            new \RuntimeException("Not implemented"));
-        //return new SuccessResult(200, $context->headers, $context->payload);
+        return new SuccessResult(200, $requestGateway->responseHeaders, $requestGateway->output);
     }
 }
