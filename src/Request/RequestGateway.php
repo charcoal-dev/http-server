@@ -31,6 +31,7 @@ use Charcoal\Http\Server\Exceptions\Controllers\ValidationException;
 use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
+use Charcoal\Http\Server\Request\Bags\QueryParams;
 use Charcoal\Http\Server\Routing\Router;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
@@ -55,6 +56,7 @@ final readonly class RequestGateway
     public int $contentLength;
     public string $controllerEp;
     public array $pathParams;
+    public QueryParams $queryParams;
 
     private VirtualHost $host;
     private TrustGatewayResult $trustProxy;
@@ -135,6 +137,10 @@ final readonly class RequestGateway
         }
 
         $this->requestId = $this->responseHeaders->get("X-Request-ID");
+
+        // Parse Query String
+        $this->queryParams = new QueryParams(explode("#", explode("?",
+            $this->request->url->complete, 2)[1] ?? "", 2)[0]);
 
         // Content-Type and Content-Length
         $this->contentType = ContentType::find($this->request->headers->get("Content-Type") ?? "");
