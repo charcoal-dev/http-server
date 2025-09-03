@@ -21,44 +21,80 @@ use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
 final readonly class ControllerAttributes
 {
     public array $allowedParams;
-    public bool $rejectUnrecognizedParams;
+    public array $rejectUnrecognizedParams;
     public array $constraints;
 
-    public function __construct(?\ReflectionClass $reflect)
+    /**
+     * @param \ReflectionClass|null $reflect
+     * @param array<string, \ReflectionMethod> $methods
+     */
+    public function __construct(?\ReflectionClass $reflect, array $methods = [])
     {
         if (!$reflect) {
             $this->allowedParams = [];
-            $this->rejectUnrecognizedParams = true;
+            $this->rejectUnrecognizedParams = [["__class" => true]];
             $this->constraints = [];
             return;
         }
 
         // Allowed list params
-        $allowedParams = [];
-        $allowedList = $reflect->getAttributes(AllowedParam::class);
-        if ($allowedList) {
-            foreach ($allowedList as $attrAllows) {
-                $allowedParams = array_merge($allowedParams, $attrAllows->newInstance()->params);
+        $this->allowedParams = $this->readClassMethodAttributes($reflect, $methods,
+            AllowedParam::class, true,
+            fn(mixed $current, AllowedParam $attrInstance): array => array_merge($current, $attrInstance->params));
+
+        $this->rejectUnrecognizedParams = $this->readClassMethodAttributes($reflect, $methods,
+            RejectUnrecognizedParams::class, false,
+            fn(mixed $current, RejectUnrecognizedParams $attrInstance): bool => $attrInstance->enforce
+        );
+
+        // Request constraints overrides
+        $this->constraints = $this->readClassMethodAttributes($reflect, [],
+            RequestConstraintOverride::class, true,
+            function (array $current, RequestConstraintOverride $attrInstance): array {
+                $current[$attrInstance->constraint->name] = $attrInstance->value;
+                return $current;
+            }
+        );
+    }
+
+    /**
+     * @param \ReflectionClass $reflect
+     * @param array $methods
+     * @param string $attrClass
+     * @param bool $repeats
+     * @param \Closure $apply
+     * @return array
+     */
+    private function readClassMethodAttributes(
+        \ReflectionClass $reflect,
+        array            $methods,
+        string           $attrClass,
+        bool             $repeats,
+        \Closure         $apply
+    ): array
+    {
+        $attributes = [];
+
+        // On Class
+        $onClass = $reflect->getAttributes($attrClass);
+        if ($onClass) {
+            $attributes["__class"] = $repeats ? [] : null;
+            foreach ($onClass as $classAttr) {
+                $attributes["__class"] = $apply($attributes["__class"], $classAttr->newInstance());
             }
         }
 
-        $this->allowedParams = $allowedParams;
-
-        // Reject unrecognized params
-        $rejectUnrecognizedParams = $reflect->getAttributes(RejectUnrecognizedParams::class);
-        $this->rejectUnrecognizedParams = $rejectUnrecognizedParams ?
-            $rejectUnrecognizedParams[0]->newInstance()->reject : true;
-
-        # Request constraints overrides
-        $constraintsOverrides = [];
-        $attrConstraintsOverrides = $reflect->getAttributes(RequestConstraintOverride::class);
-        if ($attrConstraintsOverrides) {
-            foreach ($attrConstraintsOverrides as $attrConstraintsOverride) {
-                $override = $attrConstraintsOverride->newInstance();
-                $constraintsOverrides[$override->constraint->name] = $override->value;
+        // On Methods
+        foreach ($methods as $name => $reflectM) {
+            $onMethod = $reflectM->getAttributes($attrClass);
+            if ($onMethod) {
+                $attributes[$name] = $repeats ? [] : null;
+                foreach ($onMethod as $methodAttr) {
+                    $attributes[$name] = $apply($attributes[$name], $methodAttr->newInstance());
+                }
             }
         }
 
-        $this->constraints = $constraintsOverrides;
+        return $attributes;
     }
 }
