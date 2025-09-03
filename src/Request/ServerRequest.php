@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Request;
 
+use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Abstracts\AbstractRequest;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Enums\HttpProtocol;
@@ -27,7 +28,7 @@ final class ServerRequest extends AbstractRequest
         HttpProtocol            $protocol,
         HeadersImmutable        $headers,
         public readonly UrlInfo $url,
-        public readonly bool    $isSecure,
+        public Buffer|\Closure  $body,
     )
     {
         parent::__construct($protocol, $method, $headers);
@@ -44,7 +45,7 @@ final class ServerRequest extends AbstractRequest
             $this->protocol,
             $header,
             $this->url,
-            $this->isSecure
+            $this->body,
         );
     }
 }
