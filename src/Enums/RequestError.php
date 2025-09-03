@@ -50,6 +50,7 @@ enum RequestError implements RequestErrorCodeInterface
     case ContentHandlingConflict;
     case UnsupportedContentEncoding;
     case BodyRequired;
+    case FileUploadDisabled;
 
     /** @for=Cors */
     case BadOriginHeader;
@@ -78,6 +79,7 @@ enum RequestError implements RequestErrorCodeInterface
             self::BodyRequired => 411,
             self::ContentOverflow => 413,
             self::BadUrlLength => 414,
+            self::FileUploadDisabled,
             self::UnsupportedTransferEncoding,
             self::UnsupportedContentEncoding,
             self::BadContentType => 415,

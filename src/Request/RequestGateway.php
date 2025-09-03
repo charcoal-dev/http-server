@@ -24,6 +24,7 @@ use Charcoal\Http\Server\Contracts\Controllers\Hooks\AfterEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\BeforeEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
 use Charcoal\Http\Server\Enums\ContentEncoding;
+use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\ControllerError;
 use Charcoal\Http\Server\Enums\RequestConstraint;
 use Charcoal\Http\Server\Enums\RequestError;
@@ -270,16 +271,30 @@ final readonly class RequestGateway
         }
 
         try {
-            $this->middleware->requestBodyDecoderPipeline($this->requestFacade);
+            $this->middleware->requestBodyDecoderPipeline(
+                $this->requestFacade,
+                $this->getControllerAttribute(ControllerAttribute::allowFileUpload));
         } catch (\Exception $e) {
             $errorCode = match (true) {
                 $e instanceof \LengthException => RequestError::BodyRequired,
+                $e instanceof \DomainException => match ($e->getCode()) {
+                    2 => RequestError::FileUploadDisabled,
+                    default => RequestError::BadContentType,
+                },
                 default => RequestError::BodyDecodeError
             };
         }
 
 
+    }
 
+    /**
+     * @param ControllerAttribute $attr
+     * @return mixed
+     */
+    public function getControllerAttribute(ControllerAttribute $attr): mixed
+    {
+        return $this->routeController->controller->attributes->getAttributeFor($attr, $this->controllerEp);
     }
 
     /**
@@ -288,7 +303,7 @@ final readonly class RequestGateway
      */
     public function getConstraintOverride(RequestConstraint $constraint): ?int
     {
-        return $this->routeController->controller->attributes->constraints[$constraint->name] ?? null;
+        return $this->getControllerAttribute(ControllerAttribute::constraints)[$constraint->name] ?? null;
     }
 
     /**
