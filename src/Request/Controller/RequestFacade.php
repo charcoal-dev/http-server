@@ -54,7 +54,7 @@ final readonly class RequestFacade
      * @throws WrappedException
      * @internal
      */
-    public function initializeBody(FileUpload|Buffer|array $payload): void
+    public function initializeBody(FileUpload|Buffer|array|null $payload): void
     {
         $this->payload = new UnsafePayload(is_array($payload) ? new BatchEnvelope($payload) : null);
         $this->body = $payload instanceof Buffer ? ($payload)->readOnly() : null;
