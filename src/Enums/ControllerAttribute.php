@@ -19,4 +19,5 @@ enum ControllerAttribute
     case constraints;
     case disableRequestBody;
     case allowFileUpload;
+    case allowTextBody;
 }

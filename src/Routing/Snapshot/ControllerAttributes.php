@@ -10,6 +10,7 @@ namespace Charcoal\Http\Server\Routing\Snapshot;
 
 use Charcoal\Http\Server\Attributes\AllowedParam;
 use Charcoal\Http\Server\Attributes\AllowFileUpload;
+use Charcoal\Http\Server\Attributes\AllowTextBody;
 use Charcoal\Http\Server\Attributes\DisableRequestBody;
 use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
 use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
@@ -60,6 +61,12 @@ final readonly class ControllerAttributes
         $map[ControllerAttribute::disableRequestBody->name] = $this->readClassMethodAttributes($reflect, [],
             DisableRequestBody::class, false,
             fn(mixed $current, DisableRequestBody $attrInstance): bool => true
+        );
+
+        // Allow plain text body?
+        $map[ControllerAttribute::allowTextBody->name] = $this->readClassMethodAttributes($reflect, [],
+            AllowTextBody::class, false,
+            fn(mixed $current, AllowTextBody $attrInstance): bool => true
         );
 
         // Allow File Uploads?
