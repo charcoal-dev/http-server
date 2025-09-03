@@ -28,7 +28,8 @@ final class ServerRequest extends AbstractRequest
         HttpProtocol            $protocol,
         HeadersImmutable        $headers,
         public readonly UrlInfo $url,
-        public Buffer|\Closure  $body,
+        public ?Buffer          $body = null,
+        public ?string          $bodyFilepath = null,
     )
     {
         parent::__construct($protocol, $method, $headers);

@@ -252,40 +252,33 @@ final readonly class RequestGateway
 
     public function parseRequestBody(): void
     {
-        $contentLength = $this->requestFacade->contentLength;
-        if ($this->requestFacade->transferEncoding && $contentLength > 0) {
-            throw new RequestGatewayException(RequestError::ContentHandlingConflict, null);
-        }
-
-        $maxLength = $this->getConstraintOverride(RequestConstraint::maxBodyBytes) ??
-            $this->constraints->get(RequestConstraint::maxBodyBytes) ?? -1;
-        if ($maxLength < 0) {
-            throw new RequestGatewayException(RequestError::InternalError,
-                new \RuntimeException("Bad constraint value maxBodyBytes: " . $maxLength));
-        }
-
-        if ($maxLength > $contentLength) {
-            throw new RequestGatewayException(RequestError::ContentOverflow,
-                new \RuntimeException("Content length of %d exceeds maximum allowed %d bytes",
-                    $contentLength, $maxLength));
-        }
-
         try {
             $this->middleware->requestBodyDecoderPipeline(
                 $this->requestFacade,
-                $this->getControllerAttribute(ControllerAttribute::allowFileUpload));
+                $this->getControllerAttribute(ControllerAttribute::allowFileUpload) ?: false,
+                $this->getConstraintOverride(RequestConstraint::maxBodyBytes),
+                $this->getConstraintOverride(RequestConstraint::maxParams),
+                $this->getConstraintOverride(RequestConstraint::maxParamLength),
+                $this->getConstraintOverride(RequestConstraint::dtoMaxDepth)
+            );
         } catch (\Exception $e) {
             $errorCode = match (true) {
+                $e instanceof \OutOfBoundsException => RequestError::ContentHandlingConflict,
+                $e instanceof \OverflowException => RequestError::ContentOverflow,
+                $e instanceof \UnderflowException => RequestError::MalformedBody,
                 $e instanceof \LengthException => RequestError::BodyRequired,
                 $e instanceof \DomainException => match ($e->getCode()) {
+                    5 => RequestError::UnsupportedTransferEncoding,
+                    4 => RequestError::UnsupportedContentEncoding,
+                    3 => RequestError::BadBodyCharset,
                     2 => RequestError::FileUploadDisabled,
                     default => RequestError::BadContentType,
                 },
                 default => RequestError::BodyDecodeError
             };
+
+            throw new RequestGatewayException($errorCode, $e);
         }
-
-
     }
 
     /**
@@ -303,7 +296,8 @@ final readonly class RequestGateway
      */
     public function getConstraintOverride(RequestConstraint $constraint): ?int
     {
-        return $this->getControllerAttribute(ControllerAttribute::constraints)[$constraint->name] ?? null;
+        return $this->getControllerAttribute(ControllerAttribute::constraints)[$constraint->name] ??
+            $this->constraints->get($constraint) ?? null;
     }
 
     /**
