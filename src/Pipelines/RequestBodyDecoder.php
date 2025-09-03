@@ -48,7 +48,7 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
     ): Buffer|FileUpload|array|null
     {
         $this->validateTransferEncoding($request->transferEncoding);
-        $this->validateContentEncoding($request->contentType);
+        $this->validateContentEncoding($request->contentEncoding);
         $contentLength = $request->contentLength;
         if ($request->transferEncoding && $contentLength > 0) {
             throw new \OutOfBoundsException("Content-Length and Transfer-Encoding are mutually exclusive");
@@ -58,12 +58,15 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
             throw new \RuntimeException("Bad constraint value maxBodyBytes: " . $maxBodyBytes);
         }
 
-        if ($maxBodyBytes > $contentLength) {
-            throw new \OverflowException("Content length of %d exceeds maximum allowed %d bytes",
-                $contentLength, $contentLength);
+        if ($contentLength > $maxBodyBytes) {
+            throw new \OverflowException(sprintf("Content length of %d exceeds maximum allowed %d bytes",
+                $contentLength, $contentLength));
         }
 
-        if ($request->contentLength === 0) {
+        $hasBody = ($request->transferEncoding === TransferEncoding::Chunked)
+            || ($request->contentLength > 0);
+
+        if (!$hasBody) {
             if ($this->isBodyRequired($request->method)) {
                 throw new \LengthException("Request body is required for method " . $request->method->name);
             }
@@ -105,13 +108,13 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
         }
 
         if ($contentLength > 0 && $contentLength > $allowedFileSize) {
-            throw new \OverflowException("Content length of %d exceeds maximum allowed %d bytes",
-                $contentLength, $allowedFileSize);
+            throw new \OverflowException(sprintf("Content length of %d exceeds maximum allowed %d bytes",
+                $contentLength, $allowedFileSize));
         }
 
         $limit = ($contentLength > 0)
-            ? min($contentLength, Constants::HARD_LIMIT_REQ_UPLOAD)
-            : Constants::HARD_LIMIT_REQ_UPLOAD;
+            ? min($contentLength, $allowedFileSize, Constants::HARD_LIMIT_REQ_UPLOAD)
+            : min($allowedFileSize, Constants::HARD_LIMIT_REQ_UPLOAD);
 
         $tmp = StreamReader::readStreamToTempFiles($stream, $limit);
         return new FileUpload($tmp["tmpPath"], $tmp["size"]);
@@ -186,7 +189,7 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
      */
     private function openBufferForBody(Buffer $body, int $limit): string
     {
-        if ($body->len() !== $limit) {
+        if ($body->len() > $limit) {
             throw new \UnderflowException("Request body is incomplete; Expected " .
                 $limit . "bytes, got " . $body->len());
         }
