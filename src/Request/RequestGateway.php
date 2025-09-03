@@ -141,9 +141,13 @@ final readonly class RequestGateway
         }
 
         // Content Length
-        $contentLength = $this->request->headers->has("Content-Length") ?
-            (int)$this->request->headers->get("Content-Length") : 0;
-        if (!$contentLength || $contentLength < 0) {
+        $contentLength = $this->request->headers->get("Content-Length");
+        if ($contentLength && !ctype_digit($contentLength)) {
+            throw new RequestGatewayException(RequestError::BadContentLength, null);
+        }
+
+        $contentLength = (int)$contentLength;
+        if ($contentLength < 0) {
             throw new RequestGatewayException(RequestError::BadContentLength, null);
         }
 
