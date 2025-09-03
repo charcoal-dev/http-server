@@ -53,6 +53,8 @@ enum RequestError implements RequestErrorCodeInterface
     case MalformedBody;
     case FileUploadDisabled;
     case BadBodyCharset;
+    case ParamsOverflow;
+    case ParamValidation;
 
     /** @for=Cors */
     case BadOriginHeader;
@@ -74,11 +76,13 @@ enum RequestError implements RequestErrorCodeInterface
             self::BadOriginHeader,
             self::BadTransferEncoding,
             self::BadContentLength,
+            self::ParamValidation,
             self::BadPeerIp => 400,
             self::CorsOriginNotAllowed => 403,
             self::EndpointNotFound => 404,
             self::MethodNotAllowed => 405,
             self::BodyRequired => 411,
+            self::ParamsOverflow,
             self::ContentOverflow => 413,
             self::BadUrlLength => 414,
             self::FileUploadDisabled,

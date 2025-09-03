@@ -8,9 +8,13 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Request;
 
+use Charcoal\Base\Charsets\Ascii;
+use Charcoal\Base\Exceptions\WrappedException;
+use Charcoal\Base\Support\Helpers\ArrayHelper;
 use Charcoal\Base\Traits\NoDumpTrait;
 use Charcoal\Base\Traits\NotCloneableTrait;
 use Charcoal\Base\Traits\NotSerializableTrait;
+use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
@@ -36,6 +40,7 @@ use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Request\Files\FileUpload;
 use Charcoal\Http\Server\Routing\Router;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
@@ -250,16 +255,26 @@ final readonly class RequestGateway
         }
     }
 
+    /**
+     * @return void
+     * @throws RequestGatewayException
+     */
     public function parseRequestBody(): void
     {
+        $allowFileUpload = $this->getControllerAttribute(ControllerAttribute::allowFileUpload) ?: false;
+        $maxBodyBytes = $this->getConstraintOverride(RequestConstraint::maxBodyBytes);
+        $maxParams = $this->getConstraintOverride(RequestConstraint::maxParams);
+        $maxParamLength = $this->getConstraintOverride(RequestConstraint::maxParamLength);
+        $maxDepth = $this->getConstraintOverride(RequestConstraint::dtoMaxDepth);
+
         try {
-            $this->middleware->requestBodyDecoderPipeline(
+            $decoded = $this->middleware->requestBodyDecoderPipeline(
                 $this->requestFacade,
-                $this->getControllerAttribute(ControllerAttribute::allowFileUpload) ?: false,
-                $this->getConstraintOverride(RequestConstraint::maxBodyBytes),
-                $this->getConstraintOverride(RequestConstraint::maxParams),
-                $this->getConstraintOverride(RequestConstraint::maxParamLength),
-                $this->getConstraintOverride(RequestConstraint::dtoMaxDepth)
+                $allowFileUpload,
+                $maxBodyBytes,
+                $maxParams,
+                $maxParamLength,
+                $maxDepth
             );
         } catch (\Exception $e) {
             $errorCode = match (true) {
@@ -279,7 +294,64 @@ final readonly class RequestGateway
 
             throw new RequestGatewayException($errorCode, $e);
         }
+
+        // Got Body?
+        if ($decoded instanceof Buffer) {
+            if ($decoded->len() > $maxBodyBytes) {
+                throw new RequestGatewayException(RequestError::ContentOverflow, null);
+            }
+        }
+
+        // Decoded Payload:
+        if (is_array($decoded)) {
+            if (count($decoded, COUNT_RECURSIVE) > $maxParams) {
+                throw new RequestGatewayException(RequestError::ParamsOverflow,
+                    new \RuntimeException("Maximum number of params: " . $maxParams));
+            }
+
+            if (ArrayHelper::checkDepth($decoded, $maxDepth + 1) > $maxDepth) {
+                throw new RequestGatewayException(RequestError::ParamsOverflow,
+                    new \RuntimeException("Maximum depth allowed: " . $maxDepth));
+            }
+
+            try {
+                array_walk_recursive($decoded, function ($value, $key) use ($maxParamLength) {
+                    if (is_string($value)) {
+                        if (!is_string($key) || !Ascii::isPrintableOnly($value) || preg_match("/\s/", $value)) {
+                            throw new \InvalidArgumentException("Invalid param key received");
+                        }
+
+                        if (strlen($key) > 64) {
+                            throw new \LengthException("Param key exceeds maximum length: 64 bytes");
+                        }
+
+                        if (strlen($value) > $maxParamLength) {
+                            throw new RequestGatewayException(RequestError::ParamsOverflow,
+                                new \RuntimeException("Maximum param length: " . $maxParamLength));
+                        }
+                    }
+                });
+            } catch (\Exception $e) {
+                throw new RequestGatewayException(RequestError::ParamValidation, $e);
+            }
+        }
+
+        // File Upload?
+        if ($decoded instanceof FileUpload) {
+            if (!$allowFileUpload || $allowFileUpload["size"] >= $decoded->size) {
+                throw new RequestGatewayException(RequestError::FileUploadDisabled,
+                    throw new \RuntimeException("File upload disabled or exceeds maximum size"));
+            }
+        }
+
+        // Initialize Facade Inputs
+        try {
+            $this->requestFacade->initializeBody($decoded);
+        } catch (WrappedException $e) {
+            throw new RequestGatewayException(RequestError::MalformedBody, $e->getPrevious());
+        }
     }
+
 
     /**
      * @param ControllerAttribute $attr

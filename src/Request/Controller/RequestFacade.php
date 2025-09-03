@@ -10,6 +10,7 @@ namespace Charcoal\Http\Server\Request\Controller;
 
 use Charcoal\Base\Abstracts\Dataset\BatchEnvelope;
 use Charcoal\Base\Exceptions\WrappedException;
+use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
@@ -17,6 +18,7 @@ use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Server\Enums\ContentEncoding;
 use Charcoal\Http\Server\Enums\TransferEncoding;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
+use Charcoal\Http\Server\Request\Files\FileUpload;
 
 /**
  * Encapsulates data associated with an HTTP request, providing a structured interface
@@ -24,8 +26,10 @@ use Charcoal\Http\Server\Request\Bags\QueryParams;
  */
 final readonly class RequestFacade
 {
-    public UnsafePayload $payload;
     public array $pathParams;
+    public UnsafePayload $payload;
+    public ?Buffer $body;
+    public ?FileUpload $upload;
 
     public function __construct(
         public string            $requestId,
@@ -50,8 +54,10 @@ final readonly class RequestFacade
      * @throws WrappedException
      * @internal
      */
-    public function initializePayload(BatchEnvelope $payload): void
+    public function initializeBody(FileUpload|Buffer|array $payload): void
     {
-        $this->payload = new UnsafePayload($payload);
+        $this->payload = new UnsafePayload(is_array($payload) ? new BatchEnvelope($payload) : null);
+        $this->body = $payload instanceof Buffer ? ($payload)->readOnly() : null;
+        $this->upload = $payload instanceof FileUpload ? $payload : null;
     }
 }
