@@ -8,6 +8,10 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Attributes;
 
+/**
+ * Represents an attribute that allows a file upload operation,
+ * with an optional restriction on the maximum file size.
+ */
 #[\Attribute(\Attribute::TARGET_CLASS)]
 final readonly class AllowFileUpload
 {
