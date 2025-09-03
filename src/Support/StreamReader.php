@@ -20,9 +20,9 @@ class StreamReader
     /**
      * @param string $stream
      * @param int $limit
-     * @return false|array
+     * @return false|array{tmpPath: string, size: int}
      */
-    public static function readStreamToTemp(string $stream, int $limit): false|array
+    public static function readStreamToTempFiles(string $stream, int $limit): false|array
     {
         if ($limit <= 0) {
             return false;
