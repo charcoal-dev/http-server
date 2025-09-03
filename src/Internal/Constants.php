@@ -14,6 +14,9 @@ namespace Charcoal\Http\Server\Internal;
  */
 interface Constants
 {
+    public const int HARD_LIMIT_MEMORY_REQ_BODY = 1048576;
+    public const int HARD_LIMIT_REQ_UPLOAD = 10485760;
+
     /**
      * Wildcard placeholder for "default" or "any" HTTP methods
      * @var string

@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Middleware;
 
 use Charcoal\Base\Abstracts\Dataset\BatchEnvelope;
+use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
@@ -78,11 +79,17 @@ final readonly class MiddlewareFacade
      */
     public function requestBodyDecoderPipeline(
         RequestFacade $request,
-    ): null|BatchEnvelope
+        false|array   $allowFileUpload,
+        int           $maxBodyBytes,
+        int           $maxParams,
+        int           $maxParamLength,
+        int           $maxDepth,
+        Buffer|string $body = null,
+    ): null|Buffer|BatchEnvelope|array
     {
         return $this->registry->execute(Pipeline::Request_BodyDecoder,
             RequestBodyDecoder::class,
-            [$request]
+            [$request, $allowFileUpload, $maxBodyBytes, $maxParams, $maxParamLength, $maxDepth, $body]
         );
     }
 }
