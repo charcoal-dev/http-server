@@ -78,7 +78,7 @@ abstract readonly class SapiRequest
                 ($_SERVER["REQUEST_SCHEME"] ?? "http") === "https",
         };
 
-        return new ServerRequest($method, $protocol, $headers, new UrlInfo($url), $isSecure);
+        return new ServerRequest($method, $protocol, $headers, new UrlInfo($url), $isSecure, null, "php://input");
     }
 
     /**
