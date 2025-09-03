@@ -60,7 +60,7 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
 
         if ($contentLength > $maxBodyBytes) {
             throw new \OverflowException(sprintf("Content length of %d exceeds maximum allowed %d bytes",
-                $contentLength, $contentLength));
+                $contentLength, $maxBodyBytes));
         }
 
         $hasBody = ($request->transferEncoding === TransferEncoding::Chunked)
