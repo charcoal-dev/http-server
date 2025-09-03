@@ -200,10 +200,14 @@ final class HttpServer implements HttpServerApiInterface
         // Todo: Init Logging
         // Todo: Concurrency Handling
         // Todo: Rate limiting
+
         // Todo: Authentication
 
-
-
+        try {
+            $requestGateway->parseRequestBody();
+        } catch (RequestGatewayException $e) {
+            return new ErrorResult($response, $e->error, $e);
+        }
 
         try {
             $requestGateway->executeController();
