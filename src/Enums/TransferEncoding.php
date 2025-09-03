@@ -17,8 +17,12 @@ enum TransferEncoding: string
 {
     case Chunked = "chunked";
 
-    public static function find(string $value): ?self
+    public static function find(?string $value): ?self
     {
+        if (!$value) {
+            return null;
+        }
+
         return self::tryFrom(strtolower($value));
     }
 }

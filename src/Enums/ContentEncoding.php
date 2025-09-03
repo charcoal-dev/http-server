@@ -17,10 +17,10 @@ enum ContentEncoding: string
 {
     case Identity = "identity";
 
-    public static function find(string $value): ?self
+    public static function find(?string $value): ?self
     {
-        $value = trim(strtolower($value));
-        if(!$value) {
+        $value = trim(strtolower($value ?? ""));
+        if (!$value) {
             return self::Identity;
         }
 
