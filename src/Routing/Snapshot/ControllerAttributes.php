@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Routing\Snapshot;
 
 use Charcoal\Http\Server\Attributes\AllowedParam;
+use Charcoal\Http\Server\Attributes\AllowFileUpload;
 use Charcoal\Http\Server\Attributes\DisableRequestBody;
 use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
 use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
@@ -26,6 +27,7 @@ final readonly class ControllerAttributes
     public array $rejectUnrecognizedParams;
     public array $constraints;
     public array $disableRequestBody;
+    public array $allowFileUploads;
 
     /**
      * @param \ReflectionClass|null $reflect
@@ -35,7 +37,7 @@ final readonly class ControllerAttributes
     {
         if (!$reflect) {
             $this->allowedParams = [];
-            $this->rejectUnrecognizedParams = [["__class" => true]];
+            $this->rejectUnrecognizedParams = [];
             $this->constraints = [];
             $this->disableRequestBody = [];
             return;
@@ -64,6 +66,12 @@ final readonly class ControllerAttributes
         $this->disableRequestBody = $this->readClassMethodAttributes($reflect, [],
             DisableRequestBody::class, false,
             fn(mixed $current, DisableRequestBody $attrInstance): bool => true
+        );
+
+        // Allow File Uploads?
+        $this->allowFileUploads = $this->readClassMethodAttributes($reflect, [],
+            AllowFileUpload::class, false,
+            fn(mixed $current, AllowFileUpload $attrInstance): array => ["size" => $attrInstance->maxFileSize]
         );
     }
 
