@@ -9,8 +9,10 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Routing\Snapshot;
 
 use Charcoal\Http\Server\Attributes\AllowedParam;
+use Charcoal\Http\Server\Attributes\DisableRequestBody;
 use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
 use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
+use Charcoal\Http\Server\Enums\ControllerAttribute;
 
 /**
  * Represents metadata and configuration attributes for a controller.
@@ -23,6 +25,7 @@ final readonly class ControllerAttributes
     public array $allowedParams;
     public array $rejectUnrecognizedParams;
     public array $constraints;
+    public array $disableRequestBody;
 
     /**
      * @param \ReflectionClass|null $reflect
@@ -34,6 +37,7 @@ final readonly class ControllerAttributes
             $this->allowedParams = [];
             $this->rejectUnrecognizedParams = [["__class" => true]];
             $this->constraints = [];
+            $this->disableRequestBody = [];
             return;
         }
 
@@ -55,6 +59,29 @@ final readonly class ControllerAttributes
                 return $current;
             }
         );
+
+        // Disable request body
+        $this->disableRequestBody = $this->readClassMethodAttributes($reflect, [],
+            DisableRequestBody::class, false,
+            fn(mixed $current, DisableRequestBody $attrInstance): bool => true
+        );
+    }
+
+    /**
+     * @param string|ControllerAttribute $attr
+     * @param string|null $entrypoint
+     * @return mixed
+     */
+    public function getAttributeFor(ControllerAttribute|string $attr, ?string $entrypoint): mixed
+    {
+        if ($attr instanceof ControllerAttribute) {
+            $attr = $attr->name;
+        }
+
+        $list = (isset($this->$attr) && is_array($this->$attr)) ? $this->$attr : [];
+        return $entrypoint !== null
+            ? ($list[$entrypoint] ?? $list["__class"] ?? null)
+            : ($list["__class"] ?? null);
     }
 
     /**
