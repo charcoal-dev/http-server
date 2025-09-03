@@ -76,7 +76,7 @@ readonly class GatewayFacade implements ControllerApiInterface
      */
     public function getAttribute(ControllerAttribute|string $attr): mixed
     {
-        return $this->attributes()->getAttributeFor($this->gateway->controllerEp, $attr);
+        return $this->attributes()->getAttributeFor($attr, $this->gateway->controllerEp);
     }
 
     /**
