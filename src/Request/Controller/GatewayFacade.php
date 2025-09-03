@@ -12,6 +12,7 @@ use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Contracts\Request\ControllerApiInterface;
+use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\ControllerError;
 use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\Request\RequestGateway;
@@ -70,6 +71,15 @@ readonly class GatewayFacade implements ControllerApiInterface
     }
 
     /**
+     * @param ControllerAttribute|string $attr
+     * @return mixed
+     */
+    public function getAttribute(ControllerAttribute|string $attr): mixed
+    {
+        return $this->attributes()->getAttributeFor($this->gateway->controllerEp, $attr);
+    }
+
+    /**
      * Checks for unrecognized parameters if the configuration dictates, and throws an exception if any are found.
      * @throws RequestGatewayException
      */
@@ -80,9 +90,10 @@ readonly class GatewayFacade implements ControllerApiInterface
         }
 
         $this->enforcedRequiredParams = true;
-        $attr = $this->attributes();
-        if ($attr->rejectUnrecognizedParams) {
-            $unrecognized = $this->request()->payload->getUnrecognizedKeys(...$attr->allowedParams);
+        if ($this->getAttribute(ControllerAttribute::rejectUnrecognizedParams)) {
+            $unrecognized = $this->request()
+                ->payload
+                ->getUnrecognizedKeys(...$this->getAttribute(ControllerAttribute::allowedParams));
             if (!empty($unrecognized)) {
                 throw new RequestGatewayException(ControllerError::UnrecognizedParam, null);
             }

@@ -18,4 +18,5 @@ enum ControllerAttribute
     case rejectUnrecognizedParams;
     case constraints;
     case disableRequestBody;
+    case allowFileUpload;
 }
