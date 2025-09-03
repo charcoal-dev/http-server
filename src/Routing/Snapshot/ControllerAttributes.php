@@ -23,11 +23,7 @@ use Charcoal\Http\Server\Enums\ControllerAttribute;
  */
 final readonly class ControllerAttributes
 {
-    public array $allowedParams;
-    public array $rejectUnrecognizedParams;
-    public array $constraints;
-    public array $disableRequestBody;
-    public array $allowFileUploads;
+    public array $map;
 
     /**
      * @param \ReflectionClass|null $reflect
@@ -35,26 +31,24 @@ final readonly class ControllerAttributes
      */
     public function __construct(?\ReflectionClass $reflect, array $methods = [])
     {
+        $map = [];
         if (!$reflect) {
-            $this->allowedParams = [];
-            $this->rejectUnrecognizedParams = [];
-            $this->constraints = [];
-            $this->disableRequestBody = [];
+            $this->map = $map;
             return;
         }
 
         // Allowed list params
-        $this->allowedParams = $this->readClassMethodAttributes($reflect, $methods,
+        $map[ControllerAttribute::allowedParams->name] = $this->readClassMethodAttributes($reflect, $methods,
             AllowedParam::class, true,
             fn(mixed $current, AllowedParam $attrInstance): array => array_merge($current, $attrInstance->params));
 
-        $this->rejectUnrecognizedParams = $this->readClassMethodAttributes($reflect, $methods,
+        $map[ControllerAttribute::rejectUnrecognizedParams->name] = $this->readClassMethodAttributes($reflect, $methods,
             RejectUnrecognizedParams::class, false,
             fn(mixed $current, RejectUnrecognizedParams $attrInstance): bool => $attrInstance->enforce
         );
 
         // Request constraints overrides
-        $this->constraints = $this->readClassMethodAttributes($reflect, [],
+        $map[ControllerAttribute::constraints->name] = $this->readClassMethodAttributes($reflect, [],
             RequestConstraintOverride::class, true,
             function (array $current, RequestConstraintOverride $attrInstance): array {
                 $current[$attrInstance->constraint->name] = $attrInstance->value;
@@ -63,16 +57,18 @@ final readonly class ControllerAttributes
         );
 
         // Disable request body
-        $this->disableRequestBody = $this->readClassMethodAttributes($reflect, [],
+        $map[ControllerAttribute::disableRequestBody->name] = $this->readClassMethodAttributes($reflect, [],
             DisableRequestBody::class, false,
             fn(mixed $current, DisableRequestBody $attrInstance): bool => true
         );
 
         // Allow File Uploads?
-        $this->allowFileUploads = $this->readClassMethodAttributes($reflect, [],
+        $map[ControllerAttribute::allowFileUpload->name] = $this->readClassMethodAttributes($reflect, [],
             AllowFileUpload::class, false,
             fn(mixed $current, AllowFileUpload $attrInstance): array => ["size" => $attrInstance->maxFileSize]
         );
+
+        $this->map = $map;
     }
 
     /**
@@ -86,10 +82,9 @@ final readonly class ControllerAttributes
             $attr = $attr->name;
         }
 
-        $list = (isset($this->$attr) && is_array($this->$attr)) ? $this->$attr : [];
         return $entrypoint !== null
-            ? ($list[$entrypoint] ?? $list["__class"] ?? null)
-            : ($list["__class"] ?? null);
+            ? ($this->map[$attr][$entrypoint] ?? $this->map[$attr]["__class"] ?? null)
+            : ($this->map[$attr]["__class"] ?? null);
     }
 
     /**
