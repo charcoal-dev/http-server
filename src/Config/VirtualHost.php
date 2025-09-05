@@ -26,7 +26,7 @@ final readonly class VirtualHost
     {
         $hostname = str_ends_with($hostname, ".") ? substr($hostname, 0, -1) : $hostname;
         $this->wildcard = str_starts_with($hostname, "*.");
-        $this->isIpAddress = IpHelper::isValidIp($hostname);
+        $this->isIpAddress = (bool)IpHelper::isValidIp($hostname);
         $this->hostname = strtolower($this->wildcard ? substr($hostname, 2) : $hostname);
         if ($this->wildcard) {
             if ($this->isIpAddress) {
