@@ -8,9 +8,10 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Request\Controller;
 
-use Charcoal\Base\Abstracts\Dataset\BatchEnvelope;
+use Charcoal\Base\Dataset\BatchEnvelope;
 use Charcoal\Base\Exceptions\WrappedException;
 use Charcoal\Buffers\Buffer;
+use Charcoal\Buffers\BufferImmutable;
 use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
@@ -28,7 +29,7 @@ final readonly class RequestFacade
 {
     public array $pathParams;
     public UnsafePayload $payload;
-    public ?Buffer $body;
+    public ?BufferImmutable $body;
     public ?FileUpload $upload;
 
     public function __construct(
@@ -57,7 +58,7 @@ final readonly class RequestFacade
     public function initializeBody(FileUpload|Buffer|array|null $payload): void
     {
         $this->payload = new UnsafePayload(is_array($payload) ? new BatchEnvelope($payload) : null);
-        $this->body = $payload instanceof Buffer ? ($payload)->readOnly() : null;
+        $this->body = $payload instanceof Buffer ? ($payload)->toImmutable() : null;
         $this->upload = $payload instanceof FileUpload ? $payload : null;
     }
 }

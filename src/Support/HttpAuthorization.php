@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Support;
 
-use Charcoal\Base\Charsets\Ascii;
+use Charcoal\Charsets\Support\AsciiHelper;
 use Charcoal\Http\Commons\Contracts\HeadersInterface;
 
 /**
@@ -28,7 +28,7 @@ readonly class HttpAuthorization
      */
     public function __construct(HeadersInterface $headers)
     {
-        $authorization = trim(Ascii::sanitizeUseFilter($headers->get("Authorization") ?? ""));
+        $authorization = trim(AsciiHelper::sanitizeUseFilter($headers->get("Authorization") ?? ""));
         if (!$authorization) {
             $this->schemes = [];
             $this->invalid = [];

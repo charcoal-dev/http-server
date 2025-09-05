@@ -17,11 +17,11 @@
   ],
   "require": {
     "php": "^8.3",
-    "charcoal-dev/contracts": "^0.1.3",
-    "charcoal-dev/base": "^0.1.6",
-    "charcoal-dev/buffers": "^0.2.1",
-    "charcoal-dev/http-commons": "^0.2.29",
-    "charcoal-dev/http-trust-proxy": "^0.1.0",
+    "charcoal-dev/contracts": "^0.1.17",
+    "charcoal-dev/base": "^0.2.1",
+    "charcoal-dev/buffers": "^0.2.4",
+    "charcoal-dev/http-commons": "^0.2.30",
+    "charcoal-dev/http-trust-proxy": "^0.1.1",
     "ext-ctype": "*"
   },
   "autoload": {

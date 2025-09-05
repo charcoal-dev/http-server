@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Support;
 
-use Charcoal\Base\Support\Helpers\ErrorHelper;
+use Charcoal\Base\Support\ErrorHelper;
 
 /**
  * Provides methods to read data from a stream and store it either in memory

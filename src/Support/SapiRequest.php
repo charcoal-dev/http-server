@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Support;
 
-use Charcoal\Base\Abstracts\Dataset\BatchEnvelope;
+use Charcoal\Base\Dataset\BatchEnvelope;
 use Charcoal\Base\Exceptions\WrappedException;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Enums\HttpProtocol;

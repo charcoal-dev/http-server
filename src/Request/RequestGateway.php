@@ -8,13 +8,13 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Request;
 
-use Charcoal\Base\Charsets\Ascii;
+use Charcoal\Base\Arrays\ArrayHelper;
 use Charcoal\Base\Exceptions\WrappedException;
-use Charcoal\Base\Support\Helpers\ArrayHelper;
-use Charcoal\Base\Traits\NoDumpTrait;
-use Charcoal\Base\Traits\NotCloneableTrait;
-use Charcoal\Base\Traits\NotSerializableTrait;
+use Charcoal\Base\Objects\Traits\NoDumpTrait;
+use Charcoal\Base\Objects\Traits\NotCloneableTrait;
+use Charcoal\Base\Objects\Traits\NotSerializableTrait;
 use Charcoal\Buffers\Buffer;
+use Charcoal\Charsets\Support\AsciiHelper;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
@@ -301,7 +301,7 @@ final readonly class RequestGateway
 
         // Got Body?
         if ($decoded instanceof Buffer) {
-            if ($decoded->len() > $maxBodyBytes) {
+            if ($decoded->length() > $maxBodyBytes) {
                 throw new RequestGatewayException(RequestError::ContentOverflow, null);
             }
         }
@@ -321,7 +321,7 @@ final readonly class RequestGateway
             try {
                 array_walk_recursive($decoded, function ($value, $key) use ($maxParamLength) {
                     if (is_string($value)) {
-                        if (!is_string($key) || !Ascii::isPrintableOnly($value) || preg_match("/\s/", $value)) {
+                        if (!is_string($key) || !AsciiHelper::isPrintableOnly($value) || preg_match("/\s/", $value)) {
                             throw new \InvalidArgumentException("Invalid param key received");
                         }
 

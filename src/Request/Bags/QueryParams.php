@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Request\Bags;
 
 use Charcoal\Http\Commons\Support\HttpHelper;
-use Traversable;
 
 /**
  * Represents a collection of query parameters that can be extended or manipulated.
@@ -71,9 +70,9 @@ final readonly class QueryParams implements \IteratorAggregate, \Countable
     }
 
     /**
-     * @return Traversable<string,string[]>
+     * @return \Traversable<string,string[]>
      */
-    public function getIterator(): Traversable
+    public function getIterator(): \Traversable
     {
         return new \ArrayIterator($this->bag);
     }
