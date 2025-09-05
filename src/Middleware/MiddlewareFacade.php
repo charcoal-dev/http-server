@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Middleware;
 
-use Charcoal\Base\Abstracts\Dataset\BatchEnvelope;
+use Charcoal\Base\Dataset\BatchEnvelope;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;

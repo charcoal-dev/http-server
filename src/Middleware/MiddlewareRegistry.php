@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Middleware;
 
-use Charcoal\Base\Support\Callbacks\StaticCallback;
+use Charcoal\Base\Support\StaticCallback;
 use Charcoal\Http\Server\Contracts\Middleware\PipelineMiddlewareInterface;
 use Charcoal\Http\Server\Enums\Pipeline;
 
