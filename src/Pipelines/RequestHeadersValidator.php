@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Pipelines;
 
-use Charcoal\Base\Enums\Charset;
+use Charcoal\Contracts\Charsets\Charset;
 use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;

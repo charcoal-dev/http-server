@@ -189,12 +189,12 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
      */
     private function openBufferForBody(Buffer $body, int $limit): string
     {
-        if ($body->len() > $limit) {
+        if ($body->length() > $limit) {
             throw new \UnderflowException("Request body is incomplete; Expected " .
-                $limit . "bytes, got " . $body->len());
+                $limit . "bytes, got " . $body->length());
         }
 
-        return $body->raw();
+        return $body->bytes();
     }
 
     /**
