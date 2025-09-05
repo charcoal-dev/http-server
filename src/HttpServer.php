@@ -8,9 +8,10 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server;
 
-use Charcoal\Base\Support\Helpers\UuidHelper;
-use Charcoal\Base\Traits\ControlledSerializableTrait;
-use Charcoal\Contracts\Http\HttpServerApiInterface;
+use Charcoal\Base\Objects\Traits\ControlledSerializableTrait;
+use Charcoal\Base\Support\UuidHelper;
+use Charcoal\Contracts\Sapi\SapiType;
+use Charcoal\Contracts\Sapi\ServerApiInterface;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Server\Config\ServerConfig;
 use Charcoal\Http\Server\Enums\RequestError;
@@ -37,7 +38,7 @@ use Charcoal\Http\TrustProxy\TrustGateway;
  * Represents an HTTP server capable of routing requests, managing middleware,
  * and handling various stages of HTTP request processing.
  */
-final class HttpServer implements HttpServerApiInterface
+final class HttpServer implements ServerApiInterface
 {
     use ServerTestableTrait;
     use ControlledSerializableTrait;
@@ -216,5 +217,13 @@ final class HttpServer implements HttpServerApiInterface
         }
 
         return new SuccessResult(200, $response, $requestGateway->output);
+    }
+
+    /**
+     * @return SapiType
+     */
+    public function type(): SapiType
+    {
+        return SapiType::Http;
     }
 }
