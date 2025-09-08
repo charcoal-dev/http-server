@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Contracts\Request;
 
+use Charcoal\Http\Commons\Headers\Headers;
+
 /**
  * Represents an interface for a success response.
  * Defines a contract for sending a response indicating successful processing.
@@ -15,6 +17,8 @@ namespace Charcoal\Http\Server\Contracts\Request;
 interface SuccessResponseInterface
 {
     public function isCacheable(): bool;
+
+    public function setHeaders(Headers $headers): void;
 
     public function send(): void;
 }
