@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Pipelines;
 
+use Charcoal\Base\Support\StreamHelper;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
@@ -18,7 +19,6 @@ use Charcoal\Http\Server\Enums\TransferEncoding;
 use Charcoal\Http\Server\Internal\Constants;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\Files\FileUpload;
-use Charcoal\Http\Server\Support\StreamReader;
 
 /**
  * RequestBodyDecoder is responsible for decoding the request body based on the content type and other constraints.
@@ -116,7 +116,7 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
             ? min($contentLength, $allowedFileSize, Constants::HARD_LIMIT_REQ_UPLOAD)
             : min($allowedFileSize, Constants::HARD_LIMIT_REQ_UPLOAD);
 
-        $tmp = StreamReader::readStreamToTempFiles($stream, $limit);
+        $tmp = StreamHelper::readStreamToTempFile($stream, $limit);
         return new FileUpload($tmp["tmpPath"], $tmp["size"]);
     }
 
@@ -139,7 +139,7 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
         $limit = min($contentLength, Constants::HARD_LIMIT_MEMORY_REQ_BODY);
         $body = match (true) {
             $body instanceof Buffer => $this->openBufferForBody($body, $limit),
-            is_string($body) => StreamReader::readStreamToMemory($body, $limit),
+            is_string($body) => StreamHelper::readStreamToMemory($body, $limit),
             default => throw new \RuntimeException("Invalid body type: " . gettype($body)),
         };
 
