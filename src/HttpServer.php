@@ -139,7 +139,7 @@ final class HttpServer implements ServerApiInterface
 
         if (!filter_var($trustProxy->clientIp, FILTER_VALIDATE_IP,
             FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-            if(!$virtualHost->allowInternal) {
+            if (!$virtualHost->allowInternal) {
                 return new ErrorResult($response, RequestError::ForwardingIpBlocked,
                     new \RuntimeException(sprintf('Private IP "%s" is blocked from accessing host: "%s"',
                         $trustProxy->clientIp, $virtualHost->hostname . ":" . $virtualHost->port)));

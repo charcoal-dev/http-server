@@ -10,9 +10,12 @@ namespace Charcoal\Http\Server\Exceptions\Controllers;
 
 use Charcoal\Buffers\Buffer;
 
+/**
+ * Exception thrown when there is an issue bypassing encoding for a provided response body.
+ */
 final class BypassEncodingException extends \Exception
 {
-    public function __construct(Buffer $message)
+    public function __construct(Buffer $responseBody, int $statusCode = 200)
     {
         parent::__construct();
     }
