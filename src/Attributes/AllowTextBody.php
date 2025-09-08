@@ -8,7 +8,16 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Attributes;
 
+use Charcoal\Http\Server\Contracts\Controllers\ControllerAttributeInterface;
+
 #[\Attribute(\Attribute::TARGET_CLASS)]
-final readonly class AllowTextBody
+final readonly class AllowTextBody implements ControllerAttributeInterface
 {
+    /**
+     * @return \Closure
+     */
+    public function getBuilderFn(): \Closure
+    {
+        return fn(mixed $current, AllowTextBody $attrInstance): bool => true;
+    }
 }

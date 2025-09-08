@@ -14,6 +14,7 @@ namespace Charcoal\Http\Server\Enums;
  */
 enum ControllerAttribute
 {
+    case defaultEntrypoint;
     case allowedParams;
     case rejectUnrecognizedParams;
     case constraints;

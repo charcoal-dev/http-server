@@ -8,13 +8,15 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Attributes;
 
+use Charcoal\Http\Server\Contracts\Controllers\ControllerAttributeInterface;
+
 /**
  * An attribute that specifies the default entry point method for a class.
  * This attribute is intended to be used to designate a specific method
  * as the entry point when the associated class is processed.
  */
 #[\Attribute(\Attribute::TARGET_CLASS)]
-final readonly class DefaultEntrypoint
+final readonly class DefaultEntrypoint implements ControllerAttributeInterface
 {
     public string $method;
 
@@ -26,5 +28,13 @@ final readonly class DefaultEntrypoint
         }
 
         $this->method = $method;
+    }
+
+    /**
+     * @return \Closure
+     */
+    public function getBuilderFn(): \Closure
+    {
+        return fn(mixed $current, DefaultEntrypoint $attrInstance): string => $attrInstance->method;
     }
 }

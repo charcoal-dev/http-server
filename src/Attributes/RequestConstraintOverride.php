@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Attributes;
 
+use Charcoal\Http\Server\Contracts\Controllers\ControllerAttributeInterface;
 use Charcoal\Http\Server\Enums\RequestConstraint;
 
 /**
@@ -17,7 +18,7 @@ use Charcoal\Http\Server\Enums\RequestConstraint;
  * 0 to 0xFFFFFFFF; otherwise, an exception will be thrown.
  */
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
-final readonly class RequestConstraintOverride
+final readonly class RequestConstraintOverride implements ControllerAttributeInterface
 {
     public function __construct(
         public RequestConstraint $constraint,
@@ -29,5 +30,16 @@ final readonly class RequestConstraintOverride
                 "Invalid value for request constraint " . $constraint->name . ": " . $value
             );
         }
+    }
+
+    /**
+     * @return \Closure
+     */
+    public function getBuilderFn(): \Closure
+    {
+        return function (array $current, RequestConstraintOverride $attrInstance): array {
+            $current[$attrInstance->constraint->name] = $attrInstance->value;
+            return $current;
+        };
     }
 }

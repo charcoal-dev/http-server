@@ -9,19 +9,10 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Contracts\Controllers;
 
 /**
- * Interface ControllerAttributeInterface
- * @package Charcoal\Http\Server\Contracts\Controllers
- * Todo: ???
+ * Interface for defining attributes associated with a controller.
+ * Provides methods to configure the behavior of the attributes.
  */
 interface ControllerAttributeInterface
 {
-    /**
-     * @return \UnitEnum
-     */
-    public function namespace(): \UnitEnum;
-
-    /**
-     * @return string[]
-     */
-    public function properties(): array;
+    public function getBuilderFn(): \Closure;
 }
