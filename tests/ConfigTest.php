@@ -1,7 +1,7 @@
 <?php
 /**
- * Part of the "charcoal-dev/http-router" package.
- * @link https://github.com/charcoal-dev/http-router
+ * Part of the "charcoal-dev/http-server" package.
+ * @link https://github.com/charcoal-dev/http-server
  */
 
 declare(strict_types=1);
@@ -12,6 +12,7 @@ use Charcoal\Http\Commons\Support\CorsPolicy;
 use Charcoal\Http\Server\Config\RequestConstraints;
 use Charcoal\Http\Server\Config\VirtualHost;
 use Charcoal\Http\Server\Config\ServerConfig;
+use Charcoal\Http\Server\Enums\ForwardingMode;
 use Charcoal\Http\TrustProxy\Config\TrustedProxy;
 use PHPUnit\Framework\TestCase;
 
@@ -33,8 +34,8 @@ final class ConfigTest extends TestCase
 
     public function testBuildsWithValidHostnamesAndProxiesAndDefaults(): void
     {
-        $s1 = new VirtualHost("example.com", false);
-        $s2 = new VirtualHost("*.example.com", false);
+        $s1 = new VirtualHost("example.com", 80, false, ForwardingMode::ReverseProxy);
+        $s2 = new VirtualHost("*.example.com", 80, false, ForwardingMode::ReverseProxy);
 
         $p1 = new readonly class(true, ["10.0.0.0/8"], "\x01\x02") extends TrustedProxy {
             public function __construct(bool $useForwarded, array $cidrList, private string $chk)
@@ -77,7 +78,7 @@ final class ConfigTest extends TestCase
 
     public function testAllowsEmptyProxiesWithHostnames(): void
     {
-        $s1 = new VirtualHost("example.com", false);
+        $s1 = new VirtualHost("example.com", 80, false, ForwardingMode::ReverseProxy);
         $cfg = new ServerConfig([$s1], [], $this->corsPolicy, $this->requestConstraints);
 
         $this->assertSame([$s1], $cfg->hostnames);
@@ -99,8 +100,8 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new VirtualHost("example.com", false);
-        $s2 = new VirtualHost("example.com", false);
+        $s1 = new VirtualHost("example.com", 80, false, ForwardingMode::ReverseProxy);
+        $s2 = new VirtualHost("example.com", 80, false, ForwardingMode::ReverseProxy);
 
         new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
     }
@@ -110,8 +111,8 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new VirtualHost("*.example.com", false);
-        $s2 = new VirtualHost("*.example.com", false);
+        $s1 = new VirtualHost("*.example.com", 80, false, ForwardingMode::ReverseProxy);
+        $s2 = new VirtualHost("*.example.com", 80, false, ForwardingMode::ReverseProxy);
 
         new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
     }
@@ -121,8 +122,8 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new VirtualHost("Example.COM", false);
-        $s2 = new VirtualHost("example.com", false);
+        $s1 = new VirtualHost("Example.COM", 80, false, ForwardingMode::ReverseProxy);
+        $s2 = new VirtualHost("example.com", 80, false, ForwardingMode::ReverseProxy);
 
         new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
     }
@@ -132,16 +133,16 @@ final class ConfigTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches("/Duplicate hostname/");
 
-        $s1 = new VirtualHost("example.com.", false);
-        $s2 = new VirtualHost("example.com", false);
+        $s1 = new VirtualHost("example.com.", 80, false, ForwardingMode::ReverseProxy);
+        $s2 = new VirtualHost("example.com", 80, false, ForwardingMode::ReverseProxy);
 
         new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
     }
 
     public function testAllowsSameBaseWithWildcardAndExact(): void
     {
-        $sExact = new VirtualHost("example.com", false);
-        $sWildcard = new VirtualHost("*.example.com", false);
+        $sExact = new VirtualHost("example.com", 80, false, ForwardingMode::ReverseProxy);
+        $sWildcard = new VirtualHost("*.example.com", 80, false, ForwardingMode::ReverseProxy);
 
         $cfg = new ServerConfig([$sExact, $sWildcard], [], $this->corsPolicy, $this->requestConstraints);
         $this->assertSame([$sExact, $sWildcard], $cfg->hostnames);
@@ -149,8 +150,8 @@ final class ConfigTest extends TestCase
 
     public function testAllowsWildcardAndSpecificSubdomainTogether(): void
     {
-        $sWildcard = new VirtualHost("*.example.com", false);
-        $sSub = new VirtualHost("api.example.com", false);
+        $sWildcard = new VirtualHost("*.example.com", 80, false, ForwardingMode::ReverseProxy);
+        $sSub = new VirtualHost("api.example.com", 80, false, ForwardingMode::ReverseProxy);
 
         $cfg = new ServerConfig([$sWildcard, $sSub], [], $this->corsPolicy, $this->requestConstraints);
         $this->assertSame([$sWildcard, $sSub], $cfg->hostnames);
@@ -158,8 +159,8 @@ final class ConfigTest extends TestCase
 
     public function testAllowsWwwAndNonWwwTogether(): void
     {
-        $s1 = new VirtualHost("www.example.com", false);
-        $s2 = new VirtualHost("example.com", false);
+        $s1 = new VirtualHost("www.example.com", 80, false, ForwardingMode::ReverseProxy);
+        $s2 = new VirtualHost("example.com", 80, false, ForwardingMode::ReverseProxy);
 
         $cfg = new ServerConfig([$s1, $s2], [], $this->corsPolicy, $this->requestConstraints);
         $this->assertSame([$s1, $s2], $cfg->hostnames);
@@ -229,7 +230,7 @@ final class ConfigTest extends TestCase
 
     public function testwwwSupportFlagExplicitFalse(): void
     {
-        $s = new VirtualHost("example.com", false);
+        $s = new VirtualHost("example.com", 80, false, ForwardingMode::ReverseProxy);
         $p = new TrustedProxy(true, ["10.0.0.0/8"]);
 
         $cfg = new ServerConfig([$s], [$p], $this->corsPolicy, $this->requestConstraints, true, false);
@@ -238,9 +239,9 @@ final class ConfigTest extends TestCase
 
     public function testPreservesOrderOfHostnamesAndProxies(): void
     {
-        $s1 = new VirtualHost("a.test", false);
-        $s2 = new VirtualHost("*.b.test", false);
-        $s3 = new VirtualHost("c.test", false);
+        $s1 = new VirtualHost("a.test", 80, false, ForwardingMode::ReverseProxy);
+        $s2 = new VirtualHost("*.b.test", 80, false, ForwardingMode::ReverseProxy);
+        $s3 = new VirtualHost("c.test", 80, false, ForwardingMode::ReverseProxy);
 
         $p1 = new TrustedProxy(true, ["10.0.0.0/8"]);
         $p2 = new TrustedProxy(true, ["192.168.0.0/16"]);
