@@ -10,7 +10,6 @@ namespace Charcoal\Http\Server\Contracts\Request;
 
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Headers\Headers;
-use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
