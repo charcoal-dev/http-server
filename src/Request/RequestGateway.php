@@ -212,7 +212,6 @@ final readonly class RequestGateway
 
         // Initiate Output Buffer
         $this->output = new WritablePayload();
-        // Todo: $this->input = UnsafePayload from Decoder Pipeline
     }
 
     /**
