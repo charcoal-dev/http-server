@@ -66,7 +66,6 @@ final readonly class RequestGateway
     private VirtualHost $host;
     private TrustGatewayResult $trustProxy;
     public WritablePayload $output;
-    public ?CacheControlDirectives $cacheControl;
 
     /**
      * @throws RequestGatewayException
@@ -417,18 +416,5 @@ final readonly class RequestGateway
 
             throw new RequestGatewayException(ControllerError::ExecutionFlow, $e);
         }
-    }
-
-    /**
-     * @param CacheControlDirectives $cacheControl
-     * @return void
-     */
-    public function setCacheControl(CacheControlDirectives $cacheControl): void
-    {
-        if (isset($this->cacheControl)) {
-            throw new \BadMethodCallException("Duplicate cache control directives");
-        }
-
-        $this->cacheControl = $cacheControl;
     }
 }

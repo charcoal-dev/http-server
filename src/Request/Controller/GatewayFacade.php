@@ -56,15 +56,6 @@ readonly class GatewayFacade implements ControllerApiInterface
     }
 
     /**
-     * @param CacheControlDirectives $cacheControl
-     * @return void
-     */
-    public function setCacheControl(CacheControlDirectives $cacheControl): void
-    {
-        $this->gateway->setCacheControl($cacheControl);
-    }
-
-    /**
      * @return ControllerAttributes
      */
     public function attributes(): ControllerAttributes

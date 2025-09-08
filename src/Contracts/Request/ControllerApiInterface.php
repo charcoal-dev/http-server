@@ -31,6 +31,4 @@ interface ControllerApiInterface
     public function headers(): Headers;
 
     public function enforceRequiredParams(): void;
-
-    public function setCacheControl(CacheControlDirectives $cacheControl): void;
 }
