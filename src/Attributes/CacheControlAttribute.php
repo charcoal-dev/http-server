@@ -16,7 +16,7 @@ use Charcoal\Http\Server\Contracts\Controllers\ControllerAttributeInterface;
  * Allows configuration of caching behavior when applied to a specific class.
  */
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
-final readonly class CacheControl implements ControllerAttributeInterface
+final readonly class CacheControlAttribute implements ControllerAttributeInterface
 {
     public function __construct(
         public CacheControlDirectives $cacheControl
@@ -34,7 +34,7 @@ final readonly class CacheControl implements ControllerAttributeInterface
     {
         return fn(
             mixed        $current,
-            CacheControl $attrInstance
+            CacheControlAttribute $attrInstance
         ): CacheControlDirectives => $attrInstance->cacheControl;
     }
 }

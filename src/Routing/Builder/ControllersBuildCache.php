@@ -260,11 +260,14 @@ final class ControllersBuildCache
     {
         $attribute = [];
 
+        // Read Attribute meta
+        $metaReflect = $this->getReflectionClass($attrClass)->getAttributes(\Attribute::class)[0] ?? null;
+        $metaReflectArgs = $metaReflect?->getArguments() ?? null;
+        $flags = $metaReflectArgs ? (int)($metaReflectArgs["flags"] ?? ($metaReflectArgs[0] ?? 0)) : 0;
+        $isRepeatable = (bool)($flags & \Attribute::IS_REPEATABLE);
+
         // On Class
         $onClass = $reflect->getAttributes($attrClass);
-        $flags = $onClass[0]->getArguments()[0] ?? null;
-        $isRepeatable = (bool)(($flags ?? 0) & \Attribute::IS_REPEATABLE);
-
         if ($onClass) {
             $attribute["__class"] = $isRepeatable ? [] : null;
             foreach ($onClass as $classAttr) {
@@ -277,11 +280,6 @@ final class ControllersBuildCache
         // On Methods
         foreach ($methods as $name => $reflectM) {
             $onMethod = $reflectM->getAttributes($attrClass);
-            if (is_null($flags)) {
-                $flags = $onMethod[0]->getArguments()[0] ?? 0;
-                $isRepeatable = (bool)($flags & \Attribute::IS_REPEATABLE);
-            }
-
             if ($onMethod) {
                 $attribute[$name] = $isRepeatable ? [] : null;
                 foreach ($onMethod as $methodAttr) {
