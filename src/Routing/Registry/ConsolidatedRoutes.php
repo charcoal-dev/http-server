@@ -90,7 +90,7 @@ final readonly class ConsolidatedRoutes
         // All entrypoint are now known!
         $controllersBuildCache = new ControllersBuildCache();
         foreach ($controllers as $classname => $methods) {
-            $controllersBuildCache->resolve($classname, null);
+            $controllersBuildCache->resolve($classname, array_unique($methods));
         }
 
         // Controllers are now validated!

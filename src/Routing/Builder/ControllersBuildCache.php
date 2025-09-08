@@ -43,7 +43,7 @@ final class ControllersBuildCache
      */
     public function set(string $fqcn, ControllerAttributes $reflection): void
     {
-        if($this->completed) {
+        if ($this->completed) {
             throw new \BadMethodCallException("ControllersBuildCache is already completed");
         }
 
@@ -61,7 +61,7 @@ final class ControllersBuildCache
      */
     public function resolve(string $fqcn, ?array $entryPoints): ControllerAttributes
     {
-        if($this->completed) {
+        if ($this->completed) {
             throw new \BadMethodCallException("ControllersBuildCache is already completed");
         }
 
@@ -69,7 +69,7 @@ final class ControllersBuildCache
         if (!$existing) {
             $entryPoints = is_array($entryPoints) ? array_unique($entryPoints) : null;
             if (!HttpServer::$validateControllerClasses) {
-                $this->set($fqcn, new ControllerAttributes($entryPoints, [], false));
+                $this->set($fqcn, new ControllerAttributes($fqcn, $entryPoints, [], false));
                 return $this->cache[$fqcn];
             }
 
@@ -181,6 +181,7 @@ final class ControllersBuildCache
             }
 
             $existing = new ControllerAttributes(
+                $fqcn,
                 $defaultEp ? null : $entryPoints,
                 $attributes,
                 true,

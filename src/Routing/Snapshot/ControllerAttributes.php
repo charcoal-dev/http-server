@@ -21,6 +21,7 @@ final readonly class ControllerAttributes
     public ?string $defaultEntrypoint;
 
     public function __construct(
+        public string $classname,
         public ?array $entryPoints,
         public array  $attributes,
         public bool   $validated
