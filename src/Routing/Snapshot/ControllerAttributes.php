@@ -8,9 +8,11 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Routing\Snapshot;
 
+use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Attributes\AllowedParam;
 use Charcoal\Http\Server\Attributes\AllowFileUpload;
 use Charcoal\Http\Server\Attributes\AllowTextBody;
+use Charcoal\Http\Server\Attributes\CacheControl;
 use Charcoal\Http\Server\Attributes\DisableRequestBody;
 use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
 use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
@@ -47,6 +49,12 @@ final readonly class ControllerAttributes
             RejectUnrecognizedParams::class, false,
             fn(mixed $current, RejectUnrecognizedParams $attrInstance): bool => $attrInstance->enforce
         );
+
+        // CacheControl
+        $map[ControllerAttribute::cacheControl->name] = $this->readClassMethodAttributes($reflect, $methods,
+            CacheControl::class,
+            false,
+            fn(mixed $current, CacheControl $attrInstance): CacheControlDirectives => $attrInstance->cacheControl);
 
         // Request constraints overrides
         $map[ControllerAttribute::constraints->name] = $this->readClassMethodAttributes($reflect, [],

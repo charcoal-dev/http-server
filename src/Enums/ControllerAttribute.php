@@ -20,4 +20,5 @@ enum ControllerAttribute
     case disableRequestBody;
     case allowFileUpload;
     case allowTextBody;
+    case cacheControl;
 }
