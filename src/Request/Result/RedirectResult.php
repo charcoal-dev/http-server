@@ -10,6 +10,7 @@ namespace Charcoal\Http\Server\Request\Result;
 
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Server\Internal\Constants;
+use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
 
 /**
  * Represents the result of a redirection, containing the redirect URL and associated headers.

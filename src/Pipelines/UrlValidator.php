@@ -10,7 +10,7 @@ namespace Charcoal\Http\Server\Pipelines;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Server\Contracts\Middleware\UrlValidatorPipeline;
-use Charcoal\Http\Server\Request\Result\RedirectUrl;
+use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
 
 /**
  * The UrlValidatorPipeline class provides functionality for validating URLs

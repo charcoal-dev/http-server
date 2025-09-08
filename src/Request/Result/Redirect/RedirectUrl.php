@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Server\Request\Result;
+namespace Charcoal\Http\Server\Request\Result\Redirect;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Server\Config\VirtualHost;

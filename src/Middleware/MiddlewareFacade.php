@@ -21,7 +21,7 @@ use Charcoal\Http\Server\Pipelines\UrlValidator;
 use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\RequestGateway;
-use Charcoal\Http\Server\Request\Result\RedirectUrl;
+use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
 
 /**
  * Represents a middleware facade responsible for managing and executing middleware pipelines.

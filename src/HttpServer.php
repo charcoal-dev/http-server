@@ -25,8 +25,9 @@ use Charcoal\Http\Server\Middleware\MiddlewareRegistry;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Request\Result\AbstractResult;
 use Charcoal\Http\Server\Request\Result\ErrorResult;
+use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
 use Charcoal\Http\Server\Request\Result\RedirectResult;
-use Charcoal\Http\Server\Request\Result\RedirectUrl;
+use Charcoal\Http\Server\Request\Result\Success\NoContentResponse;
 use Charcoal\Http\Server\Request\Result\SuccessResult;
 use Charcoal\Http\Server\Request\ServerRequest;
 use Charcoal\Http\Server\Routing\Router;
@@ -200,7 +201,7 @@ final class HttpServer implements ServerApiInterface
                 $params ?? []
             );
         } catch (PreFlightTerminateException) {
-            return new SuccessResult(204, $response, null);
+            return new SuccessResult(204, $response, new NoContentResponse());
         } catch (RequestGatewayException $e) {
             return new ErrorResult($response, $e->error, $e);
         }

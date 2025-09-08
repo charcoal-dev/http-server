@@ -10,7 +10,7 @@ namespace Charcoal\Http\Server\Exceptions;
 
 use Charcoal\Http\Server\Contracts\ExceptionHasErrorCodeInterface;
 use Charcoal\Http\Server\Contracts\RequestErrorCodeInterface;
-use Charcoal\Http\Server\Request\Result\RedirectUrl;
+use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
 
 /**
  * An exception specifically designed to handle errors related to the request context.

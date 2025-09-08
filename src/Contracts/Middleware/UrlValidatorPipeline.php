@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Contracts\Middleware;
 
 use Charcoal\Http\Commons\Url\UrlInfo;
-use Charcoal\Http\Server\Request\Result\RedirectUrl;
+use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
 
 /**
  * Represents an interface for validating URLs.

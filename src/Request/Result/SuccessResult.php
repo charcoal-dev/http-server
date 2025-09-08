@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Request\Result;
 
-use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Headers\Headers;
+use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 
 /**
  * Represents a successful result of an operation with associated HTTP status code,
@@ -20,12 +20,10 @@ readonly class SuccessResult extends AbstractResult
     public function __construct(
         int              $statusCode,
         Headers          $headers,
-        ?WritablePayload $payload,
+        SuccessResponseInterface $response,
     )
     {
-        // Todo: Compile final body from payload
-
         $headers->set("Content-Length", (string)strlen($this->body ?? ""));
-        parent::__construct($statusCode, $headers, $payload);
+        parent::__construct($statusCode, $headers);
     }
 }
