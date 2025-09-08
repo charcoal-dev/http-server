@@ -43,11 +43,10 @@ final readonly class ServerConfig
                 throw new \InvalidArgumentException("Required instance of: " . VirtualHost::class);
             }
 
-            $indexId = $hostname->hostname;
+            $indexId = $hostname->hostname . ":" . $hostname->port;
             if ($hostname->wildcard) $indexId = "*." . $indexId;
-            if ($hostname->isSecure) $indexId .= "_ssl";
             if (isset($checked[$indexId])) {
-                throw new \InvalidArgumentException("Duplicate hostname: " . $indexId);
+                throw new \InvalidArgumentException("Duplicate hostname/port at index: " . $indexId);
             }
 
             $checked[$indexId] = true;
@@ -76,10 +75,19 @@ final readonly class ServerConfig
     /**
      * @param string $hostname
      * @param int|null $port
+     * @param string $scheme
      * @return VirtualHost|null
      */
-    public function matchHostname(string $hostname, ?int $port): ?VirtualHost
+    public function matchHostname(string $hostname, ?int $port, string $scheme): ?VirtualHost
     {
+        if(!in_array($scheme, ["http", "https"])) {
+            throw new \InvalidArgumentException("Invalid scheme: " . $scheme);
+        }
+
+        if(is_null($port)) {
+            $port = "https" === $scheme ? 443 : 80;
+        }
+
         if ($this->wwwSupport && str_starts_with($hostname, "www.")) {
             $hostname = substr($hostname, 4);
         }

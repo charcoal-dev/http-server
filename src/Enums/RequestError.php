@@ -21,6 +21,7 @@ enum RequestError implements RequestErrorCodeInterface
 
     /** @for=Peer */
     case BadPeerIp;
+    case ForwardingIpBlocked;
     case IncorrectHost;
     case TlsEnforced;
 

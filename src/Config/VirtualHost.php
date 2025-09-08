@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Config;
 
+use Charcoal\Http\Server\Enums\ForwardingMode;
 use Charcoal\Net\Dns\HostnameHelper;
 use Charcoal\Net\Ip\IpHelper;
 
@@ -20,9 +21,13 @@ final readonly class VirtualHost
     public string $hostname;
     public bool $wildcard;
     public bool $isIpAddress;
-    public ?array $ports;
 
-    public function __construct(string $hostname, public bool $isSecure, int ...$ports)
+    public function __construct(
+        string                $hostname,
+        public int            $port,
+        public bool           $isSecure,
+        public ForwardingMode $forwarding,
+    )
     {
         $hostname = str_ends_with($hostname, ".") ? substr($hostname, 0, -1) : $hostname;
         $this->wildcard = str_starts_with($hostname, "*.");
@@ -44,25 +49,21 @@ final readonly class VirtualHost
             }
         }
 
-        if ($ports) {
-            foreach ($ports as $port) {
-                if ($port < 1 || $port > 0xffff) {
-                    throw new \OutOfRangeException("Invalid port: " . $port);
-                }
-            }
-
-            $ports = array_values(array_unique($ports));
+        if ($this->port < 1 || $this->port > 0xffff) {
+            throw new \OutOfRangeException("Invalid port: " . $port);
         }
-
-        $this->ports = $ports ?: null;
     }
 
     /**
      * Checks if the given hostname and port match the stored configuration.
      * Expects the hostname to be lowercased and "www." prefix already removed.
      */
-    public function matches(string $hostname, ?int $port): bool
+    public function matches(string $hostname, int $port): bool
     {
+        if ($this->port !== $port) {
+            return false;
+        }
+
         if ($this->wildcard) {
             $hostname = explode(".", $hostname);
             unset($hostname[0]);
@@ -73,10 +74,6 @@ final readonly class VirtualHost
             return false;
         }
 
-        if (!$port) {
-            return true;
-        }
-
-        return !$this->ports || in_array($port, $this->ports);
+        return true;
     }
 }
