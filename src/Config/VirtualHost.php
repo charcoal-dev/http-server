@@ -27,6 +27,7 @@ final readonly class VirtualHost
         public int            $port,
         public bool           $isSecure,
         public ForwardingMode $forwarding,
+        public bool           $allowInternal = false
     )
     {
         $hostname = str_ends_with($hostname, ".") ? substr($hostname, 0, -1) : $hostname;
