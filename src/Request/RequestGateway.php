@@ -19,7 +19,6 @@ use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\Headers;
-use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Commons\Support\CorsPolicy;
 use Charcoal\Http\Commons\Support\HttpHelper;
 use Charcoal\Http\Server\Config\RequestConstraints;
@@ -353,7 +352,6 @@ final readonly class RequestGateway
             throw new RequestGatewayException(RequestError::MalformedBody, $e->getPrevious());
         }
     }
-
 
     /**
      * @param ControllerAttribute $attr
