@@ -9,14 +9,13 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Routing\Registry;
 
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
-use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Internal\Constants;
+use Charcoal\Http\Server\Routing\Builder\ControllersBuildCache;
 use Charcoal\Http\Server\Routing\HttpRoutes;
 use Charcoal\Http\Server\Routing\Group\AbstractRouteGroup;
 use Charcoal\Http\Server\Routing\Snapshot\RoutingSnapshot;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
-use Charcoal\Http\Server\Routing\Snapshot\ControllerContext;
 
 /**
  * Represents a consolidated view of application routes.
@@ -26,10 +25,10 @@ final readonly class ConsolidatedRoutes
 {
     /** @var array<string, list<Route|AbstractRouteGroup>> */
     public array $declared;
-    /** @var array<class-string<ControllerInterface>,ControllerContext> */
-    public array $controllers;
     /** @var array<string,<array<string,class-string<ControllerInterface>>> */
     public array $entryPoints;
+
+    public ControllersBuildCache $controllers;
 
     /**
      * @param AbstractRouteGroup $group
@@ -89,27 +88,18 @@ final readonly class ConsolidatedRoutes
         }
 
         // All entrypoint are now known!
-        $validatedControllers = [];
+        $controllersBuildCache = new ControllersBuildCache();
         foreach ($controllers as $classname => $methods) {
-            if (isset($validatedControllers[$classname])) {
-                continue;
-            }
-
-            $validatedControllers[$classname] = new ControllerContext(
-                $classname,
-                $methods,
-                !HttpServer::$validateControllerClasses
-            );
+            $controllersBuildCache->resolve($classname, null);
         }
 
         // Controllers are now validated!
-        $this->controllers = $validatedControllers;
+        $this->controllers = $controllersBuildCache->complete();
         $this->entryPoints = $routeMap;
     }
 
     /**
      * Creates a snapshot of the currently declared routes along with their bindings.
-     *
      * @return RoutingSnapshot The snapshot containing all route paths and their associated controller bindings.
      */
     public function snapshot(): RoutingSnapshot
@@ -125,7 +115,7 @@ final readonly class ConsolidatedRoutes
                 }
 
                 $pathBindings[] = new RouteControllerBinding(
-                    $this->controllers[$route->classname],
+                    $this->controllers->get($route->classname),
                     $route->methods?->getArray() ?? true
                 );
             }

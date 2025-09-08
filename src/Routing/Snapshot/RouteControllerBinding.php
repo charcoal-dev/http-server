@@ -19,8 +19,8 @@ use Charcoal\Http\Commons\Enums\HttpMethod;
 final readonly class RouteControllerBinding
 {
     public function __construct(
-        public ControllerContext $controller,
-        public array|true        $methods,
+        public ControllerAttributes $controller,
+        public array|true           $methods,
     )
     {
     }
