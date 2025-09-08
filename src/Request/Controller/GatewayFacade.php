@@ -8,12 +8,14 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Request\Controller;
 
+use Charcoal\Contracts\Buffers\ReadableBufferInterface;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Contracts\Request\ControllerApiInterface;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\ControllerError;
+use Charcoal\Http\Server\Exceptions\Controllers\BypassEncodingException;
 use Charcoal\Http\Server\Exceptions\RequestGatewayException;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
@@ -98,5 +100,14 @@ readonly class GatewayFacade implements ControllerApiInterface
                 throw new RequestGatewayException(ControllerError::UnrecognizedParam, null);
             }
         }
+    }
+
+    /**
+     * @throws BypassEncodingException
+     * @api
+     */
+    public function sendResponseBypassEncoding(ReadableBufferInterface $buffer, int $statusCode = 200): never
+    {
+        throw new BypassEncodingException($buffer, $statusCode);
     }
 }
