@@ -53,10 +53,10 @@ final readonly class EncodedBufferResponse implements SuccessResponseInterface
                 default => false,
             };
 
-            $contentType = $charset ? "; charset=" . match ($this->charset) {
+            $contentType .= ($charset ? "; charset=" . match ($this->charset) {
                     Charset::ASCII => "US-ASCII",
                     default => $this->charset->value,
-                } : "";
+                } : "");
         }
 
         $headers->set("Content-Type", $contentType);
