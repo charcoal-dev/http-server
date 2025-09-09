@@ -290,10 +290,6 @@ final class ControllersBuildCache
                 /** @var ControllerAttributeInterface $classAttr */
                 $attribute["__class"] = $classAttr->getBuilderFn()($attribute["__class"], $classAttr);
             }
-
-            if (is_array($attribute["__class"]) && array_is_list($attribute["__class"])) {
-                $attribute["__class"] = array_unique($attribute["__class"]);
-            }
         }
 
         // On Methods
@@ -311,10 +307,6 @@ final class ControllersBuildCache
                     $methodAttr = $methodAttr->newInstance();
                     /** @var ControllerAttributeInterface $classAttr */
                     $attribute[$name] = $methodAttr->getBuilderFn()($attribute[$name], $methodAttr);
-                }
-
-                if (is_array($attribute[$name]) && array_is_list($attribute[$name])) {
-                    $attribute[$name] = array_unique($attribute[$name]);
                 }
             }
         }
