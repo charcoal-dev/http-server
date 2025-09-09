@@ -14,7 +14,7 @@ namespace Charcoal\Http\Server\Internal;
  */
 interface Constants
 {
-    public const string CHARCOAL_HTTP_SERVER = "Charcoal HTTP Server/0.2.0";
+    public const string CHARCOAL_HTTP_SERVER = "Charcoal/0.2.0";
 
     /**
      * Hard limits for request body and file uploads
