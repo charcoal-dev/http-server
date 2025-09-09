@@ -18,6 +18,7 @@ enum ControllerError implements RequestErrorCodeInterface
 {
     case ExecutionFlow;
     case UnrecognizedParam;
+    case RedundantResponseFinalized;
 
     /** @for= Domain/User-end Triggered */
     case ValidationException;
@@ -25,7 +26,8 @@ enum ControllerError implements RequestErrorCodeInterface
     public function getStatusCode(): int
     {
         return match ($this) {
-            self::ExecutionFlow => 500,
+            self::ExecutionFlow,
+            self::RedundantResponseFinalized => 500,
             default => 400,
         };
     }
