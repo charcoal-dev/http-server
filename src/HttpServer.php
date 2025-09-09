@@ -129,6 +129,7 @@ final class HttpServer implements ServerApiInterface
 
         // Check configured trusted proxies CIDR for the peer IP & host
         try {
+            $env = $env ?? new ServerEnv();
             $trustProxy = TrustGateway::establishTrust($this->config->proxies, $env ?? new ServerEnv());
         } catch (\Exception $e) {
             return new ErrorResult($response, RequestError::BadPeerIp, $e);
@@ -138,13 +139,7 @@ final class HttpServer implements ServerApiInterface
             strtolower(trim($trustProxy->hostname)), $trustProxy->port, $trustProxy->scheme);
         if (!$virtualHost) {
             return new ErrorResult($response, RequestError::IncorrectHost,
-                new HostnamePortMismatchException(
-                    $trustProxy->clientIp,
-                    $trustProxy->proxy,
-                    $trustProxy->scheme,
-                    $trustProxy->hostname,
-                    $trustProxy->port
-                ));
+                HostnamePortMismatchException::withContext($env, $trustProxy));
         }
 
         if (!filter_var($trustProxy->clientIp, FILTER_VALIDATE_IP,
