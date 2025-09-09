@@ -36,6 +36,7 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
     {
         $cache = new ControllersBuildCache();
         $controller = $cache->resolve(BasicAttributeController::class, ["get", "post"]);
+        $attrSplId = spl_object_id($controller);
 
         // Test class-level cache control
         $cacheControl = $controller->getAttributeFor(ControllerAttribute::cacheControl, null);
@@ -76,6 +77,9 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, null));
         $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "get"));
         $this->assertFalse($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "post"));
+
+        // Test cache control is not rebuilt for each request
+        $this->assertEquals($attrSplId, spl_object_id($controller));
     }
 
     public function testMethodAttributeOverrides(): void
