@@ -159,6 +159,7 @@ final readonly class RequestGateway
         // Initialize Request Facade
         $this->requestFacade = new RequestFacade(
             $this->responseHeaders->get("X-Request-ID"),
+            $this->trustProxy->clientIp,
             $this->request->method,
             $this->request->headers,
             new QueryParams(explode("#", explode("?",
@@ -409,7 +410,7 @@ final readonly class RequestGateway
      */
     public function executeController(): SuccessResponseInterface
     {
-        $gatewayFacade = $this->middleware->controllerGatewayFacadePipeline($this);
+        $gatewayFacade = $this->middleware->controllerGatewayFacadePipeline($this, $this->host, $this->trustProxy);
         $controllerContext = $this->routeController->controller;
 
         $gatewayFacade->enforceRequiredParams();

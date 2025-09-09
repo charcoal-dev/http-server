@@ -34,6 +34,7 @@ final readonly class RequestFacade
 
     public function __construct(
         public string            $requestId,
+        public string            $clientIp,
         public HttpMethod        $method,
         public HeadersImmutable  $headers,
         public QueryParams       $queryParams,
