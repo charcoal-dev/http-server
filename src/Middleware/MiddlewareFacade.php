@@ -79,6 +79,7 @@ final readonly class MiddlewareFacade
      */
     public function requestBodyDecoderPipeline(
         RequestFacade $request,
+        bool          $bodyDisabled,
         false|array   $allowFileUpload,
         int           $maxBodyBytes,
         int           $maxParams,
@@ -89,7 +90,7 @@ final readonly class MiddlewareFacade
     {
         return $this->registry->execute(Pipeline::Request_BodyDecoder,
             RequestBodyDecoder::class,
-            [$request, $allowFileUpload, $maxBodyBytes, $maxParams, $maxParamLength, $maxDepth, $body]
+            [$request, $bodyDisabled, $allowFileUpload, $maxBodyBytes, $maxParams, $maxParamLength, $maxDepth, $body]
         );
     }
 }

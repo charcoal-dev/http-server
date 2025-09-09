@@ -29,6 +29,7 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
 {
     /**
      * @param RequestFacade $request
+     * @param bool $bodyDisabled
      * @param false|array $allowFileUpload
      * @param int $maxBodyBytes
      * @param int $maxParams
@@ -39,6 +40,7 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
      */
     final public function __invoke(
         RequestFacade $request,
+        bool          $bodyDisabled,
         false|array   $allowFileUpload,
         int           $maxBodyBytes,
         int           $maxParams,
@@ -72,6 +74,10 @@ class RequestBodyDecoder implements RequestBodyDecoderPipeline
             }
 
             return null;
+        }
+
+        if ($bodyDisabled) {
+            throw new \DomainException("Request body is disabled", 6);
         }
 
         // File Uploads

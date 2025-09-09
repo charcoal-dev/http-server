@@ -262,6 +262,11 @@ final readonly class RequestGateway
      */
     public function parseRequestBody(): void
     {
+        $bodyDisabled = $this->getControllerAttribute(ControllerAttribute::disableRequestBody);
+        if ($bodyDisabled) {
+            $bodyDisabled = !(($this->getControllerAttribute(ControllerAttribute::enableRequestBody) === true));
+        }
+
         $allowFileUpload = $this->getControllerAttribute(ControllerAttribute::allowFileUpload) ?: false;
         $maxBodyBytes = $this->getConstraintOverride(RequestConstraint::maxBodyBytes);
         $maxParams = $this->getConstraintOverride(RequestConstraint::maxParams);
@@ -271,6 +276,7 @@ final readonly class RequestGateway
         try {
             $decoded = $this->middleware->requestBodyDecoderPipeline(
                 $this->requestFacade,
+                $bodyDisabled,
                 $allowFileUpload,
                 $maxBodyBytes,
                 $maxParams,
@@ -284,6 +290,7 @@ final readonly class RequestGateway
                 $e instanceof \UnderflowException => RequestError::MalformedBody,
                 $e instanceof \LengthException => RequestError::BodyRequired,
                 $e instanceof \DomainException => match ($e->getCode()) {
+                    6 => RequestError::BodyDisabled,
                     5 => RequestError::UnsupportedTransferEncoding,
                     4 => RequestError::UnsupportedContentEncoding,
                     3 => RequestError::BadBodyCharset,
@@ -296,8 +303,18 @@ final readonly class RequestGateway
             throw new RequestGatewayException($errorCode, $e);
         }
 
+        if ($decoded && $bodyDisabled) {
+            throw new RequestGatewayException(RequestError::BodyDisabled,
+                new \RuntimeException("Body disabled; Middleware returned " . get_debug_type($decoded)));
+        }
+
         // Got Body?
         if ($decoded instanceof Buffer) {
+            if (!$this->getControllerAttribute(ControllerAttribute::allowTextBody)) {
+                throw new RequestGatewayException(RequestError::BadContentType,
+                    new \RuntimeException("Text body disabled; Middleware returned " . get_debug_type($decoded)));
+            }
+
             if ($decoded->length() > $maxBodyBytes) {
                 throw new RequestGatewayException(RequestError::ContentOverflow, null);
             }

@@ -19,6 +19,7 @@ interface RequestBodyDecoderPipeline extends PipelineMiddlewareInterface
 {
     /**
      * @param RequestFacade $request
+     * @param bool $bodyDisabled
      * @param array{size: int}|false $allowFileUpload
      * @param int $maxBodyBytes
      * @param int $maxParams
@@ -29,6 +30,7 @@ interface RequestBodyDecoderPipeline extends PipelineMiddlewareInterface
      */
     public function __invoke(
         RequestFacade $request,
+        bool          $bodyDisabled,
         false|array   $allowFileUpload,
         int           $maxBodyBytes,
         int           $maxParams,
