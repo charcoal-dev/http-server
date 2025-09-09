@@ -342,7 +342,7 @@ final readonly class RequestGateway
             try {
                 array_walk_recursive($decoded, function ($value, $key) use ($maxParamLength) {
                     if (is_string($value)) {
-                        if (!is_string($key) || !AsciiHelper::isPrintableOnly($value) || preg_match("/\s/", $value)) {
+                        if (!is_string($key) || !AsciiHelper::isPrintableOnly($key) || preg_match("/\s/", $key)) {
                             throw new \InvalidArgumentException("Invalid param key received");
                         }
 
@@ -363,9 +363,9 @@ final readonly class RequestGateway
 
         // File Upload?
         if ($decoded instanceof FileUpload) {
-            if (!$allowFileUpload || $allowFileUpload["size"] >= $decoded->size) {
+            if (!$allowFileUpload || $decoded->size > $allowFileUpload["size"]) {
                 throw new RequestGatewayException(RequestError::FileUploadDisabled,
-                    throw new \RuntimeException("File upload disabled or exceeds maximum size"));
+                    new \RuntimeException("File upload disabled or exceeds maximum size"));
             }
         }
 
