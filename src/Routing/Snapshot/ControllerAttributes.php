@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Routing\Snapshot;
 
+use Charcoal\Base\Arrays\ArrayHelper;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
 
 /**
@@ -53,7 +54,10 @@ final readonly class ControllerAttributes
      * @param string|null $entrypoint
      * @return array
      */
-    public function getAggregatedAttributeFor(ControllerAttribute|string $attr, ?string $entrypoint): array
+    public function getAggregatedAttributeFor(
+        ControllerAttribute|string $attr,
+        ?string                    $entrypoint
+    ): array
     {
         if ($attr instanceof ControllerAttribute) {
             $attr = $attr->name;
