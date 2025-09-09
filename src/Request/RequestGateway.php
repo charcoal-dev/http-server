@@ -38,6 +38,7 @@ use Charcoal\Http\Server\Exceptions\Controllers\ValidationException;
 use Charcoal\Http\Server\Exceptions\Internal\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
 use Charcoal\Http\Server\Exceptions\Internal\Response\ResponseFinalizedInterrupt;
+use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
@@ -412,6 +413,11 @@ final readonly class RequestGateway
         $controllerContext = $this->routeController->controller;
 
         $gatewayFacade->enforceRequiredParams();
+
+        if (HttpServer::$enableOutputBuffering
+            && (HttpServer::$outputBufferToStdErr || HttpServer::$outputBufferToStdOut)) {
+            ob_start();
+        }
 
         try {
             try {

@@ -28,11 +28,31 @@ trait ServerBehaviourTrait
     public static bool $useErrorLogForStdErr = true;
 
     /**
-     * @param array|string $messages
-     * @param string $header
-     * @return void
+     * @internal
      */
-    public static function writeToStdErr(
+    public static function flushOutputBuffer(): false|array
+    {
+        if (!self::$enableOutputBuffering) {
+            return false;
+        }
+
+        $buffered = ob_get_level() > 0 ? ob_get_clean() : false;
+        if (!$buffered) {
+            return false;
+        }
+
+        $buffered = preg_split("/\r\n|\r|\n/", $buffered);
+        if (self::$outputBufferToStdErr) {
+            self::writeToStdErr($buffered);
+        }
+
+        return $buffered;
+    }
+
+    /**
+     * @internal
+     */
+    private static function writeToStdErr(
         array|string $messages,
         string       $header = "Charcoal HTTP Server:"
     ): void
