@@ -97,28 +97,32 @@ final class ControllersBuildCache
             $attributes = [];
             $epReflections = [];
 
-            // Override Class Default Entrypoint, (bump [__class] as the primary value)
-//            if (isset($attributes[ControllerAttribute::defaultEntrypoint->name])) {
-//                if ($attributes[ControllerAttribute::defaultEntrypoint->name]) {
-//                    $attributes[ControllerAttribute::defaultEntrypoint->name] =
-//                        $attributes[ControllerAttribute::defaultEntrypoint->name]["__class"];
-//                }
-//            }
-
             // Resolve Inherited Chain
             [$chain, $inherited] = $this->aggregateInheritedAttributes($fqcn);
             $hasParent = $chain > 0;
             $attributes["__parent"] = $hasParent ? $inherited : null;
+            $defaultEpBase = $this->readControllerAttributes(
+                $reflection,
+                [],
+                ControllerAttribute::defaultEntrypoint,
+                $attributes
+            )["__class"] ?? null;
 
-            // Interface check:
-            // Ensures top level class implement ControllerInterface
+            if ($defaultEpBase) {
+                $attributes[ControllerAttribute::defaultEntrypoint->name] = $defaultEpBase;
+            }
+
+            // [SanityCheck]: Ensure top level class implement ControllerInterface
             if (!$hasParent && !$reflection->implementsInterface(ControllerInterface::class)) {
                 throw new \InvalidArgumentException(
                     "Controller class does not implement ControllerInterface: " . $fqcn);
             }
 
             // Has Default Entrypoint?
-            $defaultEp = $attributes[ControllerAttribute::defaultEntrypoint->name] ?? null;
+            $defaultEp = $attributes[ControllerAttribute::defaultEntrypoint->name]
+                ?? $attributes["__parent"][ControllerAttribute::defaultEntrypoint->name]
+                ?? null;
+
             if ($reflection->implementsInterface(InvokableControllerInterface::class)) {
                 if ($defaultEp) {
                     throw new \InvalidArgumentException(
@@ -195,9 +199,6 @@ final class ControllersBuildCache
             if ($isAbstract) {
                 $this->abstracts[] = $fqcn;
             }
-
-            // Final Reshaping
-
 
             $existing = new ControllerAttributes(
                 $fqcn,
