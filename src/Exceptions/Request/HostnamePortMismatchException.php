@@ -31,6 +31,13 @@ final class HostnamePortMismatchException extends \Exception implements Exceptio
             "proxy" => [
                 "hop" => $proxyResult->proxyHop,
                 "matched" => $proxyResult->proxy
+            ],
+            "headers" => [
+                "Forwarded" => $env->getForwardedHeader(),
+                "X-Forwarded-For" => $env->getXForwardedFor(),
+                "X-Forwarded-Proto" => $env->getXForwardedHeaders()[0] ?? null,
+                "X-Forwarded-Host" => $env->getXForwardedHeaders()[1] ?? null,
+                "X-Forwarded-Port" => $env->getXForwardedHeaders()[2] ?? null,
             ]
         ]);
     }
