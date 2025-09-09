@@ -136,8 +136,8 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
 
         // Request Constraints test
         $this->assertNull($this->getRequestConstraint($controller, RequestConstraint::maxParamLength));
-        $this->assertEquals(789, $this->getRequestConstraint($controller, RequestConstraint::dtoMaxDepth));
-        $this->assertEquals(456, $this->getRequestConstraint($controller, RequestConstraint::maxBodyBytes));
+        $this->assertEquals(12, $this->getRequestConstraint($controller, RequestConstraint::dtoMaxDepth));
+        $this->assertEquals(4567, $this->getRequestConstraint($controller, RequestConstraint::maxBodyBytes));
         $this->assertEquals(789, $this->getRequestConstraint($controller, RequestConstraint::maxParams));
     }
 

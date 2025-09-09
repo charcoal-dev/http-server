@@ -16,7 +16,7 @@ use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
 use Charcoal\Http\Server\Enums\RequestConstraint;
 
 #[CacheControlAttribute(new CacheControlDirectives(CacheControl::Private, maxAge: 0, noCache: true))]
-#[RequestConstraintOverride(RequestConstraint::dtoMaxDepth, 789)]
+#[RequestConstraintOverride(RequestConstraint::dtoMaxDepth, 12)]
 final class ConcreteInheritanceController extends AbstractApiController
 {
     public function get(): void

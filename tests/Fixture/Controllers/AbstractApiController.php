@@ -14,7 +14,7 @@ use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
 use Charcoal\Http\Server\Enums\RequestConstraint;
 
 #[AllowedParam(["format", "version"])]
-#[RequestConstraintOverride(RequestConstraint::maxBodyBytes, 456)]
+#[RequestConstraintOverride(RequestConstraint::maxBodyBytes, 4567)]
 abstract class AbstractApiController extends AbstractBaseController
 {
     #[EnableRequestBody]
