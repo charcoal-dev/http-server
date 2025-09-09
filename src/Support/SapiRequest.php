@@ -119,11 +119,13 @@ abstract readonly class SapiRequest
 
     /**
      * Handle success result by printing the body.
-     * @throws ResponseBytesDispatchedException
      */
     protected static function handleSuccessResult(SuccessResult $result): void
     {
-        $result->response->send();
+        try {
+            $result->response->send();
+        } catch (ResponseBytesDispatchedException) {
+        }
     }
 
     /**
