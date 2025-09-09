@@ -269,7 +269,7 @@ final readonly class RequestGateway
      */
     public function parseRequestBody(): void
     {
-        $bodyDisabled = $this->getControllerAttribute(ControllerAttribute::disableRequestBody);
+        $bodyDisabled = $this->getControllerAttribute(ControllerAttribute::disableRequestBody) ?: false;
         if ($bodyDisabled) {
             $bodyDisabled = !(($this->getControllerAttribute(ControllerAttribute::enableRequestBody) === true));
         }
