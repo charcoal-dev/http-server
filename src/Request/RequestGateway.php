@@ -15,7 +15,6 @@ use Charcoal\Base\Objects\Traits\NotCloneableTrait;
 use Charcoal\Base\Objects\Traits\NotSerializableTrait;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Charsets\Support\AsciiHelper;
-use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\Headers;
@@ -41,6 +40,7 @@ use Charcoal\Http\Server\Exceptions\Internal\Response\ResponseFinalizedInterrupt
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Request\Controller\ResponseFacade;
 use Charcoal\Http\Server\Request\Files\FileUpload;
 use Charcoal\Http\Server\Request\Result\Success\EncodedBufferResponse;
 use Charcoal\Http\Server\Request\Result\Success\NoContentResponse;
@@ -65,9 +65,8 @@ final readonly class RequestGateway
     public RequestFacade $requestFacade;
     public RouteControllerBinding $routeController;
     public string $controllerEp;
-    public WritablePayload $output;
+    public ResponseFacade $response;
     private ?SuccessResponseInterface $finalizedResponse;
-    private int $responseStatusCode;
 
     private VirtualHost $host;
     private TrustGatewayResult $trustProxy;
@@ -214,8 +213,8 @@ final readonly class RequestGateway
 
         $this->controllerEp = $entryPoint;
 
-        // Initiate Output Buffer
-        $this->output = new WritablePayload();
+        // Initiate Response Facade
+        $this->response = new ResponseFacade();
     }
 
     /**
@@ -459,22 +458,19 @@ final readonly class RequestGateway
             return $this->finalizedResponse;
         }
 
-        if (!isset($this->responseStatusCode)) {
-            $this->responseStatusCode = 200;
-        }
-
-        if ($this->output->count() === 0) {
-            return new NoContentResponse($this->responseStatusCode);
+        if ($this->response->count() === 0) {
+            return new NoContentResponse($this->response->getStatusCode());
         }
 
         // Todo: Encode the response
 
         return new EncodedBufferResponse(
-            $this->responseStatusCode,
+            $this->response->getStatusCode(),
             false,
             $encodedBody,
-            true,
-
+            $this->response->isCacheable(),
+            $this->response->getContentType(),
+            $this->response->charset
         );
     }
 
@@ -499,18 +495,5 @@ final readonly class RequestGateway
     public function isResponseFinalized(): bool
     {
         return isset($this->finalizedResponse);
-    }
-
-    /**
-     * @throws RequestGatewayException
-     */
-    public function setStatusCode(int $statusCode): void
-    {
-        if (isset($this->responseStatusCode)) {
-            throw new RequestGatewayException(ControllerError::RedundantResponseFinalized,
-                new \RuntimeException("Status code was already set; Redundant duplicate call"));
-        }
-
-        $this->responseStatusCode = $statusCode;
     }
 }

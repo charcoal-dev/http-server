@@ -10,7 +10,6 @@ namespace Charcoal\Http\Server\Request\Controller;
 
 use Charcoal\Contracts\Buffers\ReadableBufferInterface;
 use Charcoal\Contracts\Charsets\Charset;
-use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Contracts\ContentTypeEnumInterface;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Headers\Headers;
@@ -45,9 +44,9 @@ readonly class GatewayFacade implements ControllerApiInterface
     /**
      * Returns the response object.
      */
-    public function response(): WritablePayload
+    public function response(): ResponseFacade
     {
-        return $this->gateway->output;
+        return $this->gateway->response;
     }
 
     /**
@@ -98,15 +97,6 @@ readonly class GatewayFacade implements ControllerApiInterface
                 throw new RequestGatewayException(ControllerError::UnrecognizedParam, null);
             }
         }
-    }
-
-    /**
-     * @throws RequestGatewayException
-     * @api
-     */
-    public function setStatusCode(int $statusCode): void
-    {
-        $this->gateway->setStatusCode($statusCode);
     }
 
     /**
