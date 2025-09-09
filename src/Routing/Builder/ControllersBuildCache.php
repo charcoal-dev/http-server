@@ -175,6 +175,23 @@ final class ControllersBuildCache
                 }
             }
 
+            // Sanity Checks
+            if (isset($attributes[ControllerAttribute::disableRequestBody->name])) {
+                $bodyDisabledIn = array_keys($attributes[ControllerAttribute::disableRequestBody->name]);
+                foreach ([ControllerAttribute::enableRequestBody,
+                             ControllerAttribute::allowFileUpload,
+                             ControllerAttribute::allowTextBody] as $enablingAttr) {
+                    $enabledBodyIn = array_keys($attributes[$enablingAttr->name] ?? []);
+                    $intersect = array_intersect($bodyDisabledIn, $enabledBodyIn);
+                    if ($intersect) {
+                        throw new \InvalidArgumentException(
+                            "Controller attribute " . $enablingAttr->name . " cannot be used with " .
+                            ControllerAttribute::disableRequestBody->name . " in: " . $fqcn . "::" .
+                            implode(", ", $intersect));
+                    }
+                }
+            }
+
             if ($isAbstract) {
                 $this->abstracts[] = $fqcn;
             }
