@@ -8,10 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Routing\Builder;
 
-use Charcoal\Base\Arrays\ArrayHelper;
 use Charcoal\Base\Objects\Traits\NotCloneableTrait;
 use Charcoal\Base\Objects\Traits\NotSerializableTrait;
-use Charcoal\Http\Server\Attributes\DefaultEntrypoint;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerAttributeInterface;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
@@ -98,23 +96,18 @@ final class ControllersBuildCache
             $attributes = [];
             $epReflections = [];
 
-            // Default Entrypoint
-            $attributes[ControllerAttribute::defaultEntrypoint->name] = $this->readControllerAttributes(
-                $reflection,
-                [],
-                DefaultEntrypoint::class
-            );
-
             // Override Class Default Entrypoint, (bump [__class] as the primary value)
-            if (isset($attributes[ControllerAttribute::defaultEntrypoint->name])) {
-                $attributes[ControllerAttribute::defaultEntrypoint->name] =
-                    $attributes[ControllerAttribute::defaultEntrypoint->name]["__class"];
-            }
+//            if (isset($attributes[ControllerAttribute::defaultEntrypoint->name])) {
+//                if ($attributes[ControllerAttribute::defaultEntrypoint->name]) {
+//                    $attributes[ControllerAttribute::defaultEntrypoint->name] =
+//                        $attributes[ControllerAttribute::defaultEntrypoint->name]["__class"];
+//                }
+//            }
 
             // Resolve Inherited Chain
-            [$chain, $inherited] = $this->aggregateInheritedAttributes($reflection);
+            [$chain, $inherited] = $this->aggregateInheritedAttributes($fqcn);
             $hasParent = $chain > 0;
-            $attributes["__parent"] = $inherited ?: null;
+            $attributes["__parent"] = $hasParent ? $inherited : null;
 
             // Interface check:
             // Ensures top level class implement ControllerInterface
@@ -165,15 +158,15 @@ final class ControllersBuildCache
 
             // Read all registered Attributes
             foreach (ControllerAttribute::cases() as $attr) {
-                if ($attr === ControllerAttribute::defaultEntrypoint) {
-                    continue; // Skip
-                }
-
-                $attributes[$attr->name] = $this->readControllerAttributes(
+                $attrDeclared = $this->readControllerAttributes(
                     $reflection,
                     $epReflections,
                     $attr->value
                 );
+
+                if ($attrDeclared) {
+                    $attributes[$attr->name] = $attrDeclared;
+                }
             }
 
             if ($isAbstract) {
@@ -225,22 +218,27 @@ final class ControllersBuildCache
     }
 
     /**
-     * @param \ReflectionClass $reflection
-     * @return array
+     * @param class-string<ControllerInterface> $fqcn
+     * @return array<int, array>
      */
-    private function aggregateInheritedAttributes(\ReflectionClass $reflection): array
+    private function aggregateInheritedAttributes(string $fqcn): array
     {
+        $reflection = $this->getReflectionClass($fqcn);
+
         $chain = 0;
         $inherited = [];
         while (true) {
-            $parent = $reflection->getParentClass();
-            if (!$parent) {
+            $reflection = $reflection->getParentClass();
+            if (!$reflection) {
                 break;
             }
 
             $chain++;
-            $parent = $this->resolve($parent->getName(), null);
-            $inherited = ArrayHelper::mergeAssocDeep($inherited, $parent->attributes);
+            $attributes = $this->resolve($reflection->getName(), null);
+            $parentAttributes = $attributes->attributes;
+            unset($parentAttributes["__parent"]);
+            $inherited = array_merge_recursive($inherited, $parentAttributes);
+            unset($attributes, $parentAttributes);
         }
 
         return [$chain, $inherited];

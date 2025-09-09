@@ -41,14 +41,37 @@ final readonly class ControllerAttributes
             $attr = $attr->name;
         }
 
-        return $entrypoint !== null
-            ? ($this->attributes[$attr][$entrypoint]
-                ?? $this->attributes[$attr]["__class"]
-                ?? $this->attributes["__parent"][$attr][$entrypoint]
-                ?? $this->attributes["__parent"][$attr]["__class"]
-                ?? null)
-            : ($this->attributes[$attr]["__class"]
-                ?? $this->attributes["__parent"][$attr]["__class"]
-                ?? null);
+        return ($entrypoint ? ($this->attributes[$attr][$entrypoint] ?? null) : null)
+            ?? $this->attributes[$attr]["__class"]
+            ?? ($entrypoint ? ($this->attributes["__parent"][$attr][$entrypoint] ?? null) : null)
+            ?? $this->attributes["__parent"][$attr]["__class"]
+            ?? null;
+    }
+
+    /**
+     * @param ControllerAttribute|string $attr
+     * @param string|null $entrypoint
+     * @return array
+     */
+    public function getAggregatedAttributeFor(ControllerAttribute|string $attr, ?string $entrypoint): array
+    {
+        if ($attr instanceof ControllerAttribute) {
+            $attr = $attr->name;
+        }
+
+        $nodes = [];
+        $nodes[] = $entrypoint ? ($this->attributes[$attr][$entrypoint] ?? null) : null;
+        $nodes[] = $this->attributes[$attr]["__class"] ?? null;
+        if ($this->attributes["__parent"]) {
+            $nodes[] = $entrypoint ? ($this->attributes["__parent"][$attr][$entrypoint] ?? null) : null;
+            $nodes[] = $this->attributes["__parent"][$attr]["__class"] ?? null;
+        }
+
+        $nodes = array_filter($nodes, fn($node) => $node && is_array($node));
+        if (!$nodes) {
+            return [];
+        }
+
+        return array_merge_recursive(...$nodes);
     }
 }

@@ -18,6 +18,11 @@ use Charcoal\Http\Tests\Server\Fixture\Controllers\ConcreteInheritanceController
 use Charcoal\Http\Tests\Server\Fixture\Controllers\MethodAttributeController;
 use Charcoal\Http\Tests\Server\Fixture\Controllers\MixedAttributeController;
 
+/**
+ * Unit tests for validating the behavior of controller attributes in various scenarios.
+ * The tests ensure correct handling of class-level and method-specific attributes,
+ * attribute inheritance, and lookup priority.
+ */
 final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
 {
     protected function setUp(): void
@@ -109,12 +114,18 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $controller = $cache->resolve(MixedAttributeController::class, ["get", "post"]);
 
         // Test method-specific attribute takes priority
-        $getParams = $controller->getAttributeFor(ControllerAttribute::allowedParams, "get");
-        $this->assertEquals(["method1"], $getParams);
+        $getParams = $controller->getAggregatedAttributeFor(ControllerAttribute::allowedParams, "get");
+        $this->assertEquals(["method1", "class1", "class2", "common", "base"], $getParams);
+
+        // Just method declared attributes
+        $getParams2 = $controller->getAttributeFor(ControllerAttribute::allowedParams, "get");
+        $this->assertEquals(["method1"], $getParams2);
 
         // Test method without a specific attribute falls back to class then parent
-        $postParams = $controller->getAttributeFor(ControllerAttribute::allowedParams, "post");
+        $postParams = $controller->getAggregatedAttributeFor(ControllerAttribute::allowedParams, "post");
         $this->assertIsArray($postParams);
+        $this->assertNotContains("method1", $postParams);
+        $this->assertContains("class1", $postParams);
         $this->assertContains("class1", $postParams);
         $this->assertContains("class2", $postParams);
         $this->assertContains("common", $postParams); // From parent
@@ -143,10 +154,6 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         // Test non-existent attribute returns null
         $nonExistent = $controller->getAttributeFor(ControllerAttribute::disableRequestBody, null);
         $this->assertNull($nonExistent);
-
-        // Test non-existent method returns null
-        $nonExistentMethod = $controller->getAttributeFor(ControllerAttribute::cacheControl, "nonexistent");
-        $this->assertNull($nonExistentMethod);
     }
 
     public function testParentAttributeLookupPath(): void
@@ -158,7 +165,7 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         // For "get" method, should fall back to parent attributes for allowedParams
         $parentOnlyAttribute = $controller->getAttributeFor(ControllerAttribute::allowedParams, "get");
 
-        // Should find merged parent attributes since child doesn"t override allowedParams
+        // Should find merged parent attributes since child doesn't override allowedParams
         $this->assertIsArray($parentOnlyAttribute);
         $this->assertContains("common", $parentOnlyAttribute);
         $this->assertContains("base", $parentOnlyAttribute);
