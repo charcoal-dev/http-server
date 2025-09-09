@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Request\Result;
 
 use Charcoal\Http\Commons\Headers\Headers;
+use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 
 /**
@@ -18,11 +19,16 @@ use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 readonly class SuccessResult extends AbstractResult
 {
     public function __construct(
-        Headers                  $headers,
-        SuccessResponseInterface $response,
+        Headers                         $headers,
+        public SuccessResponseInterface $response,
+        public ?CacheControlDirectives  $cacheControl
     )
     {
         $response->setHeaders($headers);
+        if ($this->cacheControl && $this->response->isCacheable()) {
+            $headers->set("Cache-Control", implode(", ", $this->cacheControl->directives));
+        }
+
         parent::__construct($response->getStatusCode(), $headers);
     }
 }

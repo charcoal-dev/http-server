@@ -14,6 +14,7 @@ use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Enums\HttpProtocol;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Url\UrlInfo;
+use Charcoal\Http\Server\Exceptions\Request\ResponseBytesDispatchedException;
 use Charcoal\Http\Server\Request\Result\AbstractResult;
 use Charcoal\Http\Server\Request\Result\ErrorResult;
 use Charcoal\Http\Server\Request\Result\RedirectResult;
@@ -85,6 +86,7 @@ abstract readonly class SapiRequest
      * This is an optional helper method, use this or implement your own logic following this.
      * Sends an HTTP response based on the provided result object, including status code,
      * headers, and response body. Handles redirects and errors as specific cases.
+     * @throws ResponseBytesDispatchedException
      * @api
      */
     final public static function serveResult(AbstractResult $result): never
@@ -113,11 +115,11 @@ abstract readonly class SapiRequest
 
     /**
      * Handle success result by printing the body.
-     * @api Extend this method to handle success cases.
+     * @throws ResponseBytesDispatchedException
      */
     protected static function handleSuccessResult(SuccessResult $result): void
     {
-        print $result->body;
+        $result->response->send();
     }
 
     /**

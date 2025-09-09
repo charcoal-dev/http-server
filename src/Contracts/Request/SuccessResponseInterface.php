@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Contracts\Request;
 
 use Charcoal\Http\Commons\Headers\Headers;
+use Charcoal\Http\Server\Exceptions\Request\ResponseBytesDispatchedException;
 
 /**
  * Represents an interface for a success response.
@@ -22,5 +23,9 @@ interface SuccessResponseInterface
 
     public function setHeaders(Headers $headers): void;
 
+    /**
+     * @return never
+     * @throws ResponseBytesDispatchedException
+     */
     public function send(): never;
 }

@@ -14,6 +14,7 @@ use Charcoal\Contracts\Sapi\SapiType;
 use Charcoal\Contracts\Sapi\ServerApiInterface;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Server\Config\ServerConfig;
+use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Exceptions\Internal\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
@@ -201,7 +202,11 @@ final class HttpServer implements ServerApiInterface
                 $params ?? []
             );
         } catch (PreFlightTerminateException) {
-            return new SuccessResult($response, new NoContentResponse(204));
+            return new SuccessResult(
+                $response,
+                new NoContentResponse(204),
+                $requestGateway->getControllerAttribute(ControllerAttribute::cacheControl) ?: null
+            );
         } catch (RequestGatewayException $e) {
             return new ErrorResult($response, $e->error, $e);
         }
@@ -226,7 +231,11 @@ final class HttpServer implements ServerApiInterface
             return new ErrorResult($response, $e->error, $e);
         }
 
-        return new SuccessResult($requestGateway->responseHeaders, $response);
+        return new SuccessResult(
+            $requestGateway->responseHeaders,
+            $response,
+            $requestGateway->getControllerAttribute(ControllerAttribute::cacheControl) ?: null
+        );
     }
 
     /**
