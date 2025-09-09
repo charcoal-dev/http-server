@@ -10,6 +10,9 @@ namespace Charcoal\Http\Server\Middleware;
 
 use Charcoal\Base\Dataset\BatchEnvelope;
 use Charcoal\Buffers\Buffer;
+use Charcoal\Contracts\Charsets\Charset;
+use Charcoal\Http\Commons\Body\PayloadImmutable;
+use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
@@ -17,11 +20,13 @@ use Charcoal\Http\Server\Enums\Pipeline;
 use Charcoal\Http\Server\Pipelines\ControllerGatewayFacadeResolver;
 use Charcoal\Http\Server\Pipelines\RequestBodyDecoder;
 use Charcoal\Http\Server\Pipelines\RequestHeadersValidator;
+use Charcoal\Http\Server\Pipelines\ResponseBodyEncoder;
 use Charcoal\Http\Server\Pipelines\UrlValidator;
 use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
+use Charcoal\Http\Server\Request\Result\Response\EncodedResponseBody;
 
 /**
  * Represents a middleware facade responsible for managing and executing middleware pipelines.
@@ -91,6 +96,21 @@ final readonly class MiddlewareFacade
         return $this->registry->execute(Pipeline::Request_BodyDecoder,
             RequestBodyDecoder::class,
             [$request, $bodyDisabled, $allowFileUpload, $maxBodyBytes, $maxParams, $maxParamLength, $maxDepth, $body]
+        );
+    }
+
+    /**
+     * Encodes the response body using the specified pipeline and encoder class.
+     */
+    public function responseBodyEncoderPipeline(
+        ContentType      $contentType,
+        Charset          $charset,
+        PayloadImmutable $response
+    ): EncodedResponseBody
+    {
+        return $this->registry->execute(Pipeline::Response_BodyEncoder,
+            ResponseBodyEncoder::class,
+            [$contentType, $charset, $response]
         );
     }
 }

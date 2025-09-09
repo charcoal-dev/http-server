@@ -27,7 +27,7 @@ use Charcoal\Http\Server\Request\Result\AbstractResult;
 use Charcoal\Http\Server\Request\Result\ErrorResult;
 use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
 use Charcoal\Http\Server\Request\Result\RedirectResult;
-use Charcoal\Http\Server\Request\Result\Success\NoContentResponse;
+use Charcoal\Http\Server\Request\Result\Response\NoContentResponse;
 use Charcoal\Http\Server\Request\Result\SuccessResult;
 use Charcoal\Http\Server\Request\ServerRequest;
 use Charcoal\Http\Server\Routing\Router;

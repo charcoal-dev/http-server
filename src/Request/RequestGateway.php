@@ -15,6 +15,7 @@ use Charcoal\Base\Objects\Traits\NotCloneableTrait;
 use Charcoal\Base\Objects\Traits\NotSerializableTrait;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Charsets\Support\AsciiHelper;
+use Charcoal\Http\Commons\Body\PayloadImmutable;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\Headers;
@@ -42,8 +43,9 @@ use Charcoal\Http\Server\Request\Bags\QueryParams;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\Controller\ResponseFacade;
 use Charcoal\Http\Server\Request\Files\FileUpload;
-use Charcoal\Http\Server\Request\Result\Success\EncodedBufferResponse;
-use Charcoal\Http\Server\Request\Result\Success\NoContentResponse;
+use Charcoal\Http\Server\Request\Result\Response\EncodedBufferResponse;
+use Charcoal\Http\Server\Request\Result\Response\EncodedResponseBody;
+use Charcoal\Http\Server\Request\Result\Response\NoContentResponse;
 use Charcoal\Http\Server\Routing\Router;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
@@ -459,19 +461,38 @@ final readonly class RequestGateway
         }
 
         if ($this->response->count() === 0) {
-            return new NoContentResponse($this->response->getStatusCode());
+            $this->setFinalizedResponse(new NoContentResponse($this->response->getStatusCode()));
+            return $this->finalizedResponse;
         }
 
-        // Todo: Encode the response
-
-        return new EncodedBufferResponse(
+        $encodedBody = $this->encodeResponseBody();
+        $this->setFinalizedResponse(new EncodedBufferResponse(
             $this->response->getStatusCode(),
             false,
-            $encodedBody,
+            $encodedBody->buffer,
             $this->response->isCacheable(),
-            $this->response->getContentType(),
-            $this->response->charset
-        );
+            $encodedBody->contentType,
+            $encodedBody->charset
+        ));
+
+        return $this->finalizedResponse;
+    }
+
+    /**
+     * @return EncodedResponseBody
+     * @throws RequestGatewayException
+     */
+    private function encodeResponseBody(): EncodedResponseBody
+    {
+        try {
+            return $this->middleware->responseBodyEncoderPipeline(
+                $this->response->getContentType(),
+                $this->response->charset,
+                new PayloadImmutable($this->response)
+            );
+        } catch (\Exception $e) {
+            throw new RequestGatewayException(RequestError::ResponseEncodeError, $e);
+        }
     }
 
     /**
