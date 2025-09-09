@@ -75,7 +75,6 @@ readonly class GatewayFacade implements ControllerApiInterface
 
     /**
      * Checks for unrecognized parameters if the configuration dictates, and throws an exception if any are found.
-     * Is automatically called when controller has single entrypoint.
      * @throws RequestGatewayException
      */
     public function enforceRequiredParams(): void
@@ -87,7 +86,10 @@ readonly class GatewayFacade implements ControllerApiInterface
         $this->enforcedRequiredParams = true;
         if ($this->getAttribute(ControllerAttribute::rejectUnrecognizedParams) === true) {
             $unrecognized = $this->request()->payload
-                ->getUnrecognizedKeys(...$this->getAttribute(ControllerAttribute::allowedParams, aggregated: true));
+                ->getUnrecognizedKeys(...$this->getAttribute(
+                    ControllerAttribute::allowedParams,
+                    aggregated: true
+                ) ?? []);
             if (!empty($unrecognized)) {
                 throw new RequestGatewayException(ControllerError::UnrecognizedParam, null);
             }

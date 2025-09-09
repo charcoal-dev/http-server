@@ -406,14 +406,11 @@ final readonly class RequestGateway
         $controllerContext = $this->routeController->controller;
 
         try {
+            $gatewayFacade->enforceRequiredParams();
+
             $controller = new $controllerContext->classname($this);
             if ($controller instanceof BeforeEntrypointCallback) {
                 $controller->beforeEntrypointCallback($gatewayFacade);
-            }
-
-            // Single Entrypoint?
-            if (count($controllerContext->entryPoints) === 1) {
-                $gatewayFacade->enforceRequiredParams();
             }
 
             if ($controller instanceof InvokableControllerInterface) {
