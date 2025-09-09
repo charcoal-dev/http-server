@@ -17,7 +17,7 @@ use Charcoal\Http\Server\Request\Result\Success\EncodedBufferResponse;
 use Charcoal\Http\Server\Request\Result\Success\NoContentResponse;
 
 /**
- * Exception thrown when there is an issue bypassing encoding for a provided response body.
+ * Interrupt during controller execution to bypass the encoding process.
  */
 final class BypassEncodingException extends ResponseFinalizedException
 {
@@ -39,6 +39,7 @@ final class BypassEncodingException extends ResponseFinalizedException
         }
 
         return new EncodedBufferResponse(
+            statusCode: $this->statusCode,
             bypassedEncoder: true,
             buffer: new BufferImmutable($this->responseBody->bytes()),
             isCacheable: $this->isCacheable,

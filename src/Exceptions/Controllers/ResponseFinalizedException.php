@@ -11,7 +11,7 @@ namespace Charcoal\Http\Server\Exceptions\Controllers;
 use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 
 /**
- * Represents an exception thrown when an attempt is made to modify a response that has already been finalized.
+ * Interrupt during controller execution to finalize the response.
  */
 abstract class ResponseFinalizedException extends \Exception
 {

@@ -40,6 +40,7 @@ final class RequestGatewayException extends \Exception implements ExceptionHasEr
      * @param RequestErrorCodeInterface $error
      * @param RedirectUrl $redirectTo
      * @return self
+     * @api
      */
     public static function forRedirect(RequestErrorCodeInterface $error, RedirectUrl $redirectTo): self
     {
