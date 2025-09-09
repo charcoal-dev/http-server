@@ -10,8 +10,10 @@ namespace Charcoal\Http\Tests\Server;
 
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
+use Charcoal\Http\Server\Enums\RequestConstraint;
 use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Routing\Builder\ControllersBuildCache;
+use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
 use Charcoal\Http\Tests\Server\Fixture\Controllers\AbstractBaseController;
 use Charcoal\Http\Tests\Server\Fixture\Controllers\BasicAttributeController;
 use Charcoal\Http\Tests\Server\Fixture\Controllers\ConcreteInheritanceController;
@@ -50,6 +52,25 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(CacheControlDirectives::class, $methodCache);
         $this->assertContains("public", $methodCache->directives);
         $this->assertContains("max-age=300", $methodCache->directives);
+
+        // Request Constraints test
+        $requestConstraints = $controller->getAttributeFor(ControllerAttribute::constraints, null);
+        $this->assertEquals([
+            RequestConstraint::maxParamLength->name => 123,
+            RequestConstraint::maxBodyBytes->name => 456
+        ], $requestConstraints);
+
+        // getAggregatedAttributeFor + pseudo entrypoint
+        $this->assertEquals([
+            RequestConstraint::maxParamLength->name => 123,
+            RequestConstraint::maxBodyBytes->name => 456
+        ], $controller->getAggregatedAttributeFor(ControllerAttribute::constraints, "get"));
+
+        // Is body disabled? (DisableRequestBody is not declared in this controller)
+        $this->assertFalse($this->isBodyDisabled($controller, null));
+        $this->assertFalse($this->isBodyDisabled($controller, "get"));
+        $this->assertFalse($this->isBodyDisabled($controller, "post"));
+        $this->assertFalse($this->isBodyDisabled($controller, "nonexistent"));
     }
 
     public function testMethodAttributeOverrides(): void
@@ -79,6 +100,12 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         // Test method without attributes returns null
         $getParams = $controller->getAttributeFor(ControllerAttribute::allowedParams, "get");
         $this->assertNull($getParams);
+
+        // Is body disabled? (DisableRequestBody is not declared in this controller)
+        $this->assertTrue($this->isBodyDisabled($controller, null));
+        $this->assertTrue($this->isBodyDisabled($controller, "get"));
+        $this->assertFalse($this->isBodyDisabled($controller, "post"));
+        $this->assertTrue($this->isBodyDisabled($controller, "nonexistent"));
     }
 
     public function testInheritanceChain(): void
@@ -106,6 +133,12 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("private", $postCache->directives);
         $this->assertContains("max-age=1800", $postCache->directives);
         $this->assertNotContains("no-cache", $postCache->directives); // Method doesn't have no-cache
+
+        // Request Constraints test
+        $this->assertNull($this->getRequestConstraint($controller, RequestConstraint::maxParamLength));
+        $this->assertEquals(789, $this->getRequestConstraint($controller, RequestConstraint::dtoMaxDepth));
+        $this->assertEquals(456, $this->getRequestConstraint($controller, RequestConstraint::maxBodyBytes));
+        $this->assertEquals(789, $this->getRequestConstraint($controller, RequestConstraint::maxParams));
     }
 
     public function testLookupPriority(): void
@@ -171,5 +204,26 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("base", $parentOnlyAttribute);
         $this->assertContains("format", $parentOnlyAttribute);
         $this->assertContains("version", $parentOnlyAttribute);
+    }
+
+    private function isBodyDisabled(ControllerAttributes $controller, ?string $entrypoint): bool
+    {
+        $disabled = $controller->getAttributeFor(ControllerAttribute::disableRequestBody, $entrypoint) ?? false;
+        if ($disabled) {
+            return !(($controller->getAttributeFor(ControllerAttribute::enableRequestBody, $entrypoint) === true));
+        }
+
+        return false;
+    }
+
+    private function getRequestConstraint(ControllerAttributes $controller, RequestConstraint $constraint): ?int
+    {
+        $constraints = $controller->getAggregatedAttributeFor(ControllerAttribute::constraints, null);
+        $value = $constraints[$constraint->name] ?? null;
+        if (is_array($value)) {
+            return $value[0] ?? null;
+        }
+
+        return $value;
     }
 }

@@ -359,7 +359,7 @@ final readonly class RequestGateway
      */
     public function getControllerAttribute(ControllerAttribute $attr): mixed
     {
-        return $this->routeController->controller->attributes->getAttributeFor($attr, $this->controllerEp);
+        return $this->routeController->controller->getAttributeFor($attr, $this->controllerEp);
     }
 
     /**

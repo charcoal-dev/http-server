@@ -12,8 +12,11 @@ use Charcoal\Http\Commons\Enums\CacheControl;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Attributes\AllowedParam;
 use Charcoal\Http\Server\Attributes\CacheControlAttribute;
+use Charcoal\Http\Server\Attributes\DisableRequestBody;
+use Charcoal\Http\Server\Attributes\EnableRequestBody;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 
+#[DisableRequestBody]
 final class MethodAttributeController implements ControllerInterface
 {
     #[CacheControlAttribute(new CacheControlDirectives(CacheControl::Public, maxAge: 3600))]
@@ -22,6 +25,7 @@ final class MethodAttributeController implements ControllerInterface
     }
 
     #[AllowedParam(["filter"])]
+    #[EnableRequestBody]
     #[CacheControlAttribute(new CacheControlDirectives(CacheControl::NoStore))]
     public function post(): void
     {

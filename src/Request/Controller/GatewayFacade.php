@@ -11,7 +11,6 @@ namespace Charcoal\Http\Server\Request\Controller;
 use Charcoal\Contracts\Buffers\ReadableBufferInterface;
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Headers\Headers;
-use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Contracts\Request\ControllerApiInterface;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\ControllerError;
@@ -60,7 +59,7 @@ readonly class GatewayFacade implements ControllerApiInterface
      */
     public function attributes(): ControllerAttributes
     {
-        return $this->gateway->routeController->controller->attributes;
+        return $this->gateway->routeController->controller;
     }
 
     /**
@@ -74,6 +73,7 @@ readonly class GatewayFacade implements ControllerApiInterface
 
     /**
      * Checks for unrecognized parameters if the configuration dictates, and throws an exception if any are found.
+     * Is automatically called when controller has single entrypoint.
      * @throws RequestGatewayException
      */
     public function enforceRequiredParams(): void
