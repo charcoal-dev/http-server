@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Contracts\Controllers\Hooks;
 
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
+use Charcoal\Http\Server\Exceptions\Controllers\ResponseFinalizedException;
 use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 
 /**
@@ -16,5 +17,10 @@ use Charcoal\Http\Server\Request\Controller\GatewayFacade;
  */
 interface AfterEntrypointCallback extends ControllerInterface
 {
+    /**
+     * @param GatewayFacade $request
+     * @return void
+     * @throws ResponseFinalizedException
+     */
     public function afterEntrypointCallback(GatewayFacade $request): void;
 }

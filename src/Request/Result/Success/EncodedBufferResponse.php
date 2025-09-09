@@ -23,6 +23,7 @@ use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 final readonly class EncodedBufferResponse implements SuccessResponseInterface
 {
     public function __construct(
+        public bool            $bypassedEncoder,
         public BufferImmutable $buffer,
         public bool            $isCacheable,
         public ContentType     $contentType = ContentType::Text,
@@ -31,6 +32,10 @@ final readonly class EncodedBufferResponse implements SuccessResponseInterface
     {
     }
 
+    /**
+     * @param Headers $headers
+     * @return void
+     */
     public function setHeaders(Headers $headers): void
     {
         $contentType = $this->contentType->value;
@@ -56,11 +61,17 @@ final readonly class EncodedBufferResponse implements SuccessResponseInterface
         $headers->set("Content-Length", (string)$this->buffer->length());
     }
 
+    /**
+     * @return bool
+     */
     public function isCacheable(): bool
     {
         return $this->isCacheable;
     }
 
+    /**
+     * @return void
+     */
     public function send(): void
     {
         print($this->buffer->bytes());
