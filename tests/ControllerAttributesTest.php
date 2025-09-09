@@ -202,12 +202,18 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
 
         // Should find merged parent attributes since child doesn't override allowedParams
         $this->assertIsArray($parentOnlyAttribute);
+        $this->assertCount(4, $parentOnlyAttribute);
         $this->assertContains("common", $parentOnlyAttribute);
         $this->assertContains("base", $parentOnlyAttribute);
         $this->assertContains("format", $parentOnlyAttribute);
         $this->assertContains("version", $parentOnlyAttribute);
 
         $this->assertTrue($this->isBodyDisabled($controller, null));
+        $this->assertTrue($this->isBodyDisabled($controller, "get"));
+        $this->assertFalse($this->isBodyDisabled($controller, "post"));
+        $this->assertFalse($this->isBodyDisabled($controller, "put"));
+        $this->assertTrue($this->isBodyDisabled($controller, "nonexistent"));
+
     }
 
     private function isBodyDisabled(ControllerAttributes $controller, ?string $entrypoint): bool
