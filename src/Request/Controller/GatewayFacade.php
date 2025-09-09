@@ -64,11 +64,13 @@ readonly class GatewayFacade implements ControllerApiInterface
 
     /**
      * @param ControllerAttribute|string $attr
+     * @param bool $aggregated
      * @return mixed
      */
-    public function getAttribute(ControllerAttribute|string $attr): mixed
+    public function getAttribute(ControllerAttribute|string $attr, bool $aggregated = false): mixed
     {
-        return $this->attributes()->getAttributeFor($attr, $this->gateway->controllerEp);
+        return $aggregated ? $this->attributes()->getAggregatedAttributeFor($attr, $this->gateway->controllerEp)
+            : $this->attributes()->getAttributeFor($attr, $this->gateway->controllerEp);
     }
 
     /**
@@ -83,10 +85,9 @@ readonly class GatewayFacade implements ControllerApiInterface
         }
 
         $this->enforcedRequiredParams = true;
-        if ($this->getAttribute(ControllerAttribute::rejectUnrecognizedParams)) {
-            $unrecognized = $this->request()
-                ->payload
-                ->getUnrecognizedKeys(...$this->getAttribute(ControllerAttribute::allowedParams));
+        if ($this->getAttribute(ControllerAttribute::rejectUnrecognizedParams) === true) {
+            $unrecognized = $this->request()->payload
+                ->getUnrecognizedKeys(...$this->getAttribute(ControllerAttribute::allowedParams, aggregated: true));
             if (!empty($unrecognized)) {
                 throw new RequestGatewayException(ControllerError::UnrecognizedParam, null);
             }
