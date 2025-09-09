@@ -25,6 +25,9 @@
     "ext-ctype": "*",
     "ext-mbstring": "*"
   },
+  "suggest": {
+    "ext-simplexml": "*"
+  },
   "autoload": {
     "psr-4": {
       "Charcoal\\Http\\Server\\": [

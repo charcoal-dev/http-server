@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Exceptions\Internal\Response;
 
 use Charcoal\Http\Commons\Contracts\ContentTypeEnumInterface;
-use Charcoal\Http\Server\Request\Result\Success\FileDownloadResponse;
+use Charcoal\Http\Server\Request\Result\Response\FileDownloadResponse;
 
 /**
  * Interrupt during controller execution to trigger a file download.

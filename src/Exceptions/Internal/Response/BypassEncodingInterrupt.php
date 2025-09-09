@@ -13,8 +13,8 @@ use Charcoal\Contracts\Buffers\ReadableBufferInterface;
 use Charcoal\Contracts\Charsets\Charset;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
-use Charcoal\Http\Server\Request\Result\Success\EncodedBufferResponse;
-use Charcoal\Http\Server\Request\Result\Success\NoContentResponse;
+use Charcoal\Http\Server\Request\Result\Response\EncodedBufferResponse;
+use Charcoal\Http\Server\Request\Result\Response\NoContentResponse;
 
 /**
  * Interrupt during controller execution to bypass the encoding process.

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Server\Request\Result\Success;
+namespace Charcoal\Http\Server\Request\Result\Response;
 
 use Charcoal\Buffers\BufferImmutable;
 use Charcoal\Contracts\Charsets\Charset;
