@@ -11,6 +11,7 @@ namespace Charcoal\Http\Tests\Server\Fixture\Controllers;
 use Charcoal\Http\Commons\Enums\CacheControl;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Attributes\AllowedParam;
+use Charcoal\Http\Server\Attributes\AllowTextBody;
 use Charcoal\Http\Server\Attributes\CacheControlAttribute;
 use Charcoal\Http\Server\Attributes\DisableRequestBody;
 use Charcoal\Http\Server\Attributes\EnableRequestBody;
@@ -22,6 +23,7 @@ final class MethodAttributeController implements ControllerInterface
 {
     #[CacheControlAttribute(new CacheControlDirectives(CacheControl::Public, maxAge: 3600))]
     #[RejectUnrecognizedParams(true)]
+    #[AllowTextBody]
     public function get(): void
     {
     }

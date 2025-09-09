@@ -121,6 +121,11 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, null));
         $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "get"));
         $this->assertFalse($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "post"));
+
+        // Text Body?
+        $this->assertNull($controller->getAttributeFor(ControllerAttribute::allowTextBody, "null"));
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::allowTextBody, "get"));
+        $this->assertNull($controller->getAttributeFor(ControllerAttribute::allowTextBody, "post"));
     }
 
     public function testInheritanceChain(): void
