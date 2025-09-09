@@ -16,7 +16,6 @@ use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
  * An exception specifically designed to handle errors related to the request context.
  * It extends the base Exception class and provides additional details such as the request error instance
  * and an optional redirect target.
- * @internal
  */
 final class RequestGatewayException extends \Exception implements ExceptionHasErrorCodeInterface
 {
