@@ -71,6 +71,11 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->isBodyDisabled($controller, "get"));
         $this->assertFalse($this->isBodyDisabled($controller, "post"));
         $this->assertFalse($this->isBodyDisabled($controller, "nonexistent"));
+
+        // Rejects Unrecognized Params?
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, null));
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "get"));
+        $this->assertFalse($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "post"));
     }
 
     public function testMethodAttributeOverrides(): void
@@ -106,6 +111,12 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($this->isBodyDisabled($controller, "get"));
         $this->assertFalse($this->isBodyDisabled($controller, "post"));
         $this->assertTrue($this->isBodyDisabled($controller, "nonexistent"));
+
+        // Rejects Unrecognized Params?
+        // No class-level declaration, therefore NULL default
+        $this->assertNull($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, null));
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "get"));
+        $this->assertFalse($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "post"));
     }
 
     public function testInheritanceChain(): void
@@ -139,6 +150,8 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(12, $this->getRequestConstraint($controller, RequestConstraint::dtoMaxDepth));
         $this->assertEquals(4567, $this->getRequestConstraint($controller, RequestConstraint::maxBodyBytes));
         $this->assertEquals(789, $this->getRequestConstraint($controller, RequestConstraint::maxParams));
+
+        // Rejects Unrecognized Params
     }
 
     public function testLookupPriority(): void
@@ -163,6 +176,14 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("class2", $postParams);
         $this->assertContains("common", $postParams); // From parent
         $this->assertContains("base", $postParams);   // From parent
+
+        // RejectUnrecognizedParams=true in parent class
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, null));
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "post"));
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "nonExistent"));
+
+        // RejectUnrecognizedParams=false in method
+        $this->assertFalse($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "get"));
     }
 
     public function testAbstractClassAttributes(): void
@@ -179,6 +200,9 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("max-age=600", $cacheControl->directives);
 
         $this->assertTrue($this->isBodyDisabled($abstractController, null));
+
+        $rejectsUnrecognizedParams = $abstractController->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, null);
+        $this->assertTrue($rejectsUnrecognizedParams);
     }
 
     public function testNonExistentAttributes(): void
@@ -213,7 +237,6 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->isBodyDisabled($controller, "post"));
         $this->assertFalse($this->isBodyDisabled($controller, "put"));
         $this->assertTrue($this->isBodyDisabled($controller, "nonexistent"));
-
     }
 
     private function isBodyDisabled(ControllerAttributes $controller, ?string $entrypoint): bool

@@ -14,12 +14,14 @@ use Charcoal\Http\Server\Attributes\AllowedParam;
 use Charcoal\Http\Server\Attributes\CacheControlAttribute;
 use Charcoal\Http\Server\Attributes\DisableRequestBody;
 use Charcoal\Http\Server\Attributes\EnableRequestBody;
+use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 
 #[DisableRequestBody]
 final class MethodAttributeController implements ControllerInterface
 {
     #[CacheControlAttribute(new CacheControlDirectives(CacheControl::Public, maxAge: 3600))]
+    #[RejectUnrecognizedParams(true)]
     public function get(): void
     {
     }
@@ -27,6 +29,7 @@ final class MethodAttributeController implements ControllerInterface
     #[AllowedParam(["filter"])]
     #[EnableRequestBody]
     #[CacheControlAttribute(new CacheControlDirectives(CacheControl::NoStore))]
+    #[RejectUnrecognizedParams(false)]
     public function post(): void
     {
     }
