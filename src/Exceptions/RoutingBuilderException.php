@@ -13,9 +13,4 @@ namespace Charcoal\Http\Server\Exceptions;
  */
 final class RoutingBuilderException extends \Exception
 {
-    /** @internal */
-    public function __construct()
-    {
-        parent::__construct();
-    }
 }
