@@ -10,6 +10,9 @@ namespace Charcoal\Http\Server\Attributes;
 
 use Charcoal\Http\Server\Contracts\Controllers\ControllerAttributeInterface;
 
+/**
+ * Represents an attribute that allows a class to handle a text body in a specific manner.
+ */
 #[\Attribute(\Attribute::TARGET_CLASS)]
 final readonly class AllowTextBody implements ControllerAttributeInterface
 {
