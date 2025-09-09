@@ -15,6 +15,7 @@ use Charcoal\Http\Commons\Enums\HttpProtocol;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Server\Exceptions\Request\ResponseBytesDispatchedException;
+use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Request\Result\AbstractResult;
 use Charcoal\Http\Server\Request\Result\ErrorResult;
 use Charcoal\Http\Server\Request\Result\RedirectResult;
@@ -90,6 +91,13 @@ abstract readonly class SapiRequest
      */
     final public static function serveResult(AbstractResult $result): never
     {
+        if (HttpServer::$enableOutputBuffering) {
+            try {
+                HttpServer::flushOutputBuffer();
+            } catch (\Throwable) {
+            }
+        }
+
         if (ob_get_level() > 0) {
             throw new \RuntimeException("Cannot send response while Output Buffering is enabled");
         }
