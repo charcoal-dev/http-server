@@ -413,10 +413,10 @@ final readonly class RequestGateway
         $controllerContext = $this->routeController->controller;
 
         $gatewayFacade->enforceRequiredParams();
+        $buffering = false;
 
-        if (HttpServer::$enableOutputBuffering
-            && (HttpServer::$outputBufferToStdErr || HttpServer::$outputBufferToStdOut)) {
-            ob_start();
+        if (HttpServer::$enableOutputBuffering && HttpServer::$outputBufferToStdErr) {
+            $buffering = ob_start();
         }
 
         try {
@@ -459,6 +459,13 @@ final readonly class RequestGateway
             }
 
             throw new RequestGatewayException(ControllerError::ExecutionFlow, $e);
+        } finally {
+            if ($buffering) {
+                try {
+                    HttpServer::flushOutputBuffer();
+                } catch (\Throwable) {
+                }
+            }
         }
 
         if ($this->isResponseFinalized()) {

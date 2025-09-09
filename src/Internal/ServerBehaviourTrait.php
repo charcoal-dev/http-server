@@ -22,8 +22,6 @@ trait ServerBehaviourTrait
     public static bool $enableOutputBuffering = false;
     /** @internal Sinks output buffering to STDERR; defaults to false */
     public static bool $outputBufferToStdErr = false;
-    /** @internal Sets output buffering to STDOUT; As part of response body; defaults to false */
-    public static bool $outputBufferToStdOut = false;
     /** @internal Enables use of error_log() for STDERR; defaults to true */
     public static bool $useErrorLogForStdErr = true;
 
@@ -57,6 +55,10 @@ trait ServerBehaviourTrait
         string       $header = "Charcoal HTTP Server:"
     ): void
     {
+        if (!$messages) {
+            return;
+        }
+
         $messages = is_array($messages) ? $messages : [$messages];
         $messages = array_filter($messages, fn($ln) => is_string($ln) && $ln);
 

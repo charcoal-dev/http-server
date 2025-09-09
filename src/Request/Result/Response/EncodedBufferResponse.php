@@ -14,6 +14,7 @@ use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 use Charcoal\Http\Server\Exceptions\Request\ResponseBytesDispatchedException;
+use Charcoal\Http\Server\HttpServer;
 
 /**
  * Represents a response encapsulating an encoded buffer.
