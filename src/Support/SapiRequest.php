@@ -91,6 +91,10 @@ abstract readonly class SapiRequest
      */
     final public static function serveResult(AbstractResult $result): never
     {
+        if (ob_get_level() > 0) {
+            throw new \RuntimeException("Cannot send response while Output Buffering is enabled");
+        }
+
         // Set the HTTP status code and headers
         http_response_code($result->statusCode);
         foreach ($result->headers as $name => $value) {
