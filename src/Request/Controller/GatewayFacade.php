@@ -9,13 +9,17 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Request\Controller;
 
 use Charcoal\Contracts\Buffers\ReadableBufferInterface;
+use Charcoal\Contracts\Charsets\Charset;
 use Charcoal\Http\Commons\Body\WritablePayload;
+use Charcoal\Http\Commons\Contracts\ContentTypeEnumInterface;
+use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Server\Contracts\Request\ControllerApiInterface;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\ControllerError;
-use Charcoal\Http\Server\Exceptions\Controllers\BypassEncodingException;
-use Charcoal\Http\Server\Exceptions\RequestGatewayException;
+use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
+use Charcoal\Http\Server\Exceptions\Internal\Response\BypassEncodingInterrupt;
+use Charcoal\Http\Server\Exceptions\Internal\Response\FileDownloadInterrupt;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
 
@@ -97,11 +101,41 @@ readonly class GatewayFacade implements ControllerApiInterface
     }
 
     /**
-     * @throws BypassEncodingException
+     * @throws RequestGatewayException
      * @api
      */
-    public function sendResponseBypassEncoding(ReadableBufferInterface $buffer, int $statusCode = 200): never
+    public function setStatusCode(int $statusCode): void
     {
-        throw new BypassEncodingException($buffer, $statusCode);
+        $this->gateway->setStatusCode($statusCode);
+    }
+
+    /**
+     * @throws BypassEncodingInterrupt
+     * @api
+     */
+    public function sendResponseBypassEncoding(
+        ?ReadableBufferInterface $buffer,
+        bool                     $isCacheable,
+        ContentType              $contentType = ContentType::Text,
+        int                      $statusCode = 200,
+        ?Charset                 $charset = null
+    ): never
+    {
+        throw new BypassEncodingInterrupt($buffer, $isCacheable, $contentType, $statusCode, $charset);
+    }
+
+    /**
+     * @throws FileDownloadInterrupt
+     * @api
+     */
+    public function sendFileDownload(
+        string                   $filepath,
+        string                   $downloadFilename,
+        ContentTypeEnumInterface $contentType,
+        int                      $statusCode = 200,
+        ?int                     $filesize = null
+    ): never
+    {
+        throw new FileDownloadInterrupt($filepath, $downloadFilename, $contentType, $statusCode, $filesize);
     }
 }

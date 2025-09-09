@@ -18,12 +18,11 @@ use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 readonly class SuccessResult extends AbstractResult
 {
     public function __construct(
-        int                      $statusCode,
         Headers                  $headers,
         SuccessResponseInterface $response,
     )
     {
         $response->setHeaders($headers);
-        parent::__construct($statusCode, $headers);
+        parent::__construct($response->getStatusCode(), $headers);
     }
 }

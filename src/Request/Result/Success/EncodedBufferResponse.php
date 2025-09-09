@@ -13,6 +13,7 @@ use Charcoal\Contracts\Charsets\Charset;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
+use Charcoal\Http\Server\Exceptions\Request\ResponseBytesDispatchedException;
 
 /**
  * Represents a response encapsulating an encoded buffer.
@@ -23,6 +24,7 @@ use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 final readonly class EncodedBufferResponse implements SuccessResponseInterface
 {
     public function __construct(
+        public int             $statusCode,
         public bool            $bypassedEncoder,
         public BufferImmutable $buffer,
         public bool            $isCacheable,
@@ -70,10 +72,21 @@ final readonly class EncodedBufferResponse implements SuccessResponseInterface
     }
 
     /**
-     * @return void
+     * @return int
      */
-    public function send(): void
+    public function getStatusCode(): int
+    {
+        return $this->statusCode;
+    }
+
+    /**
+     * @return never
+     * @throws ResponseBytesDispatchedException
+     */
+    public function send(): never
     {
         print($this->buffer->bytes());
+
+        throw new ResponseBytesDispatchedException();
     }
 }

@@ -26,6 +26,7 @@ use Charcoal\Http\Server\Config\VirtualHost;
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\AfterEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\BeforeEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
+use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 use Charcoal\Http\Server\Enums\ContentEncoding;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\ControllerError;
@@ -34,12 +35,15 @@ use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Enums\TransferEncoding;
 use Charcoal\Http\Server\Exceptions\Controllers\ValidationErrorException;
 use Charcoal\Http\Server\Exceptions\Controllers\ValidationException;
-use Charcoal\Http\Server\Exceptions\PreFlightTerminateException;
-use Charcoal\Http\Server\Exceptions\RequestGatewayException;
+use Charcoal\Http\Server\Exceptions\Internal\PreFlightTerminateException;
+use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
+use Charcoal\Http\Server\Exceptions\Internal\Response\ResponseFinalizedInterrupt;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\Files\FileUpload;
+use Charcoal\Http\Server\Request\Result\Success\EncodedBufferResponse;
+use Charcoal\Http\Server\Request\Result\Success\NoContentResponse;
 use Charcoal\Http\Server\Routing\Router;
 use Charcoal\Http\Server\Routing\Snapshot\RouteControllerBinding;
 use Charcoal\Http\Server\Routing\Snapshot\RouteSnapshot;
@@ -61,10 +65,12 @@ final readonly class RequestGateway
     public RequestFacade $requestFacade;
     public RouteControllerBinding $routeController;
     public string $controllerEp;
+    public WritablePayload $output;
+    private ?SuccessResponseInterface $finalizedResponse;
+    private int $responseStatusCode;
 
     private VirtualHost $host;
     private TrustGatewayResult $trustProxy;
-    public WritablePayload $output;
 
     /**
      * @throws RequestGatewayException
@@ -397,30 +403,43 @@ final readonly class RequestGateway
     }
 
     /**
-     * @return void
+     * @return SuccessResponseInterface
      * @throws RequestGatewayException
      */
-    public function executeController(): void
+    public function executeController(): SuccessResponseInterface
     {
         $gatewayFacade = $this->middleware->controllerGatewayFacadePipeline($this);
         $controllerContext = $this->routeController->controller;
 
+        $gatewayFacade->enforceRequiredParams();
+
         try {
-            $gatewayFacade->enforceRequiredParams();
+            try {
+                // Construct Controller, dispatch "BeforeEntrypointCallback" hook
+                $controller = new $controllerContext->classname($this);
+                if ($controller instanceof BeforeEntrypointCallback) {
+                    $controller->beforeEntrypointCallback($gatewayFacade);
+                }
 
-            $controller = new $controllerContext->classname($this);
-            if ($controller instanceof BeforeEntrypointCallback) {
-                $controller->beforeEntrypointCallback($gatewayFacade);
+                // Dispatch Entrypoint
+                if ($controller instanceof InvokableControllerInterface) {
+                    $controller($gatewayFacade);
+                } else {
+                    call_user_func_array([$controller, $this->controllerEp], [$gatewayFacade]);
+                }
+            } catch (ResponseFinalizedInterrupt $e) {
+                $this->setFinalizedResponse($e->getResponseObject());
             }
 
-            if ($controller instanceof InvokableControllerInterface) {
-                $controller($gatewayFacade);
-            } else {
-                call_user_func_array([$controller, $this->controllerEp], [$gatewayFacade]);
-            }
-
-            if ($controller instanceof AfterEntrypointCallback) {
-                $controller->afterEntrypointCallback($gatewayFacade);
+            // AfterEntrypointCallback is called even after response has already finalized via interrupt exception
+            // However, once finalized response body cannot be altered
+            try {
+                assert(isset($controller));
+                if ($controller instanceof AfterEntrypointCallback) {
+                    $controller->afterEntrypointCallback($gatewayFacade);
+                }
+            } catch (ResponseFinalizedInterrupt $e) {
+                $this->setFinalizedResponse($e->getResponseObject());
             }
         } catch (RequestGatewayException $e) {
             throw $e;
@@ -435,5 +454,63 @@ final readonly class RequestGateway
 
             throw new RequestGatewayException(ControllerError::ExecutionFlow, $e);
         }
+
+        if ($this->isResponseFinalized()) {
+            return $this->finalizedResponse;
+        }
+
+        if (!isset($this->responseStatusCode)) {
+            $this->responseStatusCode = 200;
+        }
+
+        if ($this->output->count() === 0) {
+            return new NoContentResponse($this->responseStatusCode);
+        }
+
+        // Todo: Encode the response
+
+        return new EncodedBufferResponse(
+            $this->responseStatusCode,
+            false,
+            $encodedBody,
+            true,
+
+        );
+    }
+
+    /**
+     * @param SuccessResponseInterface $response
+     * @return void
+     * @throws RequestGatewayException
+     */
+    private function setFinalizedResponse(SuccessResponseInterface $response): void
+    {
+        if (isset($this->finalizedResponse)) {
+            throw new RequestGatewayException(ControllerError::RedundantResponseFinalized,
+                new \RuntimeException("Response was already finalized; Redundant duplicate response"));
+        }
+
+        $this->finalizedResponse = $response;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isResponseFinalized(): bool
+    {
+        return isset($this->finalizedResponse);
+    }
+
+    /**
+     * @throws RequestGatewayException
+     */
+    public function setStatusCode(int $statusCode): void
+    {
+        if (isset($this->responseStatusCode)) {
+            throw new RequestGatewayException(ControllerError::RedundantResponseFinalized,
+                new \RuntimeException("Status code was already set; Redundant duplicate call"));
+        }
+
+        $this->responseStatusCode = $statusCode;
     }
 }

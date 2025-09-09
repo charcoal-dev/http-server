@@ -10,13 +10,14 @@ namespace Charcoal\Http\Server\Request\Result\Success;
 
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
+use Charcoal\Http\Server\Exceptions\Request\ResponseBytesDispatchedException;
 
 /**
  * No Content Response
  */
 final readonly class NoContentResponse implements SuccessResponseInterface
 {
-    public function send(): void
+    public function __construct(public int $statusCode = 204)
     {
     }
 
@@ -27,5 +28,19 @@ final readonly class NoContentResponse implements SuccessResponseInterface
     public function isCacheable(): bool
     {
         return false;
+    }
+
+    public function getStatusCode(): int
+    {
+        return $this->statusCode;
+    }
+
+    /**
+     * @return never
+     * @throws ResponseBytesDispatchedException
+     */
+    public function send(): never
+    {
+        throw new ResponseBytesDispatchedException();
     }
 }

@@ -18,7 +18,9 @@ interface SuccessResponseInterface
 {
     public function isCacheable(): bool;
 
+    public function getStatusCode(): int;
+
     public function setHeaders(Headers $headers): void;
 
-    public function send(): void;
+    public function send(): never;
 }

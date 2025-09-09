@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Contracts\Controllers;
 
-use Charcoal\Http\Server\Exceptions\Controllers\ResponseFinalizedException;
+use Charcoal\Http\Server\Exceptions\Internal\Response\ResponseFinalizedInterrupt;
 use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 
 /**
@@ -20,7 +20,7 @@ interface InvokableControllerInterface extends ControllerInterface
     /**
      * @param GatewayFacade $request
      * @return void
-     * @throws ResponseFinalizedException
+     * @throws ResponseFinalizedInterrupt
      */
     public function __invoke(GatewayFacade $request): void;
 }
