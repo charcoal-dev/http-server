@@ -86,7 +86,6 @@ abstract readonly class SapiRequest
      * This is an optional helper method, use this or implement your own logic following this.
      * Sends an HTTP response based on the provided result object, including status code,
      * headers, and response body. Handles redirects and errors as specific cases.
-     * @throws ResponseBytesDispatchedException
      * @api
      */
     final public static function serveResult(AbstractResult $result): never
