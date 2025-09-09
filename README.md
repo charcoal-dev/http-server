@@ -1,13 +1,13 @@
-# Charcoal HTTP Router
+# Charcoal HTTP Server
 
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-The HTTP Router library handles request routing in Charcoal applications, mapping incoming HTTP requests to their
-designated handlers or controllers based on defined routes. It supports flexible route definitions, parameter
-extraction, and integration with middleware, providing a clean and efficient mechanism for directing traffic within the
-framework.
+Charcoal HTTP Server lib provides a comprehensive HTTP request handling system for Charcoal applications, encompassing
+request routing, middleware processing, controller execution, and response generation. It features advanced request
+validation, CORS policy enforcement, file upload handling, caching directives, and flexible response encoding,
+delivering a robust foundation for building HTTP-based services and APIs within the framework.
 
 For detailed information, guidance, and setup instructions regarding this library, please refer to our official
 documentation website:
 
-[https://charcoal.dev/libs/http-router](https://charcoal.dev/libs/http-router)
+[https://charcoal.dev/libs/http-server](https://charcoal.dev/libs/http-server)
