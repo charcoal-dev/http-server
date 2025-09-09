@@ -20,6 +20,7 @@ use Charcoal\Http\Server\Exceptions\Internal\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
 use Charcoal\Http\Server\Exceptions\Request\HostnamePortMismatchException;
 use Charcoal\Http\Server\Exceptions\Request\TlsRequiredException;
+use Charcoal\Http\Server\Internal\ServerBehaviourTrait;
 use Charcoal\Http\Server\Internal\ServerTestableTrait;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Middleware\MiddlewareRegistry;
@@ -43,9 +44,8 @@ use Charcoal\Http\TrustProxy\TrustGateway;
 final class HttpServer implements ServerApiInterface
 {
     use ServerTestableTrait;
+    use ServerBehaviourTrait;
     use ControlledSerializableTrait;
-
-    public static bool $exposeCharcoalServer = true;
 
     private readonly Router $router;
     private readonly MiddlewareRegistry $middleware;
