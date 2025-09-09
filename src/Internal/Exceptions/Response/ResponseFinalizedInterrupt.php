@@ -6,15 +6,16 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Server\Exceptions\Controllers;
+namespace Charcoal\Http\Server\Internal\Exceptions\Response;
 
 use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 
 /**
  * Interrupt during controller execution to finalize the response.
  */
-abstract class ResponseFinalizedException extends \Exception
+abstract class ResponseFinalizedInterrupt extends \Exception
 {
+    /** @internal  */
     public function __construct(
         public readonly int $statusCode = 200
     )
@@ -22,5 +23,6 @@ abstract class ResponseFinalizedException extends \Exception
         parent::__construct("Response finalized", $this->statusCode);
     }
 
+    /** @internal  */
     abstract public function getResponseObject(): SuccessResponseInterface;
 }

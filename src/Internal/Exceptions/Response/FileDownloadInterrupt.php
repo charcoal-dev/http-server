@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Server\Exceptions\Controllers;
+namespace Charcoal\Http\Server\Internal\Exceptions\Response;
 
 use Charcoal\Http\Commons\Contracts\ContentTypeEnumInterface;
 use Charcoal\Http\Server\Request\Result\Success\FileDownloadResponse;
@@ -14,10 +14,11 @@ use Charcoal\Http\Server\Request\Result\Success\FileDownloadResponse;
 /**
  * Interrupt during controller execution to trigger a file download.
  */
-final class FileDownloadException extends ResponseFinalizedException
+final class FileDownloadInterrupt extends ResponseFinalizedInterrupt
 {
     public readonly string $filepath;
 
+    /** @internal */
     public function __construct(
         string                                   $filepath,
         public readonly string                   $downloadFilename,
@@ -30,6 +31,7 @@ final class FileDownloadException extends ResponseFinalizedException
         parent::__construct($statusCode);
     }
 
+    /** @internal */
     public function getResponseObject(): FileDownloadResponse
     {
         return new FileDownloadResponse(

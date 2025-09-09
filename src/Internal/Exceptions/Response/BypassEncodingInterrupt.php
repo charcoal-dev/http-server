@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Server\Exceptions\Controllers;
+namespace Charcoal\Http\Server\Internal\Exceptions\Response;
 
 use Charcoal\Buffers\BufferImmutable;
 use Charcoal\Contracts\Buffers\ReadableBufferInterface;
@@ -19,8 +19,9 @@ use Charcoal\Http\Server\Request\Result\Success\NoContentResponse;
 /**
  * Interrupt during controller execution to bypass the encoding process.
  */
-final class BypassEncodingException extends ResponseFinalizedException
+final class BypassEncodingInterrupt extends ResponseFinalizedInterrupt
 {
+    /** @internal  */
     public function __construct(
         public readonly ?ReadableBufferInterface $responseBody,
         public readonly bool                     $isCacheable = false,
@@ -32,6 +33,7 @@ final class BypassEncodingException extends ResponseFinalizedException
         parent::__construct($statusCode);
     }
 
+    /** @internal  */
     public function getResponseObject(): SuccessResponseInterface
     {
         if ($this->responseBody === null || $this->responseBody->length() === 0) {
