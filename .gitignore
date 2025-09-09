@@ -1,10 +1,12 @@
 .idea/
 vendor/
+tmp/
 workspace/
 workspace/composer.phar
 composer.lock
 
 phpunit.phar
+.phpunit.cache
 /.phpunit.result.cache
 /coverage/
 /coverage.xml

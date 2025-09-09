@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="vendor/autoload.php"
-         colors="true"
-         convertWarningsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertErrorsToExceptions="true"
-         stopOnFailure="false"
-         failOnRisky="true"
-         failOnWarning="true"
-         testdox="true">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.3/phpunit.xsd"
+        bootstrap="vendor/autoload.php"
+        cacheDirectory="tmp/.phpunit.cache"
+        colors="true"
+        failOnRisky="true"
+        failOnWarning="true"
+        testdox="true">
     <testsuites>
         <testsuite name="Charcoal HTTP:Router Test Suite">
-            <directory>./tests</directory>
+            <directory>tests</directory>
         </testsuite>
     </testsuites>
+    <php>
+        <ini name="error_reporting" value="-1"/>
+        <ini name="display_errors" value="1"/>
+    </php>
 </phpunit>

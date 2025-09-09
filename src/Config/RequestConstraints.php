@@ -44,18 +44,6 @@ final class RequestConstraints
     }
 
     /**
-     * @deprecated
-     */
-    public function change(RequestConstraint $override, mixed $value): void
-    {
-        if (!is_int($value) || $value < 0 || $value > 0xFFFFFFFE) {
-            throw new \InvalidArgumentException("Invalid HTTP constraint override value: " . $override->name);
-        }
-
-        $this->{$override->name} = $value;
-    }
-
-    /**
      * @param RequestConstraint $enum
      * @return int
      */
