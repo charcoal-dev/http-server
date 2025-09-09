@@ -25,7 +25,6 @@ final readonly class ErrorResult extends AbstractResult
     )
     {
         $headers->set("Connection", "close");
-
         $statusCodeEnum = $this->exception instanceof ExceptionHasErrorCodeInterface &&
         $this->exception->errorCode() instanceof RequestErrorCodeInterface ?
             $this->exception->errorCode() : $this->error;
