@@ -138,7 +138,13 @@ final class HttpServer implements ServerApiInterface
             strtolower(trim($trustProxy->hostname)), $trustProxy->port, $trustProxy->scheme);
         if (!$virtualHost) {
             return new ErrorResult($response, RequestError::IncorrectHost,
-                new HostnamePortMismatchException($trustProxy->hostname, $trustProxy->port));
+                new HostnamePortMismatchException(
+                    $trustProxy->clientIp,
+                    $trustProxy->proxy,
+                    $trustProxy->scheme,
+                    $trustProxy->hostname,
+                    $trustProxy->port
+                ));
         }
 
         if (!filter_var($trustProxy->clientIp, FILTER_VALIDATE_IP,
