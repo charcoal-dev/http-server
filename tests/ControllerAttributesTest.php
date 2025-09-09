@@ -148,11 +148,11 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
 
         // Test method-specific attribute takes priority
         $getParams = $controller->getAggregatedAttributeFor(ControllerAttribute::allowedParams, "get");
-        $this->assertEquals(["method1", "class1", "class2", "common", "base"], $getParams);
+        $this->assertEquals(["common", "base", "method1", "class1", "class2"], $getParams);
 
-        // Just method declared attributes
+        // Method's own declared + inherited from parent (does NOT include class-level)
         $getParams2 = $controller->getAttributeFor(ControllerAttribute::allowedParams, "get");
-        $this->assertEquals(["method1"], $getParams2);
+        $this->assertEquals(["common", "base", "method1"], $getParams2);
 
         // Test method without a specific attribute falls back to class then parent
         $postParams = $controller->getAggregatedAttributeFor(ControllerAttribute::allowedParams, "post");
@@ -177,6 +177,8 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf(CacheControlDirectives::class, $cacheControl);
         $this->assertContains("public", $cacheControl->directives);
         $this->assertContains("max-age=600", $cacheControl->directives);
+
+        $this->assertTrue($this->isBodyDisabled($abstractController, null));
     }
 
     public function testNonExistentAttributes(): void
@@ -192,7 +194,7 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
     public function testParentAttributeLookupPath(): void
     {
         $cache = new ControllersBuildCache();
-        $controller = $cache->resolve(ConcreteInheritanceController::class, ["get"]);
+        $controller = $cache->resolve(ConcreteInheritanceController::class, ["get", "post", "put"]);
 
         // Test the full lookup path: method -> class -> parent method -> parent class
         // For "get" method, should fall back to parent attributes for allowedParams
@@ -204,6 +206,8 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("base", $parentOnlyAttribute);
         $this->assertContains("format", $parentOnlyAttribute);
         $this->assertContains("version", $parentOnlyAttribute);
+
+        $this->assertTrue($this->isBodyDisabled($controller, null));
     }
 
     private function isBodyDisabled(ControllerAttributes $controller, ?string $entrypoint): bool
@@ -218,12 +222,7 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
 
     private function getRequestConstraint(ControllerAttributes $controller, RequestConstraint $constraint): ?int
     {
-        $constraints = $controller->getAggregatedAttributeFor(ControllerAttribute::constraints, null);
-        $value = $constraints[$constraint->name] ?? null;
-        if (is_array($value)) {
-            return $value[0] ?? null;
-        }
-
-        return $value;
+        $constraints = $controller->getAttributeFor(ControllerAttribute::constraints, null);
+        return $constraints[$constraint->name] ?? null;
     }
 }

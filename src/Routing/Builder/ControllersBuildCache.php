@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Routing\Builder;
 
+use Charcoal\Base\Arrays\ArrayHelper;
 use Charcoal\Base\Objects\Traits\NotCloneableTrait;
 use Charcoal\Base\Objects\Traits\NotSerializableTrait;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerAttributeInterface;
@@ -156,12 +157,17 @@ final class ControllersBuildCache
                 }
             }
 
-            // Read all registered Attributes
+            // Read all registered/known Attributes
             foreach (ControllerAttribute::cases() as $attr) {
+                if ($attr === ControllerAttribute::defaultEntrypoint) {
+                    continue;
+                }
+
                 $attrDeclared = $this->readControllerAttributes(
                     $reflection,
                     $epReflections,
-                    $attr->value
+                    $attr,
+                    $attributes
                 );
 
                 if ($attrDeclared) {
@@ -172,6 +178,9 @@ final class ControllersBuildCache
             if ($isAbstract) {
                 $this->abstracts[] = $fqcn;
             }
+
+            // Final Reshaping
+
 
             $existing = new ControllerAttributes(
                 $fqcn,
@@ -208,6 +217,7 @@ final class ControllersBuildCache
 
     /**
      * @return array
+     * @api
      */
     public function inspect(): array
     {
@@ -237,9 +247,10 @@ final class ControllersBuildCache
             $attributes = $this->resolve($reflection->getName(), null);
             $parentAttributes = $attributes->attributes;
             unset($parentAttributes["__parent"]);
-            $inherited = array_merge_recursive($inherited, $parentAttributes);
+            $inherited = ArrayHelper::mergeAssocDeep($parentAttributes, $inherited);
             unset($attributes, $parentAttributes);
         }
+
 
         return [$chain, $inherited];
     }
@@ -247,43 +258,63 @@ final class ControllersBuildCache
     /**
      * @param \ReflectionClass $reflect
      * @param array<non-empty-string,\ReflectionMethod> $methods
-     * @param class-string<ControllerAttributeInterface> $attrClass
+     * @param ControllerAttribute $attr
+     * @param array $current
      * @return array
      */
     private function readControllerAttributes(
-        \ReflectionClass $reflect,
-        array            $methods,
-        string           $attrClass
+        \ReflectionClass    $reflect,
+        array               $methods,
+        ControllerAttribute $attr,
+        array               $current,
     ): array
     {
         $attribute = [];
 
         // Read Attribute meta
-        $metaReflect = $this->getReflectionClass($attrClass)->getAttributes(\Attribute::class)[0] ?? null;
+        $metaReflect = $this->getReflectionClass($attr->value)->getAttributes(\Attribute::class)[0] ?? null;
         $metaReflectArgs = $metaReflect?->getArguments() ?? null;
         $flags = $metaReflectArgs ? (int)($metaReflectArgs["flags"] ?? ($metaReflectArgs[0] ?? 0)) : 0;
         $isRepeatable = (bool)($flags & \Attribute::IS_REPEATABLE);
 
         // On Class
-        $onClass = $reflect->getAttributes($attrClass);
+        $onClass = $reflect->getAttributes($attr->value);
         if ($onClass) {
-            $attribute["__class"] = $isRepeatable ? [] : null;
+            $attribute["__class"] = $current["__parent"][$attr->name]["__class"] ?? null;
+            if (is_null($attribute["__class"]) && $isRepeatable) {
+                $attribute["__class"] = [];
+            }
+
             foreach ($onClass as $classAttr) {
                 $classAttr = $classAttr->newInstance();
                 /** @var ControllerAttributeInterface $classAttr */
                 $attribute["__class"] = $classAttr->getBuilderFn()($attribute["__class"], $classAttr);
             }
+
+            if (is_array($attribute["__class"]) && array_is_list($attribute["__class"])) {
+                $attribute["__class"] = array_unique($attribute["__class"]);
+            }
         }
 
         // On Methods
         foreach ($methods as $name => $reflectM) {
-            $onMethod = $reflectM->getAttributes($attrClass);
+            $onMethod = $reflectM->getAttributes($attr->value);
             if ($onMethod) {
-                $attribute[$name] = $isRepeatable ? [] : null;
+                $attribute[$name] = $current["__parent"][$attr->name][$name]
+                    ?? $current["__parent"][$attr->name]["__class"]
+                    ?? null;
+                if (is_null($attribute[$name]) && $isRepeatable) {
+                    $attribute[$name] = [];
+                }
+
                 foreach ($onMethod as $methodAttr) {
                     $methodAttr = $methodAttr->newInstance();
                     /** @var ControllerAttributeInterface $classAttr */
                     $attribute[$name] = $methodAttr->getBuilderFn()($attribute[$name], $methodAttr);
+                }
+
+                if (is_array($attribute[$name]) && array_is_list($attribute[$name])) {
+                    $attribute[$name] = array_unique($attribute[$name]);
                 }
             }
         }

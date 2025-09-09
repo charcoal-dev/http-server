@@ -9,12 +9,14 @@ declare(strict_types=1);
 namespace Charcoal\Http\Tests\Server\Fixture\Controllers;
 
 use Charcoal\Http\Server\Attributes\AllowedParam;
+use Charcoal\Http\Server\Attributes\DisableRequestBody;
 use Charcoal\Http\Server\Attributes\EnableRequestBody;
 use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
 use Charcoal\Http\Server\Enums\RequestConstraint;
 
 #[AllowedParam(["format", "version"])]
 #[RequestConstraintOverride(RequestConstraint::maxBodyBytes, 4567)]
+#[DisableRequestBody]
 abstract class AbstractApiController extends AbstractBaseController
 {
     #[EnableRequestBody]

@@ -75,6 +75,11 @@ final readonly class ControllerAttributes
             return [];
         }
 
-        return array_merge_recursive(...$nodes);
+        $merged = array_merge_recursive(...$nodes);
+        if (array_is_list($merged)) {
+            $merged = array_values(array_unique($merged));
+        }
+
+        return $merged;
     }
 }
