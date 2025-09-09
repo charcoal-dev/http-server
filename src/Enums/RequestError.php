@@ -62,6 +62,9 @@ enum RequestError implements RequestErrorCodeInterface
     case BadOriginHeader;
     case CorsOriginNotAllowed;
 
+    /** @for=Response */
+    case RedundantResponseFinalized;
+
     /**
      * Determines and returns the appropriate HTTP status code
      * based on the current instance.
