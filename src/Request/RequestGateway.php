@@ -355,11 +355,18 @@ final readonly class RequestGateway
 
     /**
      * @param ControllerAttribute $attr
+     * @param bool $aggregated
      * @return mixed
      */
-    public function getControllerAttribute(ControllerAttribute $attr): mixed
+    public function getControllerAttribute(ControllerAttribute $attr, bool $aggregated = false): mixed
     {
-        return $this->routeController->controller->getAttributeFor($attr, $this->controllerEp);
+        $entryPoint = $this->controllerEp;
+        if ($attr === ControllerAttribute::constraints) {
+            $entryPoint = null;
+        }
+
+        return $aggregated ? $this->routeController->controller->getAggregatedAttributeFor($attr, $entryPoint)
+            : $this->routeController->controller->getAttributeFor($attr, $entryPoint);
     }
 
     /**
