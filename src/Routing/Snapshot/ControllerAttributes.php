@@ -18,16 +18,14 @@ use Charcoal\Http\Server\Enums\ControllerAttribute;
  */
 final readonly class ControllerAttributes
 {
-    public ?string $defaultEntrypoint;
-
     public function __construct(
         public string $classname,
+        public ?string $defaultEntrypoint,
         public ?array $entryPoints,
         public array  $attributes,
         public bool   $validated
     )
     {
-        $this->defaultEntrypoint = $this->attributes[ControllerAttribute::defaultEntrypoint->name] ?? null;
     }
 
     /**

@@ -68,7 +68,7 @@ final class ControllersBuildCache
         if (!$existing) {
             $entryPoints = is_array($entryPoints) ? array_unique($entryPoints) : null;
             if (!HttpServer::$validateControllerClasses) {
-                $this->set($fqcn, new ControllerAttributes($fqcn, $entryPoints, [], false));
+                $this->set($fqcn, new ControllerAttributes($fqcn, null, $entryPoints ?? [], [], false));
                 return $this->cache[$fqcn];
             }
 
@@ -202,6 +202,7 @@ final class ControllersBuildCache
 
             $existing = new ControllerAttributes(
                 $fqcn,
+                $defaultEp ?: null,
                 $defaultEp ? null : $entryPoints,
                 $attributes,
                 true,
