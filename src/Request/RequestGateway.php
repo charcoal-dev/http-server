@@ -42,6 +42,7 @@ use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\Controller\ResponseFacade;
+use Charcoal\Http\Server\Request\Controller\ServerFacade;
 use Charcoal\Http\Server\Request\Files\FileUpload;
 use Charcoal\Http\Server\Request\Result\Response\EncodedBufferResponse;
 use Charcoal\Http\Server\Request\Result\Response\EncodedResponseBody;
@@ -64,14 +65,12 @@ final readonly class RequestGateway
     use NotCloneableTrait;
 
     public ServerRequest $request;
+    public ServerFacade $serverFacade;
     public RequestFacade $requestFacade;
     public RouteControllerBinding $routeController;
     public string $controllerEp;
     public ResponseFacade $response;
     private ?SuccessResponseInterface $finalizedResponse;
-
-    private VirtualHost $host;
-    private TrustGatewayResult $trustProxy;
 
     /**
      * @throws RequestGatewayException
@@ -125,8 +124,7 @@ final readonly class RequestGateway
     public function accepted(VirtualHost $host, TrustGatewayResult $trustProxy): void
     {
         // Set the host and trust proxy instances
-        $this->host = $host;
-        $this->trustProxy = $trustProxy;
+        $this->serverFacade = new ServerFacade($host, $trustProxy);
 
         // Negotiate X-Request-ID and Content-Type
         $requestId = $this->request->headers->get("X-Request-ID");
@@ -159,7 +157,7 @@ final readonly class RequestGateway
         // Initialize Request Facade
         $this->requestFacade = new RequestFacade(
             $this->responseHeaders->get("X-Request-ID"),
-            $this->trustProxy->clientIp,
+            $this->serverFacade->proxy->clientIp,
             $this->request->method,
             $this->request->headers,
             new QueryParams(explode("#", explode("?",
@@ -410,7 +408,7 @@ final readonly class RequestGateway
      */
     public function executeController(): SuccessResponseInterface
     {
-        $gatewayFacade = $this->middleware->controllerGatewayFacadePipeline($this, $this->host, $this->trustProxy);
+        $gatewayFacade = $this->middleware->controllerGatewayFacadePipeline($this);
         $controllerContext = $this->routeController->controller;
 
         $gatewayFacade->enforceRequiredParams();

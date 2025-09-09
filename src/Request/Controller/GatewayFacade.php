@@ -13,7 +13,6 @@ use Charcoal\Contracts\Charsets\Charset;
 use Charcoal\Http\Commons\Contracts\ContentTypeEnumInterface;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Headers\Headers;
-use Charcoal\Http\Server\Config\VirtualHost;
 use Charcoal\Http\Server\Contracts\Request\ControllerApiInterface;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\ControllerError;
@@ -22,7 +21,6 @@ use Charcoal\Http\Server\Exceptions\Internal\Response\BypassEncodingInterrupt;
 use Charcoal\Http\Server\Exceptions\Internal\Response\FileDownloadInterrupt;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
-use Charcoal\Http\TrustProxy\Result\TrustGatewayResult;
 
 /**
  * Represents a controller API that interacts with request and response contexts.
@@ -31,28 +29,16 @@ readonly class GatewayFacade implements ControllerApiInterface
 {
     protected bool $enforcedRequiredParams;
 
-    public function __construct(
-        private RequestGateway     $gateway,
-        private VirtualHost        $host,
-        private TrustGatewayResult $proxy,
-    )
+    public function __construct(private RequestGateway $gateway)
     {
     }
 
     /**
-     * @return VirtualHost
+     * @return ServerFacade
      */
-    public function host(): VirtualHost
+    public function server(): ServerFacade
     {
-        return $this->host;
-    }
-
-    /**
-     * @return TrustGatewayResult
-     */
-    public function proxy(): TrustGatewayResult
-    {
-        return $this->proxy;
+        return $this->gateway->serverFacade;
     }
 
     /**

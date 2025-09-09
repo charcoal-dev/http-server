@@ -71,15 +71,11 @@ final readonly class MiddlewareFacade
     /**
      * Executes the controller request facade pipeline with the specified request gateway.
      */
-    public function controllerGatewayFacadePipeline(
-        RequestGateway     $requestGateway,
-        VirtualHost        $host,
-        TrustGatewayResult $proxy,
-    ): GatewayFacade
+    public function controllerGatewayFacadePipeline(RequestGateway $requestGateway): GatewayFacade
     {
         return $this->registry->execute(Pipeline::Controller_ContextFacadeResolver,
             ControllerGatewayFacadeResolver::class,
-            [$requestGateway, $host, $proxy]
+            [$requestGateway]
         );
     }
 

@@ -10,18 +10,16 @@ namespace Charcoal\Http\Server\Contracts\Request;
 
 use Charcoal\Http\Commons\Body\WritablePayload;
 use Charcoal\Http\Commons\Headers\Headers;
-use Charcoal\Http\Server\Config\VirtualHost;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
-use Charcoal\Http\TrustProxy\Result\TrustGatewayResult;
 
 /**
  * Interface representing a controller API that manages the lifecycle of HTTP requests and responses.
  */
 interface ControllerApiInterface
 {
-    public function __construct(RequestGateway $gateway, VirtualHost $host, TrustGatewayResult $proxy);
+    public function __construct(RequestGateway $gateway);
 
     public function attributes(): ControllerAttributes;
 
