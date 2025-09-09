@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Charcoal\Http\Server\Internal\Exceptions\Response;
+namespace Charcoal\Http\Server\Exceptions\Internal\Response;
 
 use Charcoal\Http\Commons\Contracts\ContentTypeEnumInterface;
 use Charcoal\Http\Server\Request\Result\Success\FileDownloadResponse;

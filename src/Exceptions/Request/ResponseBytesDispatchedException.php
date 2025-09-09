@@ -11,6 +11,11 @@ namespace Charcoal\Http\Server\Exceptions\Request;
 /**
  * Exception thrown when response bytes are successfully dispatched.
  */
-class ResponseBytesDispatchedException extends \Exception
+final class ResponseBytesDispatchedException extends \Exception
 {
+    /** @internal */
+    public function __construct()
+    {
+        parent::__construct();
+    }
 }
