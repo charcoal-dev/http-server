@@ -9,8 +9,10 @@ declare(strict_types=1);
 namespace Charcoal\Http\Tests\Server\Fixture\Controllers;
 
 use Charcoal\Http\Server\Attributes\AllowedParam;
+use Charcoal\Http\Server\Attributes\AllowFileUpload;
 use Charcoal\Http\Server\Attributes\DisableRequestBody;
 use Charcoal\Http\Server\Attributes\EnableRequestBody;
+use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
 use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
 use Charcoal\Http\Server\Enums\RequestConstraint;
 
@@ -19,7 +21,13 @@ use Charcoal\Http\Server\Enums\RequestConstraint;
 #[DisableRequestBody]
 abstract class AbstractApiController extends AbstractBaseController
 {
+    #[RejectUnrecognizedParams(false)]
+    public function post(): void
+    {
+    }
+
     #[EnableRequestBody]
+    #[AllowFileUpload(1024)]
     public function put(): void
     {
     }

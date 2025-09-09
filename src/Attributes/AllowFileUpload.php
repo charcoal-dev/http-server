@@ -14,7 +14,7 @@ use Charcoal\Http\Server\Contracts\Controllers\ControllerAttributeInterface;
  * Represents an attribute that allows a file upload operation,
  * with an optional restriction on the maximum file size.
  */
-#[\Attribute(\Attribute::TARGET_CLASS)]
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 final readonly class AllowFileUpload implements ControllerAttributeInterface
 {
     public int $maxFileSize;
@@ -34,7 +34,7 @@ final readonly class AllowFileUpload implements ControllerAttributeInterface
     public function getBuilderFn(): \Closure
     {
         return fn(
-            mixed $current,
+            mixed           $current,
             AllowFileUpload $attrInstance
         ): array => ["size" => $attrInstance->maxFileSize];
     }

@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Tests\Server;
 
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
+use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\RequestConstraint;
 use Charcoal\Http\Server\HttpServer;
@@ -156,6 +157,13 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(789, $this->getRequestConstraint($controller, RequestConstraint::maxParams));
 
         // Rejects Unrecognized Params
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, null));
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "get"));
+
+        // AbstractApiController::post declaresRejectUnrecognizedParams=false
+        // But method overrides declared in ConcreteInheritanceController; therefore=true
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "post"));
+        $this->assertTrue($controller->getAttributeFor(ControllerAttribute::rejectUnrecognizedParams, "put"));
     }
 
     public function testLookupPriority(): void
@@ -236,11 +244,20 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("format", $parentOnlyAttribute);
         $this->assertContains("version", $parentOnlyAttribute);
 
+        // Body Disabled?
         $this->assertTrue($this->isBodyDisabled($controller, null));
         $this->assertTrue($this->isBodyDisabled($controller, "get"));
         $this->assertFalse($this->isBodyDisabled($controller, "post"));
         $this->assertFalse($this->isBodyDisabled($controller, "put"));
         $this->assertTrue($this->isBodyDisabled($controller, "nonexistent"));
+
+        // Allow File Uploads?
+        $this->assertNull($controller->getAttributeFor(ControllerAttribute::allowFileUpload, null));
+        $this->assertNull($controller->getAttributeFor(ControllerAttribute::allowFileUpload, "get"));
+        $this->assertNull($controller->getAttributeFor(ControllerAttribute::allowFileUpload, "post"));
+        $this->assertEquals(1024,
+            $controller->getAttributeFor(ControllerAttribute::allowFileUpload, "put")["size"] ?? null);
+        $this->assertNull($controller->getAttributeFor(ControllerAttribute::allowFileUpload, "nonExistent"));
     }
 
     private function isBodyDisabled(ControllerAttributes $controller, ?string $entrypoint): bool
