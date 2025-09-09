@@ -12,6 +12,8 @@ use Charcoal\Http\Server\Contracts\Controllers\ControllerAttributeInterface;
 
 /**
  * Represents an attribute that allows a class to handle a text body in a specific manner.
+ * Text bodies (contentTypes: text/plain, text/html, text/css, etc...) are disabled by default.
+ * Special use-cases only; This does NOT include application/* bodies (i.e., JSON, XML, etc...)
  */
 #[\Attribute(\Attribute::TARGET_CLASS)]
 final readonly class AllowTextBody implements ControllerAttributeInterface
