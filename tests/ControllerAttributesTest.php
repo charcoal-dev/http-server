@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Charcoal\Http\Tests\Server;
 
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
-use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\RequestConstraint;
 use Charcoal\Http\Server\HttpServer;
