@@ -15,6 +15,7 @@ use Charcoal\Http\Server\Attributes\CacheControlAttribute;
 use Charcoal\Http\Server\Attributes\DefaultEntrypoint;
 use Charcoal\Http\Server\Attributes\DisableRequestBody;
 use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
+use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
 
 /**
  * Represents a set of attributes that can be used to define behavior and constraints
@@ -25,7 +26,7 @@ enum ControllerAttribute: string
     case defaultEntrypoint = DefaultEntrypoint::class;
     case allowedParams = AllowedParam::class;
     case rejectUnrecognizedParams = RejectUnrecognizedParams::class;
-    case constraints = RequestConstraint::class;
+    case constraints = RequestConstraintOverride::class;
     case disableRequestBody = DisableRequestBody::class;
     case allowFileUpload = AllowFileUpload::class;
     case allowTextBody = AllowTextBody::class;
