@@ -45,6 +45,8 @@ final class HttpServer implements ServerApiInterface
     use ServerTestableTrait;
     use ControlledSerializableTrait;
 
+    public static bool $exposeCharcoalServer = true;
+
     private readonly Router $router;
     private readonly MiddlewareRegistry $middleware;
 

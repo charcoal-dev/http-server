@@ -16,7 +16,7 @@ use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
  * Represents a successful result of an operation with associated HTTP status code,
  * headers, and payload. This class is immutable and extends the AbstractResult base class.
  */
-readonly class SuccessResult extends AbstractResult
+final readonly class SuccessResult extends AbstractResult
 {
     public function __construct(
         Headers                         $headers,

@@ -10,6 +10,8 @@ namespace Charcoal\Http\Server\Request\Result;
 
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
+use Charcoal\Http\Server\HttpServer;
+use Charcoal\Http\Server\Internal\Constants;
 
 /**
  * Represents an abstract result with immutable headers.
@@ -23,6 +25,10 @@ abstract readonly class AbstractResult
         Headers    $headers,
     )
     {
+        if (HttpServer::$exposeCharcoalServer) {
+            $headers->set("X-Powered-By", Constants::CHARCOAL_HTTP_SERVER);
+        }
+
         $this->headers = new HeadersImmutable($headers);
     }
 
