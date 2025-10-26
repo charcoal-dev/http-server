@@ -35,7 +35,6 @@ use Charcoal\Http\Server\Enums\RequestConstraint;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Enums\TransferEncoding;
 use Charcoal\Http\Server\Exceptions\Controllers\ValidationErrorException;
-use Charcoal\Http\Server\Exceptions\Controllers\ValidationException;
 use Charcoal\Http\Server\Exceptions\Internal\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
 use Charcoal\Http\Server\Exceptions\Internal\Response\ResponseFinalizedInterrupt;

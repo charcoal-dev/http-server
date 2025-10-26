@@ -8,13 +8,11 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Exceptions\Controllers;
 
-use Charcoal\Contracts\Sapi\ValidationExceptionInterface;
-
 /**
  * This exception includes an optional parameter name associated with the validation failure,
  * along with a message describing the error and an optional error code.
  */
-class ValidationException extends \Exception implements ValidationExceptionInterface
+class ValidationException extends \Exception
 {
     public function __construct(
         string                $message,
