@@ -1,6 +1,7 @@
 .idea/
 vendor/
 tmp/
+composer.phar
 workspace/
 workspace/composer.phar
 composer.lock
