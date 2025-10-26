@@ -15,6 +15,7 @@ use Charcoal\Base\Objects\Traits\NotCloneableTrait;
 use Charcoal\Base\Objects\Traits\NotSerializableTrait;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Charsets\Support\AsciiHelper;
+use Charcoal\Contracts\Sapi\ValidationExceptionInterface;
 use Charcoal\Http\Commons\Body\PayloadImmutable;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
@@ -454,7 +455,7 @@ final readonly class RequestGateway
                 $e->setContextMessage($gatewayFacade);
             }
 
-            if ($e instanceof ValidationException) {
+            if ($e instanceof ValidationExceptionInterface) {
                 throw new RequestGatewayException(ControllerError::ValidationException, $e);
             }
 
