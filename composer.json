@@ -17,7 +17,7 @@
   ],
   "require": {
     "php": "^8.3",
-    "charcoal-dev/contracts": "^0.1.21",
+    "charcoal-dev/contracts": "^0.1.22",
     "charcoal-dev/base": "^0.2.4",
     "charcoal-dev/buffers": "^0.2.4",
     "charcoal-dev/http-commons": "^0.2.31",

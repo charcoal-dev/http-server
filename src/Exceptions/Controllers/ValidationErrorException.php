@@ -20,6 +20,7 @@ use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 class ValidationErrorException extends ValidationException
 {
     public readonly string $translatedMessage;
+    public readonly int|string $translatedCode;
 
     public function __construct(
         public readonly DomainMessageEnumInterface $error,
@@ -37,6 +38,7 @@ class ValidationErrorException extends ValidationException
      */
     public function setContextMessage(GatewayFacade $context): void
     {
-        $this->translatedMessage = $this->error->getTranslatedMessage($context);
+        $this->translatedMessage = $this->error->getTranslatedMessage($context, $this->context);
+        $this->translatedCode = $this->error->getCode($context, $this->context);
     }
 }
