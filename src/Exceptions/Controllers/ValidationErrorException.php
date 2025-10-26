@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Exceptions\Controllers;
 
-use Charcoal\Http\Server\Contracts\Controllers\ValidationErrorEnumInterface;
+use Charcoal\Contracts\Sapi\DomainMessageEnumInterface;
 use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 
 /**
@@ -22,10 +22,10 @@ class ValidationErrorException extends ValidationException
     public readonly string $translatedMessage;
 
     public function __construct(
-        public readonly ValidationErrorEnumInterface $error,
-        ?array                                       $context = [],
-        ?string                                      $message = null,
-        int                                          $code = 0
+        public readonly DomainMessageEnumInterface $error,
+        ?array                                     $context = [],
+        ?string                                    $message = null,
+        int                                        $code = 0
     )
     {
         parent::__construct($message ?? $error->name, $code, $context);

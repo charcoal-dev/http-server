@@ -10,6 +10,7 @@ namespace Charcoal\Http\Server\Request\Controller;
 
 use Charcoal\Contracts\Buffers\ReadableBufferInterface;
 use Charcoal\Contracts\Charsets\Charset;
+use Charcoal\Contracts\Sapi\SapiRequestContextInterface;
 use Charcoal\Http\Commons\Contracts\ContentTypeEnumInterface;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Headers\Headers;
@@ -25,7 +26,7 @@ use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
 /**
  * Represents a controller API that interacts with request and response contexts.
  */
-readonly class GatewayFacade implements ControllerApiInterface
+readonly class GatewayFacade implements ControllerApiInterface, SapiRequestContextInterface
 {
     protected bool $enforcedRequiredParams;
 
