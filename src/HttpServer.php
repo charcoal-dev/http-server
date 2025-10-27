@@ -179,6 +179,24 @@ final class HttpServer implements ServerApiInterface
             return new ErrorResult($response, RequestError::EndpointNotFound, null);
         }
 
+        // Pre-Flight Control (Resolve actual entrypoint method and CORS enforcement)
+        try {
+            $requestGateway->preFlightControl(
+                $this->router,
+                $this->config->corsPolicy,
+                $route,
+            );
+        } catch (PreFlightTerminateException) {
+            return new SuccessResult(
+                $response,
+                new NoContentResponse(204),
+                $requestGateway->getControllerAttribute(ControllerAttribute::cacheControl) ?: null
+            );
+        } catch (RequestGatewayException $e) {
+            return new ErrorResult($response, $e->error, $e);
+        }
+
+        // Resolve Controller
         try {
             $controller = $this->router->getControllerForRoute($route, $request->method);
         } catch (\Exception $e) {
@@ -197,18 +215,11 @@ final class HttpServer implements ServerApiInterface
 
         // Pre-Flight Control (Resolve actual entrypoint method and CORS enforcement)
         try {
-            $requestGateway->preFlightControl(
+            $requestGateway->resolveEntryPoint(
                 $this->router,
-                $this->config->corsPolicy,
                 $route,
                 $controller,
                 $params ?? []
-            );
-        } catch (PreFlightTerminateException) {
-            return new SuccessResult(
-                $response,
-                new NoContentResponse(204),
-                $requestGateway->getControllerAttribute(ControllerAttribute::cacheControl) ?: null
             );
         } catch (RequestGatewayException $e) {
             return new ErrorResult($response, $e->error, $e);

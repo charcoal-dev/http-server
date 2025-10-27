@@ -15,7 +15,6 @@ use Charcoal\Base\Objects\Traits\NotCloneableTrait;
 use Charcoal\Base\Objects\Traits\NotSerializableTrait;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Charsets\Support\AsciiHelper;
-use Charcoal\Contracts\Sapi\Exceptions\TranslatedExceptionInterface;
 use Charcoal\Contracts\Sapi\Exceptions\ValidationExceptionInterface;
 use Charcoal\Http\Commons\Body\PayloadImmutable;
 use Charcoal\Http\Commons\Enums\ContentType;
@@ -176,16 +175,11 @@ final readonly class RequestGateway
      * @throws PreFlightTerminateException
      */
     public function preFlightControl(
-        Router                 $router,
-        CorsPolicy             $corsPolicy,
-        RouteSnapshot          $route,
-        RouteControllerBinding $controller,
-        array                  $pathParams
+        Router        $router,
+        CorsPolicy    $corsPolicy,
+        RouteSnapshot $route,
     ): void
     {
-        $this->routeController = $controller;
-        $this->requestFacade->setPathParams($pathParams);
-
         // Cors policy applicable if Origin header is present
         $isPreFlight = $this->request->method === HttpMethod::OPTIONS;
         $origin = $this->request->headers->get("Origin");
@@ -200,13 +194,27 @@ final readonly class RequestGateway
                 false => $this->responseHeaders->set("Access-Control-Allow-Origin", "*"),
                 true => $this->validateOrigin($origin, $corsPolicy, $this->request->method)
             };
-
-            // Handle preflight requests before entrypoint resolution
-            if ($isPreFlight) {
-                $allowed = implode(", ", $router->getAllowedMethodsFor($route));
-                $this->defaultPreFlightRequestHandler($allowed, $corsPolicy);
-            }
         }
+
+        // Handle preflight requests before entrypoint resolution
+        if ($isPreFlight) {
+            $allowed = implode(", ", $router->getAllowedMethodsFor($route));
+            $this->defaultPreFlightRequestHandler($allowed, $corsPolicy);
+        }
+    }
+
+    /**
+     * @throws RequestGatewayException
+     */
+    public function resolveEntryPoint(
+        Router                 $router,
+        RouteSnapshot          $route,
+        RouteControllerBinding $controller,
+        array                  $pathParams
+    ): void
+    {
+        $this->routeController = $controller;
+        $this->requestFacade->setPathParams($pathParams);
 
         // Resolve Entrypoint
         $entryPoint = $controller->matchEntryPoint($this->request->method);
@@ -454,7 +462,7 @@ final readonly class RequestGateway
         } catch (RequestGatewayException $e) {
             throw $e;
         } catch (\Exception $e) {
-            if($e instanceof ValidationTranslatedException) {
+            if ($e instanceof ValidationTranslatedException) {
                 $e->setContextMessage($gatewayFacade);
             }
 
