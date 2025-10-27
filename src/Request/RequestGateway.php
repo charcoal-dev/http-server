@@ -288,7 +288,8 @@ final readonly class RequestGateway
                 $maxBodyBytes,
                 $maxParams,
                 $maxParamLength,
-                $maxDepth
+                $maxDepth,
+                $this->request->body ?? $this->request->bodyStreamPath
             );
         } catch (\Exception $e) {
             $errorCode = match (true) {
