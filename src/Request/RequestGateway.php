@@ -396,6 +396,10 @@ final readonly class RequestGateway
      */
     public function getControllerAttribute(ControllerAttribute $attr, bool $aggregated = false): mixed
     {
+        if (!isset($this->controllerEp)) {
+            return false;
+        }
+
         $entryPoint = $this->controllerEp;
         if ($attr === ControllerAttribute::constraints) {
             $entryPoint = null;
