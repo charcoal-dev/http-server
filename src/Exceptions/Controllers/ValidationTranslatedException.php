@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Exceptions\Controllers;
 
 use Charcoal\Contracts\Sapi\DomainMessageEnumInterface;
-use Charcoal\Contracts\Sapi\ValidationExceptionInterface;
+use Charcoal\Contracts\Sapi\Exceptions\TranslatedExceptionInterface;
 use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 
 /**
@@ -18,7 +18,7 @@ use Charcoal\Http\Server\Request\Controller\GatewayFacade;
  * typically used to handle validation errors with localized or enumerated error messages.
  * @api
  */
-class ValidationErrorException extends ValidationException implements ValidationExceptionInterface
+class ValidationTranslatedException extends ValidationException implements TranslatedExceptionInterface
 {
     public readonly string $translatedMessage;
     public readonly int|string $translatedCode;
@@ -39,7 +39,7 @@ class ValidationErrorException extends ValidationException implements Validation
      */
     public function setContextMessage(GatewayFacade $context): void
     {
-        $this->translatedMessage = $this->error->getTranslatedMessage($context, $this->context);
+        $this->translatedMessage = $this->error->getTranslated($context, $this->context);
         $this->translatedCode = $this->error->getCode($context, $this->context);
     }
 

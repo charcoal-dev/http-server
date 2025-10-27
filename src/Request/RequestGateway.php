@@ -15,7 +15,8 @@ use Charcoal\Base\Objects\Traits\NotCloneableTrait;
 use Charcoal\Base\Objects\Traits\NotSerializableTrait;
 use Charcoal\Buffers\Buffer;
 use Charcoal\Charsets\Support\AsciiHelper;
-use Charcoal\Contracts\Sapi\ValidationExceptionInterface;
+use Charcoal\Contracts\Sapi\Exceptions\TranslatedExceptionInterface;
+use Charcoal\Contracts\Sapi\Exceptions\ValidationExceptionInterface;
 use Charcoal\Http\Commons\Body\PayloadImmutable;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
@@ -34,7 +35,7 @@ use Charcoal\Http\Server\Enums\ControllerError;
 use Charcoal\Http\Server\Enums\RequestConstraint;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Enums\TransferEncoding;
-use Charcoal\Http\Server\Exceptions\Controllers\ValidationErrorException;
+use Charcoal\Http\Server\Exceptions\Controllers\ValidationTranslatedException;
 use Charcoal\Http\Server\Exceptions\Internal\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
 use Charcoal\Http\Server\Exceptions\Internal\Response\ResponseFinalizedInterrupt;
@@ -451,7 +452,7 @@ final readonly class RequestGateway
         } catch (RequestGatewayException $e) {
             throw $e;
         } catch (\Exception $e) {
-            if ($e instanceof ValidationErrorException) {
+            if($e instanceof ValidationTranslatedException) {
                 $e->setContextMessage($gatewayFacade);
             }
 
