@@ -115,12 +115,12 @@ abstract readonly class SapiRequest
 
         // ErrorResult: Handle error cases
         if ($result instanceof ErrorResult) {
-            self::handleErrorResult($result);
+            static::handleErrorResult($result);
         }
 
         // SuccessResult: Send the response body
         assert($result instanceof SuccessResult);
-        self::handleSuccessResult($result);
+        static::handleSuccessResult($result);
         exit(0); // Done!
     }
 
