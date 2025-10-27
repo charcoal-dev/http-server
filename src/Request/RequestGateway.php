@@ -200,16 +200,18 @@ final readonly class RequestGateway
                 false => $this->responseHeaders->set("Access-Control-Allow-Origin", "*"),
                 true => $this->validateOrigin($origin, $corsPolicy, $this->request->method)
             };
+
+            // Handle preflight requests before entrypoint resolution
+            if ($isPreFlight) {
+                $allowed = implode(", ", $router->getAllowedMethodsFor($route));
+                $this->defaultPreFlightRequestHandler($allowed, $corsPolicy);
+            }
         }
 
         // Resolve Entrypoint
         $entryPoint = $controller->matchEntryPoint($this->request->method);
         if (!$entryPoint) {
             $allowed = implode(", ", $router->getAllowedMethodsFor($route));
-            if ($origin && $isPreFlight) {
-                $this->defaultPreFlightRequestHandler($allowed, $corsPolicy);
-            }
-
             $this->responseHeaders->set("Allow", $allowed);
             throw new RequestGatewayException(RequestError::MethodNotAllowed, null);
         }
@@ -223,7 +225,7 @@ final readonly class RequestGateway
     /**
      * @throws PreFlightTerminateException
      */
-    private function defaultPreFlightRequestHandler(string $methods, CorsPolicy $corsPolicy): void
+    private function defaultPreFlightRequestHandler(string $methods, CorsPolicy $corsPolicy): never
     {
         $this->responseHeaders->set("Access-Control-Allow-Methods", $methods)
             ->set("Access-Control-Allow-Headers", $corsPolicy->allow)
