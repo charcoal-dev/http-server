@@ -98,10 +98,13 @@ readonly class GatewayFacade implements ControllerApiInterface, SapiRequestConte
         $this->enforcedRequiredParams = true;
         if ($this->getAttribute(ControllerAttribute::rejectUnrecognizedParams) === true) {
             $unrecognized = $this->request()->payload
-                ->getUnrecognizedKeys(...$this->getAttribute(
-                    ControllerAttribute::allowedParams,
-                    aggregated: true
-                ) ?? []);
+                ->getUnrecognizedKeys(...array_map(
+                    "strtolower",
+                    $this->getAttribute(
+                        ControllerAttribute::allowedParams,
+                        aggregated: true
+                    ) ?? []
+                ));
             if (!empty($unrecognized)) {
                 throw new RequestGatewayException(ControllerError::UnrecognizedParam, null);
             }
