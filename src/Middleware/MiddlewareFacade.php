@@ -16,7 +16,6 @@ use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
-use Charcoal\Http\Server\Config\VirtualHost;
 use Charcoal\Http\Server\Enums\Pipeline;
 use Charcoal\Http\Server\Pipelines\ControllerGatewayFacadeResolver;
 use Charcoal\Http\Server\Pipelines\RequestBodyDecoder;
@@ -28,7 +27,6 @@ use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
 use Charcoal\Http\Server\Request\Result\Response\EncodedResponseBody;
-use Charcoal\Http\TrustProxy\Result\TrustGatewayResult;
 
 /**
  * Represents a middleware facade responsible for managing and executing middleware pipelines.
