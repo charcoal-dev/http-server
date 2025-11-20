@@ -146,6 +146,8 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $this->assertContains("base", $allowedParams);
         $this->assertContains("format", $allowedParams);
         $this->assertContains("version", $allowedParams);
+        $this->assertContains("concrete", $allowedParams);
+        $this->assertContains("deep", $allowedParams);
 
         // Test method overrides everything
         $postCache = $controller->getAttributeFor(ControllerAttribute::cacheControl, "post");
