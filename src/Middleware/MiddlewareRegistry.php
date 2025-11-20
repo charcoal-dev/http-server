@@ -112,6 +112,6 @@ class MiddlewareRegistry
 
         $this->executed[$contract->value] = true;
         return is_callable($executable) ?
-            $executable(...$params) : $executable->invoke(...$params);
+            $executable(...$params) : $executable->execute(...$params);
     }
 }
