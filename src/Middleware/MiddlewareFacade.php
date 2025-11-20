@@ -115,12 +115,12 @@ final readonly class MiddlewareFacade
     }
 
     /**
-     * @param HeadersImmutable $headers
+     * @param RequestFacade $request
      * @return AuthContextInterface
      */
-    public function authenticationPipeline(HeadersImmutable $headers): AuthContextInterface
+    public function authenticationPipeline(RequestFacade $request): AuthContextInterface
     {
-        return $this->registry->execute(Pipeline::Authentication, null, [$headers]);
+        return $this->registry->execute(Pipeline::Authentication, null, [$request]);
     }
 
     /**

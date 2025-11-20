@@ -437,7 +437,7 @@ final readonly class RequestGateway
         }
 
         try {
-            $this->authContext = $this->middleware->authenticationPipeline($this->request->headers);
+            $this->authContext = $this->middleware->authenticationPipeline($this->requestFacade);
         } catch (\Exception $e) {
             throw new RequestGatewayException(RequestError::AuthenticationFailed, $e);
         }
