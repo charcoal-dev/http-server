@@ -18,9 +18,9 @@ use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 interface InvokableControllerInterface extends ControllerInterface
 {
     /**
-     * @param GatewayFacade $request
+     * @param GatewayFacade $gateway
      * @return void
      * @throws ResponseFinalizedInterrupt
      */
-    public function __invoke(GatewayFacade $request): void;
+    public function __invoke(GatewayFacade $gateway): void;
 }

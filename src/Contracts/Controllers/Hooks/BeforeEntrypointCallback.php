@@ -19,9 +19,9 @@ use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 interface BeforeEntrypointCallback extends ControllerInterface
 {
     /**
-     * @param GatewayFacade $request
+     * @param GatewayFacade $gateway
      * @return void
      * @throws ResponseFinalizedInterrupt
      */
-    public function beforeEntrypointCallback(GatewayFacade $request): void;
+    public function beforeEntrypointCallback(GatewayFacade $gateway): void;
 }
