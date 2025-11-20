@@ -16,6 +16,8 @@ use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
+use Charcoal\Http\Server\Contracts\Controllers\Auth\AuthContextInterface;
+use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 use Charcoal\Http\Server\Enums\Pipeline;
 use Charcoal\Http\Server\Pipelines\ControllerGatewayFacadeResolver;
 use Charcoal\Http\Server\Pipelines\RequestBodyDecoder;
@@ -110,5 +112,27 @@ final readonly class MiddlewareFacade
             ResponseBodyEncoder::class,
             [$contentType, $charset, $response]
         );
+    }
+
+    /**
+     * @param HeadersImmutable $headers
+     * @return AuthContextInterface
+     */
+    public function authenticationPipeline(HeadersImmutable $headers): AuthContextInterface
+    {
+        return $this->registry->execute(Pipeline::Authentication, null, [$headers]);
+    }
+
+    /**
+     * @param ControllerInterface $controller
+     * @param HeadersImmutable $headers
+     * @return array
+     */
+    public function controllerContextPipeline(
+        ControllerInterface $controller,
+        HeadersImmutable    $headers
+    ): array
+    {
+        return $this->registry->execute(Pipeline::ControllerContext, null, [$controller, $headers]);
     }
 }

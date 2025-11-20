@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Enums;
 
+use Charcoal\Http\Server\Contracts\Middleware\AuthenticationPipeline;
+use Charcoal\Http\Server\Contracts\Middleware\ControllerContextPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\ControllerGatewayFacadePipeline;
 use Charcoal\Http\Server\Contracts\Middleware\RequestBodyDecoderPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\RequestHeadersPipeline;
@@ -26,4 +28,6 @@ enum Pipeline: string
     case Controller_ContextFacadeResolver = ControllerGatewayFacadePipeline::class;
     case Request_BodyDecoder = RequestBodyDecoderPipeline::class;
     case Response_BodyEncoder = ResponseBodyEncoderPipeline::class;
+    case Authentication = AuthenticationPipeline::class;
+    case ControllerContext = ControllerContextPipeline::class;
 }

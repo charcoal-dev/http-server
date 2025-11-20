@@ -65,6 +65,10 @@ enum RequestError implements RequestErrorCodeInterface
     case BadOriginHeader;
     case CorsOriginNotAllowed;
 
+    /** @for=Authentication */
+    case AuthenticationFailed;
+    case Unauthorized;
+
     /**
      * Determines and returns the appropriate HTTP status code
      * based on the current instance.
@@ -85,6 +89,7 @@ enum RequestError implements RequestErrorCodeInterface
             self::ContentHandlingConflict,
             self::MalformedBody,
             self::BadPeerIp => 400,
+            self::Unauthorized => 401,
             self::CorsOriginNotAllowed => 403,
             self::EndpointNotFound => 404,
             self::MethodNotAllowed => 405,

@@ -11,6 +11,7 @@ namespace Charcoal\Http\Server\Enums;
 use Charcoal\Http\Server\Attributes\AllowedParam;
 use Charcoal\Http\Server\Attributes\AllowFileUpload;
 use Charcoal\Http\Server\Attributes\AllowTextBody;
+use Charcoal\Http\Server\Attributes\AuthenticationGuard;
 use Charcoal\Http\Server\Attributes\CacheControlAttribute;
 use Charcoal\Http\Server\Attributes\DefaultEntrypoint;
 use Charcoal\Http\Server\Attributes\DisableRequestBody;
@@ -33,4 +34,5 @@ enum ControllerAttribute: string
     case allowFileUpload = AllowFileUpload::class;
     case allowTextBody = AllowTextBody::class;
     case cacheControl = CacheControlAttribute::class;
+    case authentication = AuthenticationGuard::class;
 }

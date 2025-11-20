@@ -24,6 +24,10 @@ use Charcoal\Http\Commons\Support\CorsPolicy;
 use Charcoal\Http\Commons\Support\HttpHelper;
 use Charcoal\Http\Server\Config\RequestConstraints;
 use Charcoal\Http\Server\Config\VirtualHost;
+use Charcoal\Http\Server\Contracts\Controllers\Auth\AuthAwareControllerInterface;
+use Charcoal\Http\Server\Contracts\Controllers\Auth\AuthContextInterface;
+use Charcoal\Http\Server\Contracts\Controllers\Context\ContextAwareControllerInterface;
+use Charcoal\Http\Server\Contracts\Controllers\Context\ControllerContextInterface;
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\AfterEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\BeforeEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
@@ -72,6 +76,7 @@ final readonly class RequestGateway
     public string $controllerEp;
     public ResponseFacade $response;
     private ?SuccessResponseInterface $finalizedResponse;
+    private ?AuthContextInterface $authContext;
 
     /**
      * @throws RequestGatewayException
@@ -420,6 +425,25 @@ final readonly class RequestGateway
     }
 
     /**
+     * @return void
+     * @throws RequestGatewayException
+     */
+    public function ensureAuthentication(): void
+    {
+        $authentication = $this->getControllerAttribute(ControllerAttribute::authentication);
+        if (!$authentication) {
+            $this->authContext = null;
+            return;
+        }
+
+        try {
+            $this->authContext = $this->middleware->authenticationPipeline($this->request->headers);
+        } catch (\Exception $e) {
+            throw new RequestGatewayException(RequestError::AuthenticationFailed, $e);
+        }
+    }
+
+    /**
      * @return SuccessResponseInterface
      * @throws RequestGatewayException
      */
@@ -439,6 +463,31 @@ final readonly class RequestGateway
             try {
                 // Construct Controller, dispatch "BeforeEntrypointCallback" hook
                 $controller = new $controllerContext->classname($this);
+                if ($controller instanceof AuthAwareControllerInterface) {
+                    if (!$this->authContext) {
+                        throw new RequestGatewayException(RequestError::Unauthorized,
+                            new \RuntimeException("No authentication logic was executed"));
+                    }
+
+                    $controller->setAuthenticationContext($this->authContext);
+                }
+
+                // Context Objects
+                if ($controller instanceof ContextAwareControllerInterface) {
+                    $contextObjects = $this->middleware->controllerContextPipeline(
+                        $controller, $this->request->headers);
+
+                    foreach ($contextObjects as $contextItem) {
+                        if($contextItem instanceof ControllerContextInterface) {
+                            $controller->setContext($contextItem);
+                        }
+
+                        $controller->validateContext();
+                    }
+
+                    unset($contextObjects, $contextItem);
+                }
+
                 if ($controller instanceof BeforeEntrypointCallback) {
                     $controller->beforeEntrypointCallback($gatewayFacade);
                 }

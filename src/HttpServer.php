@@ -179,7 +179,7 @@ final class HttpServer implements ServerApiInterface
             return new ErrorResult($response, RequestError::EndpointNotFound, null);
         }
 
-        // Pre-Flight Control (Resolve actual entrypoint method and CORS enforcement)
+        // Pre-Flight Control (CORS enforcement)
         try {
             $requestGateway->preFlightControl(
                 $this->router,
@@ -213,7 +213,7 @@ final class HttpServer implements ServerApiInterface
             ));
         }
 
-        // Pre-Flight Control (Resolve actual entrypoint method and CORS enforcement)
+        // Resolve actual entrypoint method
         try {
             $requestGateway->resolveEntryPoint(
                 $this->router,
@@ -225,19 +225,23 @@ final class HttpServer implements ServerApiInterface
             return new ErrorResult($response, $e->error, $e);
         }
 
-        // Todo: Sound spot for cached responses?
-
+        // Authentication
+        try {
+            $requestGateway->ensureAuthentication();
+        } catch (RequestGatewayException $e) {
+            return new ErrorResult($response, $e->error, $e);
+        }
         // Todo: Init Logging
         // Todo: Concurrency Handling
         // Todo: Rate limiting
-
-        // Todo: Authentication
 
         try {
             $requestGateway->parseRequestBody();
         } catch (RequestGatewayException $e) {
             return new ErrorResult($response, $e->error, $e);
         }
+
+        // Todo: Cached Responses
 
         try {
             $response = $requestGateway->executeController();
