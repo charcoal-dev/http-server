@@ -13,5 +13,9 @@ namespace Charcoal\Http\Server\Contracts\Controllers\Auth;
  */
 interface AuthContextInterface
 {
+    /**
+     * Return unique identifier for an authenticated client,
+     * This value maybe used to replace IP address in various operations
+     */
     public function getAuthenticatedId(): string;
 }
