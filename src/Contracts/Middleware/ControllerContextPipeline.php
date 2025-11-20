@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Contracts\Middleware;
 
-use Charcoal\Http\Commons\Headers\Headers;
+use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Server\Contracts\Controllers\Context\ControllerContextInterface;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 
@@ -20,8 +20,8 @@ interface ControllerContextPipeline extends PipelineMiddlewareInterface
 {
     /**
      * @param ControllerInterface $controller
-     * @param Headers $headers
+     * @param HeadersImmutable $headers
      * @return array<ControllerContextInterface>
      */
-    public function __invoke(ControllerInterface $controller, Headers $headers): array;
+    public function __invoke(ControllerInterface $controller, HeadersImmutable $headers): array;
 }
