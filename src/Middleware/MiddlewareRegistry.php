@@ -101,6 +101,10 @@ final class MiddlewareRegistry
         }
 
         $this->executed[$contract->value] = true;
+        if ($executable instanceof \Closure) {
+            $executable = $executable();
+        }
+
         return is_callable($executable) ?
             $executable(...$params) : $executable->execute(...$params);
     }
