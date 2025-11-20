@@ -13,4 +13,5 @@ namespace Charcoal\Http\Server\Contracts\Controllers\Auth;
  */
 interface AuthContextInterface
 {
+    public function getAuthenticatedId(): string;
 }
