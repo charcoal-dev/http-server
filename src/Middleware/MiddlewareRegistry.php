@@ -17,7 +17,7 @@ use Charcoal\Http\Server\Enums\Pipeline;
  * associated with specific pipelines. Middleware may be persisted or runtime-based
  * and can be executed with optional fallback mechanisms.
  */
-class MiddlewareRegistry
+final class MiddlewareRegistry
 {
     /** @var array<string, PipelineMiddlewareInterface|callable> */
     private array $persisted = [];
@@ -27,16 +27,6 @@ class MiddlewareRegistry
     private array $executed = [];
 
     private bool $locked = false;
-
-    /** @internal */
-    final public function __construct()
-    {
-        $this->onConstructHook();
-    }
-
-    protected function onConstructHook(): void
-    {
-    }
 
     /**
      * @param Pipeline $contract
