@@ -481,10 +481,9 @@ final readonly class RequestGateway
                         if($contextItem instanceof ControllerContextInterface) {
                             $controller->setContext($contextItem);
                         }
-
-                        $controller->validateContext();
                     }
 
+                    $controller->validateContext();
                     unset($contextObjects, $contextItem);
                 }
 
