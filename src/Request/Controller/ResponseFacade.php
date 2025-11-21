@@ -66,4 +66,17 @@ final class ResponseFacade extends WritablePayload
     {
         return $this->isCacheable;
     }
+
+    /**
+     * @param array $data
+     * @return $this
+     */
+    public function useDto(array $data): self
+    {
+        foreach ($data as $key => $value) {
+            $this->set((string)$key, $value);
+        }
+
+        return $this;
+    }
 }
