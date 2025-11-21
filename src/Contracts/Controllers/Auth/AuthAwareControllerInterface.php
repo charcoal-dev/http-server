@@ -21,10 +21,4 @@ interface AuthAwareControllerInterface
      * This method is called to pass AuthenticationContextInterface object to controller.
      */
     public function setAuthenticationContext(AuthContextInterface $authContext): void;
-
-    /**
-     * This method is to be used internally within the controller as getter for
-     * instance of a passed down AuthenticationContextInterface object.
-     */
-    public function auth(): AuthContextInterface;
 }
