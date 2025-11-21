@@ -68,8 +68,7 @@ final class ResponseFacade extends WritablePayload
     }
 
     /**
-     * @param array $data
-     * @return $this
+     * @api
      */
     public function useDto(array $data): self
     {
