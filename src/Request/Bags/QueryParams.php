@@ -70,6 +70,14 @@ final readonly class QueryParams implements \IteratorAggregate, \Countable
     }
 
     /**
+     * @return array|\string[][]
+     */
+    public function getArray(): array
+    {
+        return $this->bag;
+    }
+
+    /**
      * @return \Traversable<string,string[]>
      */
     public function getIterator(): \Traversable
