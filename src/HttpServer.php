@@ -20,6 +20,7 @@ use Charcoal\Http\Server\Exceptions\Internal\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
 use Charcoal\Http\Server\Exceptions\Request\HostnamePortMismatchException;
 use Charcoal\Http\Server\Exceptions\Request\TlsRequiredException;
+use Charcoal\Http\Server\Internal\RequestGatewayResult;
 use Charcoal\Http\Server\Internal\ServerBehaviourTrait;
 use Charcoal\Http\Server\Internal\ServerTestableTrait;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
@@ -99,13 +100,26 @@ final class HttpServer implements ServerApiInterface
      */
     public function handle(ServerRequest $request, ?ServerEnv $env = null): AbstractResult
     {
+        $result = $this->handleRequestGateway($request, $env);
+        $result->gateway?->finalizeIngressRequestLog($result->result);
+        return $result->result;
+    }
+
+    /**
+     * @param ServerRequest $request
+     * @param ServerEnv|null $env
+     * @return RequestGatewayResult
+     */
+    private function handleRequestGateway(ServerRequest $request, ?ServerEnv $env = null): RequestGatewayResult
+    {
         // Start with blank response for headers, proceed to random UUID first:
         $response = new Headers();
 
         try {
             $uuid = UuidHelper::uuid4();
         } catch (\Exception $e) {
-            return new ErrorResult($response, RequestError::InternalError, $e);
+            return new RequestGatewayResult(null,
+                new ErrorResult($response, RequestError::InternalError, $e));
         }
 
         // Placeholder until we can get the request ID from the gateway
@@ -121,7 +135,8 @@ final class HttpServer implements ServerApiInterface
                 new MiddlewareFacade($this->middleware)
             );
         } catch (RequestGatewayException $e) {
-            return new ErrorResult($response, $e->error, $e);
+            return new RequestGatewayResult(null,
+                new ErrorResult($response, $e->error, $e));
         }
 
         // Updated reference to the ServerRequest with headers
@@ -132,22 +147,38 @@ final class HttpServer implements ServerApiInterface
             $env = $env ?? new ServerEnv();
             $trustProxy = TrustGateway::establishTrust($this->config->proxies, $env ?? new ServerEnv());
         } catch (\Exception $e) {
-            return new ErrorResult($response, RequestError::BadPeerIp, $e);
+            return new RequestGatewayResult($requestGateway,
+                new ErrorResult($response, RequestError::BadPeerIp, $e));
         }
 
         $virtualHost = $this->config->matchHostname(
             strtolower(trim($trustProxy->hostname)), $trustProxy->port, $trustProxy->scheme);
         if (!$virtualHost) {
-            return new ErrorResult($response, RequestError::IncorrectHost,
-                HostnamePortMismatchException::withContext($env, $trustProxy));
+            return new RequestGatewayResult(
+                $requestGateway,
+                new ErrorResult(
+                    $response,
+                    RequestError::IncorrectHost,
+                    HostnamePortMismatchException::withContext($env, $trustProxy)
+                )
+            );
         }
 
         if (!filter_var($trustProxy->clientIp, FILTER_VALIDATE_IP,
             FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
             if (!$virtualHost->allowInternal) {
-                return new ErrorResult($response, RequestError::ForwardingIpBlocked,
-                    new \RuntimeException(sprintf('Private IP "%s" is blocked from accessing host: "%s"',
-                        $trustProxy->clientIp, $virtualHost->hostname . ":" . $virtualHost->port)));
+                return new RequestGatewayResult(
+                    $requestGateway,
+                    new ErrorResult(
+                        $response, RequestError::ForwardingIpBlocked,
+                        new \RuntimeException(
+                            sprintf('Private IP "%s" is blocked from accessing host: "%s"',
+                                $trustProxy->clientIp,
+                                $virtualHost->hostname . ":" . $virtualHost->port
+                            )
+                        )
+                    )
+                );
             }
         }
 
@@ -155,28 +186,41 @@ final class HttpServer implements ServerApiInterface
             // Check configured hostnames if one with SSL is configured
             foreach ($this->config->hostnames as $profile) {
                 if ($profile->isSecure) {
-                    return new RedirectResult($response,
-                        new RedirectUrl($request->url, 308,
-                            changeHost: $profile, tlsScheme: true, absolute: true, queryStr: true));
+                    return new RequestGatewayResult(
+                        $requestGateway,
+                        new RedirectResult($response, new RedirectUrl($request->url, 308,
+                            changeHost: $profile, tlsScheme: true, absolute: true, queryStr: true)));
                 }
             }
 
             $response->set("Upgrade", "TLS/1.3");
-            return new ErrorResult($response, RequestError::TlsEnforced,
-                new TlsRequiredException());
+            return new RequestGatewayResult(
+                $requestGateway, new ErrorResult($response, RequestError::TlsEnforced,
+                    new TlsRequiredException())
+            );
         }
 
         // Update Gateway/Context with acceptance:
         try {
             $requestGateway->accepted($virtualHost, $trustProxy);
         } catch (RequestGatewayException $e) {
-            return new ErrorResult($response, $e->error, $e);
+            return new RequestGatewayResult($requestGateway,
+                new ErrorResult($response, $e->error, $e));
         }
 
         // Match with available routes
         [$route, $tokens] = $this->router->match($request->url->path);
         if (!isset($route, $tokens)) {
-            return new ErrorResult($response, RequestError::EndpointNotFound, null);
+            return new RequestGatewayResult($requestGateway,
+                new ErrorResult($response, RequestError::EndpointNotFound, null));
+        }
+
+        // Construct Request Logger
+        try {
+            $requestGateway->enableLogging();
+        } catch (RequestGatewayException $e) {
+            return new RequestGatewayResult($requestGateway,
+                new ErrorResult($response, $e->error, $e));
         }
 
         // Pre-Flight Control (CORS enforcement)
@@ -187,21 +231,21 @@ final class HttpServer implements ServerApiInterface
                 $route,
             );
         } catch (PreFlightTerminateException) {
-            return new SuccessResult(
+            return new RequestGatewayResult($requestGateway, new SuccessResult(
                 $response,
                 new NoContentResponse(204),
                 $requestGateway->getControllerAttribute(ControllerAttribute::cacheControl) ?: null
-            );
+            ));
         } catch (RequestGatewayException $e) {
-            return new ErrorResult($response, $e->error, $e);
+            return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
         }
 
         // Resolve Controller
         try {
             $controller = $this->router->getControllerForRoute($route, $request->method);
         } catch (\Exception $e) {
-            return new ErrorResult($response,
-                RequestError::ControllerResolveError, $e);
+            return new RequestGatewayResult($requestGateway, new ErrorResult($response,
+                RequestError::ControllerResolveError, $e));
         }
 
         // Path parameters/tokens rendering:
@@ -222,14 +266,21 @@ final class HttpServer implements ServerApiInterface
                 $params ?? []
             );
         } catch (RequestGatewayException $e) {
-            return new ErrorResult($response, $e->error, $e);
+            return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
+        }
+
+        // Log Ingress HTTP Request?
+        try {
+            $requestGateway->logIngressRequest();
+        } catch (RequestGatewayException $e) {
+            return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
         }
 
         // Authentication
         try {
             $requestGateway->ensureAuthentication();
         } catch (RequestGatewayException $e) {
-            return new ErrorResult($response, $e->error, $e);
+            return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
         }
         // Todo: Init Logging
         // Todo: Concurrency Handling
@@ -238,7 +289,7 @@ final class HttpServer implements ServerApiInterface
         try {
             $requestGateway->parseRequestBody();
         } catch (RequestGatewayException $e) {
-            return new ErrorResult($response, $e->error, $e);
+            return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
         }
 
         // Todo: Cached Responses
@@ -246,14 +297,14 @@ final class HttpServer implements ServerApiInterface
         try {
             $response = $requestGateway->executeController();
         } catch (RequestGatewayException $e) {
-            return new ErrorResult($response, $e->error, $e);
+            return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
         }
 
-        return new SuccessResult(
+        return new RequestGatewayResult($requestGateway, new SuccessResult(
             $requestGateway->responseHeaders,
             $response,
             $requestGateway->getControllerAttribute(ControllerAttribute::cacheControl) ?: null
-        );
+        ));
     }
 
     /**

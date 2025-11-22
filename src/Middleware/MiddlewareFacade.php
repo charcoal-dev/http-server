@@ -20,12 +20,14 @@ use Charcoal\Http\Server\Contracts\Controllers\Auth\AuthContextInterface;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 use Charcoal\Http\Server\Enums\Pipeline;
 use Charcoal\Http\Server\Pipelines\ControllerGatewayFacadeResolver;
+use Charcoal\Http\Server\Pipelines\NoRequestLog;
 use Charcoal\Http\Server\Pipelines\RequestBodyDecoder;
 use Charcoal\Http\Server\Pipelines\RequestHeadersValidator;
 use Charcoal\Http\Server\Pipelines\ResponseBodyEncoder;
 use Charcoal\Http\Server\Pipelines\UrlValidator;
 use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Request\Logger\RequestLoggerConstructor;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
 use Charcoal\Http\Server\Request\Result\Response\EncodedResponseBody;
@@ -134,5 +136,13 @@ final readonly class MiddlewareFacade
     ): array
     {
         return $this->registry->execute(Pipeline::ControllerContext, null, [$controller, $headers]);
+    }
+
+    /**
+     * @return RequestLoggerConstructor|null
+     */
+    public function requestLoggerPipeline(): ?RequestLoggerConstructor
+    {
+        return $this->registry->execute(Pipeline::RequestLogger, NoRequestLog::class, []);
     }
 }

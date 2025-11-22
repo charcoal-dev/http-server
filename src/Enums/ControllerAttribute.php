@@ -16,6 +16,7 @@ use Charcoal\Http\Server\Attributes\CacheControlAttribute;
 use Charcoal\Http\Server\Attributes\DefaultEntrypoint;
 use Charcoal\Http\Server\Attributes\DisableRequestBody;
 use Charcoal\Http\Server\Attributes\EnableRequestBody;
+use Charcoal\Http\Server\Attributes\LogRequest;
 use Charcoal\Http\Server\Attributes\RejectUnrecognizedParams;
 use Charcoal\Http\Server\Attributes\RequestConstraintOverride;
 
@@ -35,4 +36,5 @@ enum ControllerAttribute: string
     case allowTextBody = AllowTextBody::class;
     case cacheControl = CacheControlAttribute::class;
     case authentication = AuthenticationGuard::class;
+    case requestLog = LogRequest::class;
 }

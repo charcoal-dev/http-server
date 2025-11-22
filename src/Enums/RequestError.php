@@ -65,6 +65,12 @@ enum RequestError implements RequestErrorCodeInterface
     case BadOriginHeader;
     case CorsOriginNotAllowed;
 
+    /** @for=Logger */
+    case LoggerInitError;
+    case LogInitError;
+    case LogAuthDataError;
+    case LogRequestParamsError;
+
     /** @for=Authentication */
     case AuthenticationFailed;
     case Unauthorized;

@@ -13,6 +13,7 @@ use Charcoal\Http\Server\Contracts\Middleware\ControllerContextPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\ControllerGatewayFacadePipeline;
 use Charcoal\Http\Server\Contracts\Middleware\RequestBodyDecoderPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\RequestHeadersPipeline;
+use Charcoal\Http\Server\Contracts\Middleware\RequestLoggerPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\ResponseBodyEncoderPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\UrlValidatorPipeline;
 
@@ -30,4 +31,5 @@ enum Pipeline: string
     case Response_BodyEncoder = ResponseBodyEncoderPipeline::class;
     case Authentication = AuthenticationPipeline::class;
     case ControllerContext = ControllerContextPipeline::class;
+    case RequestLogger = RequestLoggerPipeline::class;
 }

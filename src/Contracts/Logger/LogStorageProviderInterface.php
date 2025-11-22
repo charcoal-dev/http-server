@@ -8,35 +8,34 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Contracts\Logger;
 
+use Charcoal\Http\Server\Request\Logger\RequestLogPolicy;
 use Charcoal\Http\Server\Request\RequestGateway;
 
 /**
- * Interface RequestLoggerInterface
+ * Interface LogStorageProviderInterface
  * Encapsulates methods for managing and processing request logging entities.
  */
-interface RequestLoggerInterface
+interface LogStorageProviderInterface
 {
     /**
-     * @param string $uuid
      * @param RequestGateway $request
      * @param \Closure|null $beforeInsert
      * @param array $context
      * @return RequestLogEntityInterface
-     * @api
      */
     public function initLogEntity(
-        string         $uuid,
         RequestGateway $request,
         ?\Closure      $beforeInsert = null,
         array          $context = []
     ): RequestLogEntityInterface;
 
     /**
+     * @param RequestLogPolicy $policy
      * @param RequestLogEntityInterface $logEntity
      * @return void
-     * @api
      */
     public function finishLogEntity(
+        RequestLogPolicy          $policy,
         RequestLogEntityInterface $logEntity
     ): void;
 }

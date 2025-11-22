@@ -31,6 +31,7 @@ use Charcoal\Http\Server\Contracts\Controllers\Context\ControllerContextInterfac
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\AfterEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\Hooks\BeforeEntrypointCallback;
 use Charcoal\Http\Server\Contracts\Controllers\InvokableControllerInterface;
+use Charcoal\Http\Server\Contracts\Logger\RequestLogEntityInterface;
 use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
 use Charcoal\Http\Server\Enums\ContentEncoding;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
@@ -49,6 +50,8 @@ use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\Controller\ResponseFacade;
 use Charcoal\Http\Server\Request\Controller\ServerFacade;
 use Charcoal\Http\Server\Request\Files\FileUpload;
+use Charcoal\Http\Server\Request\Logger\RequestLogger;
+use Charcoal\Http\Server\Request\Result\AbstractResult;
 use Charcoal\Http\Server\Request\Result\Response\EncodedBufferResponse;
 use Charcoal\Http\Server\Request\Result\Response\EncodedResponseBody;
 use Charcoal\Http\Server\Request\Result\Response\NoContentResponse;
@@ -75,8 +78,10 @@ final readonly class RequestGateway
     public RouteControllerBinding $routeController;
     public string $controllerEp;
     public ResponseFacade $response;
+    private float $startedOn;
     private ?SuccessResponseInterface $finalizedResponse;
     private ?AuthContextInterface $authContext;
+    private ?RequestLogger $logger;
 
     /**
      * @throws RequestGatewayException
@@ -89,6 +94,8 @@ final readonly class RequestGateway
         private MiddlewareFacade   $middleware,
     )
     {
+        $this->startedOn = microtime(true);
+
         // URL Validation
         try {
             $this->middleware->urlValidationPipeline($request->url, $this->constraints->maxUriBytes);
@@ -173,6 +180,52 @@ final readonly class RequestGateway
             TransferEncoding::find($this->request->headers->get("Transfer-Encoding")),
             ContentEncoding::find($this->request->headers->get("Content-Encoding"))
         );
+    }
+
+    /**
+     * @return void
+     * @throws RequestGatewayException
+     */
+    public function enableLogging(): void
+    {
+        // Initialize Request Logger
+        try {
+            $loggerConstructor = $this->middleware->requestLoggerPipeline();
+            $this->logger = $loggerConstructor ? new RequestLogger($loggerConstructor) : null;
+            $this->logger?->setPolicy(
+                $this->getControllerAttribute(ControllerAttribute::requestLog) ?: null
+            );
+        } catch (\Exception $e) {
+            throw new RequestGatewayException(RequestError::LoggerInitError, $e);
+        }
+    }
+
+    /**
+     * @return void
+     * @throws RequestGatewayException
+     */
+    public function logIngressRequest(): void
+    {
+        if (!$this->logger) {
+            return;
+        }
+
+        try {
+            $logPolicy = $this->logger->getPolicy();
+            $this->logger->initializeLogging($this, function (RequestLogEntityInterface $logEntity) use ($logPolicy) {
+                // At this placement, Controller and Entrypoint both are available
+                $logEntity->setControllerMetadata(
+                    $this->routeController->controller->classname,
+                    $this->controllerEp
+                );
+
+                if ($logPolicy->requestHeaders) {
+                    $logEntity->setRequestHeaders($this->requestFacade->headers);
+                }
+            });
+        } catch (\Exception $e) {
+            throw new RequestGatewayException(RequestError::LogInitError, $e);
+        }
     }
 
     /**
@@ -392,6 +445,20 @@ final readonly class RequestGateway
         } catch (WrappedException $e) {
             throw new RequestGatewayException(RequestError::MalformedBody, $e->getPrevious());
         }
+
+        try {
+            if ($this->logger) {
+                $logPolicy = $this->logger->getPolicy();
+                if ($logPolicy->requestParams) {
+                    $this->logger->isLogging()->setRequestParams(
+                        $this->requestFacade->queryParams,
+                        $this->requestFacade->payload
+                    );
+                }
+            }
+        } catch (\Exception $e) {
+            throw new RequestGatewayException(RequestError::LogRequestParamsError, $e->getPrevious());
+        }
     }
 
     /**
@@ -441,6 +508,12 @@ final readonly class RequestGateway
         } catch (\Exception $e) {
             throw new RequestGatewayException(RequestError::AuthenticationFailed, $e);
         }
+
+        try {
+            $this->logger?->isLogging()->setAuthenticationData($this->authContext);
+        } catch (\Exception $e) {
+            throw new RequestGatewayException(RequestError::LogAuthDataError, $e);
+        }
     }
 
     /**
@@ -478,7 +551,7 @@ final readonly class RequestGateway
                         $controller, $this->request->headers);
 
                     foreach ($contextObjects as $contextItem) {
-                        if($contextItem instanceof ControllerContextInterface) {
+                        if ($contextItem instanceof ControllerContextInterface) {
                             $controller->setContext($contextItem);
                         }
                     }
@@ -541,6 +614,11 @@ final readonly class RequestGateway
             return $this->finalizedResponse;
         }
 
+        try {
+            $this->logger?->populateResponseBody($this->response);
+        } catch (\Exception) {
+        }
+
         $encodedBody = $this->encodeResponseBody();
         $this->setFinalizedResponse(new EncodedBufferResponse(
             $this->response->getStatusCode(),
@@ -592,5 +670,14 @@ final readonly class RequestGateway
     public function isResponseFinalized(): bool
     {
         return isset($this->finalizedResponse);
+    }
+
+    /**
+     * @param AbstractResult $result
+     * @return void
+     */
+    public function finalizeIngressRequestLog(AbstractResult $result): void
+    {
+        $this->logger?->finalizeLogEntity($result, $this->startedOn);
     }
 }
