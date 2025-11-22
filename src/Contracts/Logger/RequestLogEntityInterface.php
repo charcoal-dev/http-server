@@ -26,14 +26,12 @@ interface RequestLogEntityInterface
      * @param string $controllerFqcn
      * @param string $entrypoint
      * @return void
-     * @api
      */
     public function setControllerMetadata(string $controllerFqcn, string $entrypoint): void;
 
     /**
      * @param HeadersImmutable $headers
      * @return void
-     * @api
      */
     public function setRequestHeaders(HeadersImmutable $headers): void;
 
@@ -41,21 +39,18 @@ interface RequestLogEntityInterface
      * @param QueryParams $queryParams
      * @param UnsafePayload|null $payload
      * @return void
-     * @api
      */
     public function setRequestParams(QueryParams $queryParams, ?UnsafePayload $payload): void;
 
     /**
      * @param int $responseCode
      * @return void
-     * @api
      */
     public function setResponseCode(int $responseCode): void;
 
     /**
      * @param HeadersImmutable|Headers $headers
      * @return void
-     * @api
      */
     public function setResponseHeaders(HeadersImmutable|Headers $headers): void;
 
@@ -63,21 +58,18 @@ interface RequestLogEntityInterface
      * @param PayloadInterface|null $payload
      * @param string|null $cachedId
      * @return void
-     * @api
      */
     public function setResponseData(?PayloadInterface $payload, ?string $cachedId = null): void;
 
     /**
      * @param AuthContextInterface $authContext
      * @return void
-     * @api
      */
     public function setAuthenticationData(AuthContextInterface $authContext): void;
 
     /**
      * @param float|null $startTime
      * @return void
-     * @api
      */
     public function finalizeLogEntity(?float $startTime): void;
 }
