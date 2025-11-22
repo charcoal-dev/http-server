@@ -8,9 +8,12 @@ declare(strict_types=1);
 
 namespace Charcoal\Http\Server\Contracts\Logger;
 
-use Charcoal\Http\Commons\Contracts\HeadersInterface;
+use Charcoal\Http\Commons\Body\UnsafePayload;
 use Charcoal\Http\Commons\Contracts\PayloadInterface;
-use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Commons\Headers\Headers;
+use Charcoal\Http\Commons\Headers\HeadersImmutable;
+use Charcoal\Http\Server\Contracts\Controllers\Auth\AuthContextInterface;
+use Charcoal\Http\Server\Request\Bags\QueryParams;
 
 /**
  * Interface for defining the structure and behavior of a Request Log Entity.
@@ -28,11 +31,19 @@ interface RequestLogEntityInterface
     public function setControllerMetadata(string $controllerFqcn, string $entrypoint): void;
 
     /**
-     * @param RequestFacade $request
+     * @param HeadersImmutable $headers
      * @return void
      * @api
      */
-    public function setRequestData(RequestFacade $request): void;
+    public function setRequestHeaders(HeadersImmutable $headers): void;
+
+    /**
+     * @param QueryParams $queryParams
+     * @param UnsafePayload|null $payload
+     * @return void
+     * @api
+     */
+    public function setRequestParams(QueryParams $queryParams, ?UnsafePayload $payload): void;
 
     /**
      * @param int $responseCode
@@ -42,11 +53,11 @@ interface RequestLogEntityInterface
     public function setResponseCode(int $responseCode): void;
 
     /**
-     * @param HeadersInterface $headers
+     * @param HeadersImmutable|Headers $headers
      * @return void
      * @api
      */
-    public function setResponseHeaders(HeadersInterface $headers): void;
+    public function setResponseHeaders(HeadersImmutable|Headers $headers): void;
 
     /**
      * @param PayloadInterface|null $payload
@@ -57,10 +68,11 @@ interface RequestLogEntityInterface
     public function setResponseData(?PayloadInterface $payload, ?string $cachedId = null): void;
 
     /**
+     * @param AuthContextInterface $authContext
      * @return void
      * @api
      */
-    public function setAuthenticationData(): void;
+    public function setAuthenticationData(AuthContextInterface $authContext): void;
 
     /**
      * @param float|null $startTime
