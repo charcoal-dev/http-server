@@ -52,6 +52,7 @@ use Charcoal\Http\Server\Request\Controller\ServerFacade;
 use Charcoal\Http\Server\Request\Files\FileUpload;
 use Charcoal\Http\Server\Request\Logger\RequestLogger;
 use Charcoal\Http\Server\Request\Result\AbstractResult;
+use Charcoal\Http\Server\Request\Result\ErrorResult;
 use Charcoal\Http\Server\Request\Result\Response\EncodedBufferResponse;
 use Charcoal\Http\Server\Request\Result\Response\EncodedResponseBody;
 use Charcoal\Http\Server\Request\Result\Response\NoContentResponse;
@@ -680,6 +681,10 @@ final readonly class RequestGateway
     {
         if (!isset($this->logger)) {
             return;
+        }
+
+        if ($result instanceof ErrorResult && $result->exception) {
+            $this->logger->populateResponseBody($result->exception);
         }
 
         $this->logger->finalizeLogEntity($result, $this->startedOn);

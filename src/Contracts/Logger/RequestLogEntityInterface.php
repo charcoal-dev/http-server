@@ -55,11 +55,11 @@ interface RequestLogEntityInterface
     public function setResponseHeaders(HeadersImmutable|Headers $headers): void;
 
     /**
-     * @param PayloadInterface|null $payload
+     * @param PayloadInterface|\Exception|null $payload
      * @param string|null $cachedId
      * @return void
      */
-    public function setResponseData(?PayloadInterface $payload, ?string $cachedId = null): void;
+    public function setResponseData(null|PayloadInterface|\Exception $payload, ?string $cachedId = null): void;
 
     /**
      * @param AuthContextInterface $authContext

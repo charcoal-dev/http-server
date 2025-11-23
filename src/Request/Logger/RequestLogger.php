@@ -79,10 +79,10 @@ final class RequestLogger
     }
 
     /**
-     * @param ResponseFacade $response
+     * @param ResponseFacade|\Exception $response
      * @return void
      */
-    public function populateResponseBody(ResponseFacade $response): void
+    public function populateResponseBody(ResponseFacade|\Exception $response): void
     {
         if (!isset($this->logEntity)) {
             return;
