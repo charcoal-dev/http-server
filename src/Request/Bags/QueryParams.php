@@ -31,6 +31,7 @@ final readonly class QueryParams implements \IteratorAggregate, \Countable
 
         if (!$decoded) {
             $this->bag = [];
+            $this->count = 0;
             return;
         }
 
