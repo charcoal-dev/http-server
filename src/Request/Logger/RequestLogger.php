@@ -36,10 +36,10 @@ final class RequestLogger
     }
 
     /**
-     * @param RequestLogPolicy $policy
+     * @param RequestLogPolicy|null $policy
      * @return void
      */
-    public function setPolicy(RequestLogPolicy $policy): void
+    public function setPolicy(?RequestLogPolicy $policy): void
     {
         $this->policy = $policy;
     }
