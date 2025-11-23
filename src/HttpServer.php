@@ -215,14 +215,6 @@ final class HttpServer implements ServerApiInterface
                 new ErrorResult($response, RequestError::EndpointNotFound, null));
         }
 
-        // Construct Request Logger
-        try {
-            $requestGateway->enableLogging();
-        } catch (RequestGatewayException $e) {
-            return new RequestGatewayResult($requestGateway,
-                new ErrorResult($response, $e->error, $e));
-        }
-
         // Pre-Flight Control (CORS enforcement)
         try {
             $requestGateway->preFlightControl(
@@ -271,6 +263,7 @@ final class HttpServer implements ServerApiInterface
 
         // Log Ingress HTTP Request?
         try {
+            $requestGateway->enableLogging();
             $requestGateway->logIngressRequest();
         } catch (RequestGatewayException $e) {
             return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
@@ -282,7 +275,7 @@ final class HttpServer implements ServerApiInterface
         } catch (RequestGatewayException $e) {
             return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
         }
-        // Todo: Init Logging
+
         // Todo: Concurrency Handling
         // Todo: Rate limiting
 
