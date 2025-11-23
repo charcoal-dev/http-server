@@ -678,6 +678,10 @@ final readonly class RequestGateway
      */
     public function finalizeIngressRequestLog(AbstractResult $result): void
     {
-        $this->logger?->finalizeLogEntity($result, $this->startedOn);
+        if (!isset($this->logger)) {
+            return;
+        }
+
+        $this->logger->finalizeLogEntity($result, $this->startedOn);
     }
 }
