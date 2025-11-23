@@ -50,6 +50,7 @@ final class HttpServer implements ServerApiInterface
 
     private readonly Router $router;
     private readonly MiddlewareRegistry $middleware;
+    private ?string $currentUuid = null;
 
     /**
      * @param ServerConfig $config
@@ -101,6 +102,7 @@ final class HttpServer implements ServerApiInterface
     public function handle(ServerRequest $request, ?ServerEnv $env = null): AbstractResult
     {
         $result = $this->handleRequestGateway($request, $env);
+        $this->currentUuid = null;
         $result->gateway?->finalizeIngressRequestLog($result->result);
         return $result->result;
     }
@@ -117,6 +119,7 @@ final class HttpServer implements ServerApiInterface
 
         try {
             $uuid = UuidHelper::uuid4();
+            $this->currentUuid = $uuid;
         } catch (\Exception $e) {
             return new RequestGatewayResult(null,
                 new ErrorResult($response, RequestError::InternalError, $e));
@@ -306,5 +309,13 @@ final class HttpServer implements ServerApiInterface
     public function type(): SapiType
     {
         return SapiType::Http;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCurrentUuid(): ?string
+    {
+        return $this->currentUuid;
     }
 }
