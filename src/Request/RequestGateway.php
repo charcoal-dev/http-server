@@ -38,6 +38,7 @@ use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\ControllerError;
 use Charcoal\Http\Server\Enums\RequestConstraint;
 use Charcoal\Http\Server\Enums\RequestError;
+use Charcoal\Http\Server\Enums\RequestLogPolicyEnum;
 use Charcoal\Http\Server\Enums\TransferEncoding;
 use Charcoal\Http\Server\Exceptions\Controllers\ValidationTranslatedException;
 use Charcoal\Http\Server\Exceptions\Internal\PreFlightTerminateException;
@@ -193,9 +194,14 @@ final readonly class RequestGateway
         try {
             $loggerConstructor = $this->middleware->requestLoggerPipeline();
             $this->logger = $loggerConstructor ? new RequestLogger($loggerConstructor) : null;
-            $this->logger?->setPolicy(
-                $this->getControllerAttribute(ControllerAttribute::requestLog) ?: null
-            );
+            if ($this->logger) {
+                $logPolicy = $this->getControllerAttribute(ControllerAttribute::requestLog) ?: null;
+                if ($logPolicy instanceof RequestLogPolicyEnum) {
+                    $logPolicy = $logPolicy->getPolicy();
+                }
+
+                $this->logger->setPolicy($logPolicy);
+            }
         } catch (\Exception $e) {
             throw new RequestGatewayException(RequestError::LoggerInitError, $e);
         }
