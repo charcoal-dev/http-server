@@ -457,7 +457,7 @@ final readonly class RequestGateway
                 }
             }
         } catch (\Exception $e) {
-            throw new RequestGatewayException(RequestError::LogRequestParamsError, $e->getPrevious());
+            throw new RequestGatewayException(RequestError::LogRequestParamsError, $e);
         }
     }
 
