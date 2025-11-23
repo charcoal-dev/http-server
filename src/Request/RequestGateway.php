@@ -449,7 +449,7 @@ final readonly class RequestGateway
         try {
             if ($this->logger) {
                 $logPolicy = $this->logger->getPolicy();
-                if ($logPolicy->requestParams) {
+                if ($logPolicy && $logPolicy->requestParams) {
                     $this->logger->isLogging()->setRequestParams(
                         $this->requestFacade->queryParams,
                         $this->requestFacade->payload
