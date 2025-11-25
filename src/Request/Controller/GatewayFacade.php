@@ -97,7 +97,7 @@ final readonly class GatewayFacade implements SapiRequestContextInterface, Contr
 
         $this->enforcedRequiredParams = true;
         if ($this->getAttribute(ControllerAttribute::rejectUnrecognizedParams) === true) {
-            $this->rejectUnrecognizedParams($this->getAttribute(
+            $this->rejectUnrecognizedParams(...$this->getAttribute(
                 ControllerAttribute::allowedParams,
                 aggregated: true
             ) ?? []);
