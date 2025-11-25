@@ -14,7 +14,7 @@ use Charcoal\Contracts\Sapi\SapiRequestContextInterface;
 use Charcoal\Http\Commons\Contracts\ContentTypeEnumInterface;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Headers\Headers;
-use Charcoal\Http\Server\Contracts\Request\ControllerApiInterface;
+use Charcoal\Http\Server\Contracts\Controllers\Context\ControllerContextInterface;
 use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\ControllerError;
 use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
@@ -26,7 +26,7 @@ use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
 /**
  * Represents a controller API that interacts with request and response contexts.
  */
-readonly class GatewayFacade implements ControllerApiInterface, SapiRequestContextInterface
+final readonly class GatewayFacade implements SapiRequestContextInterface, ControllerContextInterface
 {
     protected bool $enforcedRequiredParams;
 

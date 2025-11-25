@@ -47,6 +47,7 @@ use Charcoal\Http\Server\Exceptions\Internal\Response\ResponseFinalizedInterrupt
 use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
+use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\Controller\ResponseFacade;
 use Charcoal\Http\Server\Request\Controller\ServerFacade;
@@ -529,9 +530,8 @@ final readonly class RequestGateway
      */
     public function executeController(): SuccessResponseInterface
     {
-        $gatewayFacade = $this->middleware->controllerGatewayFacadePipeline($this);
+        $gatewayFacade = new GatewayFacade($this);
         $controllerContext = $this->routeController->controller;
-
         $gatewayFacade->enforceRequiredParams();
         $buffering = false;
 
@@ -557,6 +557,7 @@ final readonly class RequestGateway
                     $contextObjects = $this->middleware->controllerContextPipeline(
                         $controller, $this->request->headers);
 
+                    $controller->setContext($gatewayFacade);
                     foreach ($contextObjects as $contextItem) {
                         if ($contextItem instanceof ControllerContextInterface) {
                             $controller->setContext($contextItem);

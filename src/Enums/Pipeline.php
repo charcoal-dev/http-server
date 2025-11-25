@@ -10,7 +10,6 @@ namespace Charcoal\Http\Server\Enums;
 
 use Charcoal\Http\Server\Contracts\Middleware\AuthenticationPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\ControllerContextPipeline;
-use Charcoal\Http\Server\Contracts\Middleware\ControllerGatewayFacadePipeline;
 use Charcoal\Http\Server\Contracts\Middleware\RequestBodyDecoderPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\RequestHeadersPipeline;
 use Charcoal\Http\Server\Contracts\Middleware\RequestLoggerPipeline;
@@ -26,7 +25,6 @@ enum Pipeline: string
 {
     case URL_Validator = UrlValidatorPipeline::class;
     case Request_HeadersValidator = RequestHeadersPipeline::class;
-    case Controller_ContextFacadeResolver = ControllerGatewayFacadePipeline::class;
     case Request_BodyDecoder = RequestBodyDecoderPipeline::class;
     case Response_BodyEncoder = ResponseBodyEncoderPipeline::class;
     case Authentication = AuthenticationPipeline::class;
