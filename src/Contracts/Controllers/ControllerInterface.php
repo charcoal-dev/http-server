@@ -11,6 +11,10 @@ namespace Charcoal\Http\Server\Contracts\Controllers;
 /**
  * Defines the contract for a controller, specifying essential methods
  * that any implementing class must define.
+ * @method void get()
+ * @method void post()
+ * @method void put()
+ * @method void delete()
  */
 interface ControllerInterface
 {
