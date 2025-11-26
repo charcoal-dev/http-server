@@ -640,6 +640,10 @@ final readonly class RequestGateway
         } catch (RequestGatewayException $e) {
             throw $e;
         } catch (\Exception $e) {
+            if ($e instanceof CachedResponseInterrupt) {
+                throw $e;
+            }
+
             if ($e instanceof ValidationTranslatedException) {
                 $e->setContextMessage($gatewayFacade);
             }
