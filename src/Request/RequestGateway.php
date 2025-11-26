@@ -20,10 +20,12 @@ use Charcoal\Http\Commons\Body\PayloadImmutable;
 use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HttpMethod;
 use Charcoal\Http\Commons\Headers\Headers;
+use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Commons\Support\CorsPolicy;
 use Charcoal\Http\Commons\Support\HttpHelper;
 use Charcoal\Http\Server\Config\RequestConstraints;
 use Charcoal\Http\Server\Config\VirtualHost;
+use Charcoal\Http\Server\Contracts\Cache\CacheProviderInterface;
 use Charcoal\Http\Server\Contracts\Controllers\Auth\AuthAwareControllerInterface;
 use Charcoal\Http\Server\Contracts\Controllers\Auth\AuthContextInterface;
 use Charcoal\Http\Server\Contracts\Controllers\Context\ContextAwareControllerInterface;
@@ -43,10 +45,12 @@ use Charcoal\Http\Server\Enums\TransferEncoding;
 use Charcoal\Http\Server\Exceptions\Controllers\ValidationTranslatedException;
 use Charcoal\Http\Server\Exceptions\Internal\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
+use Charcoal\Http\Server\Exceptions\Internal\Response\CachedResponseInterrupt;
 use Charcoal\Http\Server\Exceptions\Internal\Response\ResponseFinalizedInterrupt;
 use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Middleware\MiddlewareFacade;
 use Charcoal\Http\Server\Request\Bags\QueryParams;
+use Charcoal\Http\Server\Request\Cache\CachedResponsePointer;
 use Charcoal\Http\Server\Request\Controller\GatewayFacade;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
 use Charcoal\Http\Server\Request\Controller\ResponseFacade;
@@ -54,6 +58,7 @@ use Charcoal\Http\Server\Request\Controller\ServerFacade;
 use Charcoal\Http\Server\Request\Files\FileUpload;
 use Charcoal\Http\Server\Request\Logger\RequestLogger;
 use Charcoal\Http\Server\Request\Result\AbstractResult;
+use Charcoal\Http\Server\Request\Result\CachedResult;
 use Charcoal\Http\Server\Request\Result\ErrorResult;
 use Charcoal\Http\Server\Request\Result\Response\EncodedBufferResponse;
 use Charcoal\Http\Server\Request\Result\Response\EncodedResponseBody;
@@ -85,6 +90,8 @@ final readonly class RequestGateway
     private ?SuccessResponseInterface $finalizedResponse;
     private ?AuthContextInterface $authContext;
     private ?RequestLogger $logger;
+    private ?CacheProviderInterface $cacheProvider;
+    private ?CachedResponsePointer $cachedResponsePointer;
 
     /**
      * @throws RequestGatewayException
@@ -341,10 +348,10 @@ final readonly class RequestGateway
     }
 
     /**
-     * @return void
+     * @return $this
      * @throws RequestGatewayException
      */
-    public function parseRequestBody(): void
+    public function parseRequestBody(): self
     {
         $bodyDisabled = $this->getControllerAttribute(ControllerAttribute::disableRequestBody) ?: false;
         if ($bodyDisabled) {
@@ -467,6 +474,8 @@ final readonly class RequestGateway
         } catch (\Exception $e) {
             throw new RequestGatewayException(RequestError::LogRequestParamsError, $e);
         }
+
+        return $this;
     }
 
     /**
@@ -500,15 +509,15 @@ final readonly class RequestGateway
     }
 
     /**
-     * @return void
+     * @return $this|self
      * @throws RequestGatewayException
      */
-    public function ensureAuthentication(): void
+    public function ensureAuthentication(): self
     {
         $authentication = $this->getControllerAttribute(ControllerAttribute::authentication);
         if (!$authentication) {
             $this->authContext = null;
-            return;
+            return $this;
         }
 
         try {
@@ -522,11 +531,36 @@ final readonly class RequestGateway
         } catch (\Exception $e) {
             throw new RequestGatewayException(RequestError::LogAuthDataError, $e);
         }
+
+        return $this;
+    }
+
+    /**
+     * @return self
+     * @throws RequestGatewayException
+     */
+    public function ensureCacheFunctionality(): self
+    {
+        $cacheEnabled = $this->getControllerAttribute(ControllerAttribute::enableCachedResponse);
+        if (!$cacheEnabled) {
+            $this->cacheProvider = null;
+            return $this;
+        }
+
+        try {
+            $this->cacheProvider = $this->middleware->cacheProviderPipeline();
+        } catch (\Exception $e) {
+            throw new RequestGatewayException(RequestError::CacheProviderError, $e);
+        }
+
+        return $this;
     }
 
     /**
      * @return SuccessResponseInterface
      * @throws RequestGatewayException
+     * @throws CachedResponseInterrupt
+     * @noinspection PhpDocRedundantThrowsInspection
      */
     public function executeController(): SuccessResponseInterface
     {
@@ -699,5 +733,80 @@ final readonly class RequestGateway
         }
 
         $this->logger->finalizeLogEntity($result, $this->startedOn);
+    }
+
+    /**
+     * @throws CachedResponseInterrupt
+     * @throws RequestGatewayException
+     */
+    public function cacheResponseLookup(
+        CachedResponsePointer $pointer,
+        \DateTimeImmutable    $timestamp
+    ): void
+    {
+        if (!isset($this->cacheProvider)) {
+            throw new \RuntimeException("Cache provider not initialized, use EnableCachedResponse attribute");
+        }
+
+        try {
+            $this->cachedResponsePointer = $pointer;
+            $cachedResponse = $this->cacheProvider->get($pointer);
+            if (!$cachedResponse) {
+                return;
+            }
+
+            // Expiry/TTL Check
+            if ($pointer->validity > 0) {
+                $elapsed = $timestamp->getTimestamp() - $cachedResponse->timestamp->getTimestamp();
+                if ($elapsed > $pointer->validity) {
+                    $this->cacheProvider->delete($pointer);
+                    return;
+                }
+            }
+
+            // Integrity Check
+            if ($pointer->integrityTag && $pointer->integrityTag !== $cachedResponse->integrityTag) {
+                $this->cacheProvider->delete($pointer);
+                return;
+            }
+        } catch (\Exception $e) {
+            throw new RequestGatewayException(RequestError::CacheLookupError, $e);
+        }
+
+        throw new CachedResponseInterrupt($cachedResponse);
+    }
+
+    /**
+     * @throws RequestGatewayException
+     */
+    public function cacheResponseIfEnabled(
+        Headers                  $headers,
+        SuccessResponseInterface $response,
+        ?string                  $integrityTag,
+        ?CacheControlDirectives  $cacheControl,
+    ): void
+    {
+        if (!isset($this->cacheProvider, $this->cachedResponsePointer)) {
+            return;
+        }
+
+        if (!$response->isCacheable()) {
+            return;
+        }
+
+        try {
+            $this->cacheProvider->store(
+                $this->cachedResponsePointer,
+                new CachedResult(
+                    $headers,
+                    $response,
+                    $integrityTag,
+                    $this->cacheProvider->getTimestamp(),
+                    $cacheControl
+                )
+            );
+        } catch (\Exception $e) {
+            throw new RequestGatewayException(RequestError::CacheResponseStore, $e);
+        }
     }
 }

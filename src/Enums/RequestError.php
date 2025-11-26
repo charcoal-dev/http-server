@@ -59,6 +59,9 @@ enum RequestError implements RequestErrorCodeInterface
     case BodyDisabled;
 
     /** @for=ResponseHandler */
+    case CacheProviderError;
+    case CacheLookupError;
+    case CacheResponseStore;
     case ResponseEncodeError;
 
     /** @for=Cors */

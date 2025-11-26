@@ -16,6 +16,7 @@ use Charcoal\Http\Commons\Enums\ContentType;
 use Charcoal\Http\Commons\Enums\HeaderKeyValidation;
 use Charcoal\Http\Commons\Headers\HeadersImmutable;
 use Charcoal\Http\Commons\Url\UrlInfo;
+use Charcoal\Http\Server\Contracts\Cache\CacheProviderInterface;
 use Charcoal\Http\Server\Contracts\Controllers\Auth\AuthContextInterface;
 use Charcoal\Http\Server\Contracts\Controllers\ControllerInterface;
 use Charcoal\Http\Server\Enums\Pipeline;
@@ -130,5 +131,14 @@ final readonly class MiddlewareFacade
     public function requestLoggerPipeline(): ?RequestLoggerConstructor
     {
         return $this->registry->execute(Pipeline::RequestLogger, NoRequestLog::class, []);
+    }
+
+    /**
+     * @param array $context
+     * @return CacheProviderInterface
+     */
+    public function cacheProviderPipeline(array $context = []): CacheProviderInterface
+    {
+        return $this->registry->execute(Pipeline::CacheProvider, null, $context);
     }
 }

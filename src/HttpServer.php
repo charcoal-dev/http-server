@@ -18,6 +18,7 @@ use Charcoal\Http\Server\Enums\ControllerAttribute;
 use Charcoal\Http\Server\Enums\RequestError;
 use Charcoal\Http\Server\Exceptions\Internal\PreFlightTerminateException;
 use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
+use Charcoal\Http\Server\Exceptions\Internal\Response\CachedResponseInterrupt;
 use Charcoal\Http\Server\Exceptions\Request\HostnamePortMismatchException;
 use Charcoal\Http\Server\Exceptions\Request\TlsRequiredException;
 use Charcoal\Http\Server\Internal\RequestGatewayResult;
@@ -274,7 +275,9 @@ final class HttpServer implements ServerApiInterface
 
         // Authentication
         try {
-            $requestGateway->ensureAuthentication();
+            $requestGateway->ensureAuthentication()
+                ->ensureCacheFunctionality()
+                ->parseRequestBody();
         } catch (RequestGatewayException $e) {
             return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
         }
@@ -283,24 +286,35 @@ final class HttpServer implements ServerApiInterface
         // Todo: Rate limiting
 
         try {
-            $requestGateway->parseRequestBody();
+            try {
+                $controllerResponse = $requestGateway->executeController();
+            } catch (CachedResponseInterrupt $cached) {
+                return new RequestGatewayResult($requestGateway, $cached->result);
+            }
         } catch (RequestGatewayException $e) {
             return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
         }
 
-        // Todo: Cached Responses
-
-        try {
-            $response = $requestGateway->executeController();
-        } catch (RequestGatewayException $e) {
-            return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
-        }
-
-        return new RequestGatewayResult($requestGateway, new SuccessResult(
+        $cacheControl = $requestGateway->getControllerAttribute(ControllerAttribute::cacheControl) ?: null;
+        $successResult = new RequestGatewayResult($requestGateway, new SuccessResult(
             $requestGateway->responseHeaders,
-            $response,
-            $requestGateway->getControllerAttribute(ControllerAttribute::cacheControl) ?: null
+            $controllerResponse,
+            $cacheControl
         ));
+
+        // Store Response in Cache
+        try {
+            $requestGateway->cacheResponseIfEnabled(
+                $requestGateway->responseHeaders,
+                $controllerResponse,
+                null,
+                $cacheControl
+            );
+        } catch (RequestGatewayException $e) {
+            return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
+        }
+
+        return $successResult;
     }
 
     /**

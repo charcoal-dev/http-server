@@ -20,6 +20,7 @@ use Charcoal\Http\Server\Enums\ControllerError;
 use Charcoal\Http\Server\Exceptions\Internal\RequestGatewayException;
 use Charcoal\Http\Server\Exceptions\Internal\Response\BypassEncodingInterrupt;
 use Charcoal\Http\Server\Exceptions\Internal\Response\FileDownloadInterrupt;
+use Charcoal\Http\Server\Request\Cache\CachedResponsePointer;
 use Charcoal\Http\Server\Request\RequestGateway;
 use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
 
@@ -145,5 +146,18 @@ final readonly class GatewayFacade implements SapiRequestContextInterface, Contr
     ): never
     {
         throw new FileDownloadInterrupt($filepath, $downloadFilename, $contentType, $statusCode, $filesize);
+    }
+
+    /**
+     * @throws RequestGatewayException
+     * @throws \Charcoal\Http\Server\Exceptions\Internal\Response\CachedResponseInterrupt
+     * @api
+     */
+    public function cacheResponseLookup(
+        CachedResponsePointer $pointer,
+        \DateTimeImmutable    $timestamp
+    ): void
+    {
+        $this->gateway->cacheResponseLookup($pointer, $timestamp);
     }
 }
