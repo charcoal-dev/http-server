@@ -139,6 +139,6 @@ final readonly class MiddlewareFacade
      */
     public function cacheProviderPipeline(array $context = []): CacheProviderInterface
     {
-        return $this->registry->execute(Pipeline::CacheProvider, null, $context);
+        return $this->registry->execute(Pipeline::CacheProvider, null, [$context]);
     }
 }
