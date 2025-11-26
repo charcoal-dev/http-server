@@ -28,6 +28,7 @@ enum RequestError implements RequestErrorCodeInterface
     /** @for=Url */
     case BadUrlLength;
     case BadUrlEncoding;
+    case QueryParamDecode;
 
     /** @for=Headers */
     case BadHeaders;

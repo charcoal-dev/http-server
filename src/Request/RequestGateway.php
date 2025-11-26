@@ -177,14 +177,21 @@ final readonly class RequestGateway
             throw new RequestGatewayException(RequestError::BadContentLength, null);
         }
 
+        // Decode Query Params
+        try {
+            $queryParams = new QueryParams(explode("#", explode("?",
+                $this->request->url->complete, 2)[1] ?? "", 2)[0]);
+        } catch (\Exception $e) {
+            throw new RequestGatewayException(RequestError::QueryParamDecode, $e);
+        }
+
         // Initialize Request Facade
         $this->requestFacade = new RequestFacade(
             $this->responseHeaders->get("X-Request-ID"),
             $this->serverFacade->proxy->clientIp,
             $this->request->method,
             $this->request->headers,
-            new QueryParams(explode("#", explode("?",
-                $this->request->url->complete, 2)[1] ?? "", 2)[0]),
+            $queryParams,
             ContentType::find($this->request->headers->get("Content-Type") ?? ""),
             $contentLength,
             TransferEncoding::find($this->request->headers->get("Transfer-Encoding")),

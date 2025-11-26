@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Charcoal\Http\Server\Request\Bags;
 
 use Charcoal\Http\Commons\Support\HttpHelper;
+use Charcoal\Http\Server\HttpServer;
 
 /**
  * Represents a collection of query parameters that can be extended or manipulated.
@@ -26,7 +27,7 @@ final readonly class QueryParams implements \IteratorAggregate, \Countable
             $queryStr,
             plusAsSpace: true,
             utf8Encoding: true,
-            flatten: false
+            flatten: HttpServer::$flattenQueryParams
         );
 
         if (!$decoded) {

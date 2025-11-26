@@ -21,6 +21,9 @@ trait ServerBehaviourTrait
     public static ?string $exposeCachedOnHeader = "X-Generated-At";
     public static string $exposeCachedOnFormat = "D, d M Y H:i:s \G\M\T";
 
+    /** @var bool Decide to flatten query parameters or not; defaults to true */
+    public static bool $flattenQueryParams = true;
+
     /** @internal Enables output buffering; defaults to false */
     public static bool $enableOutputBuffering = false;
     /** @internal Sinks output buffering to STDERR; defaults to false */
