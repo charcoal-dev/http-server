@@ -589,7 +589,11 @@ final readonly class RequestGateway
                 if ($controller instanceof AfterEntrypointCallback) {
                     $controller->afterEntrypointCallback($gatewayFacade);
                 }
-            } catch (ResponseFinalizedInterrupt $e) {
+            } catch (\Exception $e) {
+                if (!$e instanceof ResponseFinalizedInterrupt) {
+                    throw $e;
+                }
+
                 $this->setFinalizedResponse($e->getResponseObject());
             }
         } catch (RequestGatewayException $e) {
