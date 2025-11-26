@@ -17,6 +17,9 @@ trait ServerBehaviourTrait
 {
     /** @var bool Sends "Charcoal/{version}" as "X-Powered-By" header; defaults to true */
     public static bool $exposeCharcoalServer = true;
+    /** @var string|null Senders header name for cached-on date; defaults to "X-Generated-At" */
+    public static ?string $exposeCachedOnHeader = "X-Generated-At";
+    public static string $exposeCachedOnFormat = "D, d M Y H:i:s \G\M\T";
 
     /** @internal Enables output buffering; defaults to false */
     public static bool $enableOutputBuffering = false;

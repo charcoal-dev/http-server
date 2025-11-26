@@ -11,6 +11,7 @@ namespace Charcoal\Http\Server\Request\Result;
 use Charcoal\Http\Commons\Headers\Headers;
 use Charcoal\Http\Commons\Support\CacheControlDirectives;
 use Charcoal\Http\Server\Contracts\Request\SuccessResponseInterface;
+use Charcoal\Http\Server\HttpServer;
 
 /**
  * Represents a cached result containing the HTTP headers, the response, and the timestamp of caching.
@@ -26,6 +27,16 @@ final readonly class CachedResult extends AbstractResult
         public ?CacheControlDirectives  $cacheControl
     )
     {
+        $response->setHeaders($headers);
+        if ($this->cacheControl && $this->response->isCacheable()) {
+            $headers->set("Cache-Control", implode(", ", $this->cacheControl->directives));
+        }
+
+        if (HttpServer::$exposeCachedOnHeader) {
+            $headers->set(HttpServer::$exposeCachedOnHeader,
+                $this->timestamp->format(HttpServer::$exposeCachedOnFormat));
+        }
+
         parent::__construct($this->response->getStatusCode(), $headers);
     }
 }

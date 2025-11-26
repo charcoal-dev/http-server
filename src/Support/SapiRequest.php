@@ -17,6 +17,7 @@ use Charcoal\Http\Commons\Url\UrlInfo;
 use Charcoal\Http\Server\Exceptions\Request\ResponseBytesDispatchedException;
 use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Request\Result\AbstractResult;
+use Charcoal\Http\Server\Request\Result\CachedResult;
 use Charcoal\Http\Server\Request\Result\ErrorResult;
 use Charcoal\Http\Server\Request\Result\RedirectResult;
 use Charcoal\Http\Server\Request\Result\SuccessResult;
@@ -119,7 +120,7 @@ abstract readonly class SapiRequest
         }
 
         // SuccessResult: Send the response body
-        assert($result instanceof SuccessResult);
+        /** @var SuccessResult|CachedResult $result */
         static::handleSuccessResult($result);
         exit(0); // Done!
     }
@@ -127,7 +128,7 @@ abstract readonly class SapiRequest
     /**
      * Handle success result by printing the body.
      */
-    protected static function handleSuccessResult(SuccessResult $result): void
+    protected static function handleSuccessResult(SuccessResult|CachedResult $result): void
     {
         try {
             $result->response->send();
