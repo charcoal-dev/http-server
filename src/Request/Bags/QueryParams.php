@@ -17,7 +17,7 @@ use Charcoal\Http\Server\HttpServer;
  */
 final readonly class QueryParams implements \IteratorAggregate, \Countable
 {
-    /** @var array<string,string[]> */
+    /** @var array<string,string[]|string> */
     private array $bag;
     private int $count;
 
@@ -47,9 +47,9 @@ final readonly class QueryParams implements \IteratorAggregate, \Countable
 
     /**
      * Retrieves the value associated with the specified key from the bag.
-     * @return string[]|null
+     * @return string[]|string|null
      */
-    public function get(string $key): array|null
+    public function get(string $key): array|string|null
     {
         return $this->bag[strtolower($key)] ?? null;
     }
@@ -72,7 +72,7 @@ final readonly class QueryParams implements \IteratorAggregate, \Countable
     }
 
     /**
-     * @return array|\string[][]
+     * @return array|string[][]|string[]
      */
     public function getArray(): array
     {
