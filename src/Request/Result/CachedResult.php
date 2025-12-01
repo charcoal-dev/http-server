@@ -39,4 +39,22 @@ final readonly class CachedResult extends AbstractResult
 
         parent::__construct($this->response->getStatusCode(), $headers);
     }
+
+    /**
+     * Merges the current headers with the provided headers.
+     * @api
+     */
+    public function withHeadersMerged(Headers $current): self
+    {
+        $final = new Headers();
+        foreach ($this->headers->getArray() as $key => $value) {
+            $final->set($key, $value);
+        }
+
+        foreach ($current->getArray() as $key => $value) {
+            $final->set($key, $value);
+        }
+
+        return new self($final, $this->response, $this->integrityTag, $this->timestamp, $this->cacheControl);
+    }
 }

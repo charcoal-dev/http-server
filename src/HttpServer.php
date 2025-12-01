@@ -289,7 +289,7 @@ final class HttpServer implements ServerApiInterface
             try {
                 $controllerResponse = $requestGateway->executeController();
             } catch (CachedResponseInterrupt $cached) {
-                return new RequestGatewayResult($requestGateway, $cached->result);
+                return new RequestGatewayResult($requestGateway, $cached->result->withHeadersMerged($response));
             }
         } catch (RequestGatewayException $e) {
             return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
