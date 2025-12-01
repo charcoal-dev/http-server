@@ -434,6 +434,10 @@ final readonly class RequestGateway
             try {
                 array_walk_recursive($decoded, function ($value, $key) use ($maxParamLength) {
                     if (is_string($value)) {
+                        if (is_int($key)) {
+                            return;
+                        }
+
                         if (!is_string($key) || !AsciiHelper::isPrintableOnly($key) || preg_match("/\s/", $key)) {
                             throw new \InvalidArgumentException("Invalid param key received");
                         }
