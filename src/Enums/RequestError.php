@@ -99,6 +99,7 @@ enum RequestError implements RequestErrorCodeInterface
             self::ContentHandlingConflict,
             self::MalformedBody,
             self::BadPeerIp => 400,
+            self::AuthenticationFailed,
             self::Unauthorized => 401,
             self::CorsOriginNotAllowed => 403,
             self::EndpointNotFound => 404,
