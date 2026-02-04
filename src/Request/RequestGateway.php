@@ -162,7 +162,7 @@ final readonly class RequestGateway
                 }
             }
 
-            // Override our randomly generated one with the one that came with request
+            // Override our randomly generated one with the one that came with the request
             $this->responseHeaders->set("X-Request-ID", $requestId);
         }
 
@@ -627,7 +627,7 @@ final readonly class RequestGateway
                 $this->setFinalizedResponse($e->getResponseObject());
             }
 
-            // AfterEntrypointCallback is called even after response has already finalized via interrupt exception
+            // AfterEntrypointCallback is called even after the response has already finalized via interrupt exception.
             // However, once finalized response body cannot be altered
             try {
                 assert(isset($controller));
