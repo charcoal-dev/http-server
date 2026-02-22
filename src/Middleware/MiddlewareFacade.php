@@ -72,14 +72,14 @@ final readonly class MiddlewareFacade
      * Processes the request body using the specified pipeline and parser class.
      */
     public function requestBodyDecoderPipeline(
-        RequestFacade $request,
-        bool          $bodyDisabled,
-        false|array   $allowFileUpload,
-        int           $maxBodyBytes,
-        int           $maxParams,
-        int           $maxParamLength,
-        int           $maxDepth,
-        Buffer|string $body = null,
+        RequestFacade      $request,
+        bool               $bodyDisabled,
+        false|array        $allowFileUpload,
+        int                $maxBodyBytes,
+        int                $maxParams,
+        int                $maxParamLength,
+        int                $maxDepth,
+        null|Buffer|string $body = null,
     ): null|Buffer|BatchEnvelope|array
     {
         return $this->registry->execute(Pipeline::Request_BodyDecoder,

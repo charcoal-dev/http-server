@@ -29,13 +29,13 @@ interface RequestBodyDecoderPipeline extends PipelineMiddlewareInterface
      * @return Buffer|FileUpload|array|null
      */
     public function __invoke(
-        RequestFacade $request,
-        bool          $bodyDisabled,
-        false|array   $allowFileUpload,
-        int           $maxBodyBytes,
-        int           $maxParams,
-        int           $maxParamLength,
-        int           $maxDepth,
-        Buffer|string $body = null,
+        RequestFacade      $request,
+        bool               $bodyDisabled,
+        false|array        $allowFileUpload,
+        int                $maxBodyBytes,
+        int                $maxParams,
+        int                $maxParamLength,
+        int                $maxDepth,
+        null|Buffer|string $body = null,
     ): Buffer|FileUpload|array|null;
 }
