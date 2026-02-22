@@ -23,7 +23,7 @@ use Charcoal\Http\Server\Request\Files\FileUpload;
 /**
  * RequestBodyDecoder is responsible for decoding the request body based on the content type and other constraints.
  * It supports various content types and validates the body based on the specified rules.
- * This decoder can also handle file uploads and ensures proper handling of request size limits.
+ * This decoder can also handle file uploads and ensure proper handling of request size limits.
  */
 class RequestBodyDecoder implements RequestBodyDecoderPipeline
 {
