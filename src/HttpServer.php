@@ -115,7 +115,7 @@ final class HttpServer implements ServerApiInterface
      */
     private function handleRequestGateway(ServerRequest $request, ?ServerEnv $env = null): RequestGatewayResult
     {
-        // Start with blank response for headers, proceed to random UUID first:
+        // Start with a blank response for headers, proceed to random UUID first:
         $response = new Headers();
 
         try {
@@ -213,11 +213,13 @@ final class HttpServer implements ServerApiInterface
         }
 
         // Match with available routes
-        [$route, $tokens] = $this->router->match($request->url->path);
-        if (!isset($route, $tokens)) {
+        $routeMatch = $this->router->match($request->url->path);
+        if (!is_array($routeMatch)) {
             return new RequestGatewayResult($requestGateway,
                 new ErrorResult($response, RequestError::EndpointNotFound, null));
         }
+
+        [$route, $tokens] = $routeMatch;
 
         // Pre-Flight Control (CORS enforcement)
         try {
@@ -281,9 +283,6 @@ final class HttpServer implements ServerApiInterface
         } catch (RequestGatewayException $e) {
             return new RequestGatewayResult($requestGateway, new ErrorResult($response, $e->error, $e));
         }
-
-        // Todo: Concurrency Handling
-        // Todo: Rate limiting
 
         try {
             try {
