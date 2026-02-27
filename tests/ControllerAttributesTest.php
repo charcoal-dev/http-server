@@ -14,6 +14,7 @@ use Charcoal\Http\Server\Enums\RequestConstraint;
 use Charcoal\Http\Server\HttpServer;
 use Charcoal\Http\Server\Routing\Builder\ControllersBuildCache;
 use Charcoal\Http\Server\Routing\Snapshot\ControllerAttributes;
+use Charcoal\Http\Tests\Server\Fixture\Controllers\AbstractApiController;
 use Charcoal\Http\Tests\Server\Fixture\Controllers\AbstractBaseController;
 use Charcoal\Http\Tests\Server\Fixture\Controllers\BasicAttributeController;
 use Charcoal\Http\Tests\Server\Fixture\Controllers\ConcreteInheritanceController;
@@ -238,9 +239,8 @@ final class ControllerAttributesTest extends \PHPUnit\Framework\TestCase
         $cache = new ControllersBuildCache();
         $controller = $cache->resolve(ConcreteInheritanceController::class, ["get", "post", "put"]);
 
-        // Test the full lookup path: method -> class -> parent method -> parent class
-        // For "get" method, should fall back to parent attributes for allowedParams
-        $parentOnlyAttribute = $controller->getAttributeFor(ControllerAttribute::allowedParams, "get");
+        $parentController = $cache->resolve(AbstractApiController::class, null);
+        $parentOnlyAttribute = $parentController->getAttributeFor(ControllerAttribute::allowedParams, "get");
 
         // Should find merged parent attributes since child doesn't override allowedParams
         $this->assertIsArray($parentOnlyAttribute);
