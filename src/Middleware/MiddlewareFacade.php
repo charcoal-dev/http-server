@@ -26,6 +26,7 @@ use Charcoal\Http\Server\Pipelines\RequestHeadersValidator;
 use Charcoal\Http\Server\Pipelines\ResponseBodyEncoder;
 use Charcoal\Http\Server\Pipelines\UrlValidator;
 use Charcoal\Http\Server\Request\Controller\RequestFacade;
+use Charcoal\Http\Server\Request\Files\FileUpload;
 use Charcoal\Http\Server\Request\Logger\RequestLoggerConstructor;
 use Charcoal\Http\Server\Request\Result\Redirect\RedirectUrl;
 use Charcoal\Http\Server\Request\Result\Response\EncodedResponseBody;
@@ -80,7 +81,7 @@ final readonly class MiddlewareFacade
         int                $maxParamLength,
         int                $maxDepth,
         null|Buffer|string $body = null,
-    ): null|Buffer|BatchEnvelope|array
+    ): null|Buffer|BatchEnvelope|array|FileUpload
     {
         return $this->registry->execute(Pipeline::Request_BodyDecoder,
             RequestBodyDecoder::class,
